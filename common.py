@@ -2,7 +2,7 @@
 # import sys
 # sys.path = [ "C:/users/vivek/Documents/Python/" ] + sys.path
 
-from colorama import init, Fore, Style
+from colorama import init, Fore
 init(convert=True)
 import sys
 import argparse
@@ -60,10 +60,14 @@ def update_json_cache(cache_path, new_cache_D):
         print("[WRITE] {filename}".format(filename=f.name))
 
 
+def make_string_green(string):
+    return "{color_code}{string}{reset_code}".format(color_code=Fore.GREEN, string=string, reset_code=Fore.RESET)
+def make_string_red(string):
+    return "{color_code}{string}{reset_code}".format(color_code=Fore.RED, string=string, reset_code=Fore.RESET)
 def print_red_line(string):
-    print("{red_color_code}{string}{reset_code}".format(red_color_code=Fore.RED, string=string, reset_code=Style.RESET_ALL))
+    print(make_string_red(string))
 def print_green_line(string):
-    print("{green_color_code}{string}{reset_code}".format(green_color_code=Fore.GREEN, string=string, reset_code=Style.RESET_ALL))
+    print(make_string_green(string))
 
 def truncate(string, length):
     if len(string) < length:
