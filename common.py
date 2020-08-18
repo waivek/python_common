@@ -153,7 +153,7 @@ class Date:
     def __init__(self, dt_str):
         if isinstance(dt_str, datetime):
             dt_str = dt_str.isoformat()
-        INDIAN_TIMEZONE  = dateutil.tz.gettz("IST")
+        INDIAN_TIMEZONE  = dateutil.tz.gettz("India Standard Time")
         self.dt = dateutil.parser.parse(dt_str).astimezone(INDIAN_TIMEZONE)
         self.string = self.dt.isoformat()
     def __add__(self, seconds_rhs):
