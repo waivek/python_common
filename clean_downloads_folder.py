@@ -10,9 +10,6 @@ def make_downloads_directory(folder_name):
         return
     os.mkdir(path)
     print_green_line("[MKDIR] {path}".format(path=path))
-def make_directories():
-    make_downloads_directory("Compressed")
-    make_downloads_directory("Executables")
 
 def find_one(items, f):
     matching_items = [ item for item in items if f(item) ]
@@ -35,14 +32,22 @@ def move_extension(extension, folder_name):
     message = "[MOVE] Moved {count} {extension} files to {folder_name}: {trunc_files}".format(
             count=make_string_green(len(basenames)), extension=make_string_green(extension), folder_name=make_string_green(folder_name), trunc_files=truncate(", ".join(basenames), 80))
     print(message)
-def move_extensions():
+
+def main():
     # D = {
     #     "Compressed" : [ "zip" ],
     # }
     D = {
         "Compressed" : [ "zip", "rar" ],
         "Executables" : [ "exe", "msi" ],
+        "Torrents" : [ "torrent" ],
+        "PDFs" : [ "pdf" ],
+        "Images" : [ "svg", "png", "jpg" ]
     }
+    for directory_name in D.keys():
+        make_downloads_directory(directory_name)
+
+    # move extensions
     for folder_name, extension_list in D.items():
         for extension in extension_list:
             move_extension(extension, folder_name)
@@ -50,5 +55,4 @@ def move_extensions():
 
 if __name__ == "__main__":
     global_downloads_directory = os.path.normpath(os.path.expanduser(r'~\Downloads'))
-    make_directories()
-    move_extensions()
+    main()

@@ -5,12 +5,263 @@
 from colorama import init, Fore
 init(convert=True)
 import sys
-import argparse
 import os.path
 import json
-from columnar import columnar
+from time import time
+
+async def get_json(url, session, headers={}):
+    async with session.get(url, headers=headers) as response:
+        json_content = await response.text()
+        D = json.loads(json_content)
+    return D
+
+async def get(url, session, headers={}):
+    async with session.get(url, headers=headers) as response:
+        content = await response.text()
+    return content
+
+async def get_urls(urls, headers={}, is_json=False):
+    import asyncio
+    import aiohttp
+    response_dictionaries = []
+    async with aiohttp.ClientSession() as session:
+        if is_json:
+            cors = [ get_json(url, session, headers) for url in urls ]
+        else:
+            cors = [ get(url, session, headers) for url in urls ]
+        response_dictionaries = await asyncio.gather(*cors)
+    return response_dictionaries
+
+def abbreviate(number):
+    number_int = int(number)
+    number_string = str(number_int)
+    number_length = len(str(number_int))
+    if number_int < 100:
+        return number_string
+    first_digit, second_digit, third_digit = number_string[0:3]
+    abbreviation_dict = {
+         1:  "",  2:  "",  3:  "",
+         4: "k",  5: "k",  6: "k",
+         7: "m",  8: "m",  9: "m",
+        10: "b", 11: "b", 12: "b",
+        13: "t", 14: "t", 15: "t"
+    }
+    letter = abbreviation_dict[number_length]
+    if number_length % 3 == 0:
+        # first three digits
+        abbr_string = f"{first_digit}{second_digit}{third_digit}{letter}"
+    if number_length % 3 == 2:
+        # first two digits, period, next digit
+        abbr_string = f"{first_digit}{second_digit}.{third_digit}{letter}"
+    if number_length % 3 == 1:
+        # first digit, period, next two digits
+        abbr_string = f"{first_digit}.{second_digit}{third_digit}{letter}"
+
+    return abbr_string
+
+def smart_pad(current_value, max_value, fillchar='0'):
+    number_of_digits = len(str(max_value))
+    return str(current_value).rjust(number_of_digits, fillchar)
+
+def enumerate_count(items):
+    item_count = len(items)
+    count_strings = []
+    for i in range(item_count):
+        count_str = smart_pad(i+1, item_count)
+        count_strings.append(f"[{count_str}/{item_count}]")
+    return zip(count_strings, items)
+
+def print_error_information(error, watchlist=None):
+    import traceback
+
+    tb = error.__traceback__
+
+    print()
+    print_red_line(repr(error))
+
+
+    frames = [ frame for frame, _ in traceback.walk_tb(tb) ]
+    summaries = traceback.extract_tb(tb)
+    pairs = reversed(list(zip(frames, summaries)))
+    latest_locals = None
+    for i, (frame, summary) in enumerate(pairs):
+        filename = summary.filename
+        line_number = summary.lineno
+        line = summary.line
+        locals_D = frame.f_locals
+        if i == 0:
+            line = make_string_green(line)
+            latest_locals = locals_D
+        print(f"    {filename}:{line_number} ... {line}")
+
+    print()
+
+    if watchlist:
+        D = { k: latest_locals[k] for k in watchlist }
+        print_dict(D)
+
+def print_object(obj, hidden=False):
+    if not hidden:
+        keys = [ key for key in dir(obj) if not key.startswith("__") ]
+    else:
+        keys = dir(obj)
+
+    D = { key : obj.__getattribute__(key) for key in keys }
+    print_dict(D)
+
+def rel2abs(relative_path):
+    # import inspect
+    # called_path    = inspect.getfile(sys._getframe(1))
+    # frames = []
+    # for i in range(1000):
+    #     try:
+    #         frm = sys._getframe(i)
+    #     except:
+    #         break
+    #     frames.append(frm)
+        
+    frame            = sys._getframe(2)
+
+    called_path      = frame.f_code.co_filename
+    parent_directory = os.path.dirname(os.path.realpath(called_path))
+    absolute_path    = os.path.realpath(os.path.join(parent_directory, relative_path))
+    return absolute_path
+
+# "."
+
+# class Timer {{{
+# taken from 'covid.py'
+class Timer():
+
+    def __init__(self, no_print=False):
+        self.start_time = None
+        self.timer_D = {}
+        self.no_print = no_print
+        self.sum_D = {}
+
+    def start(self, message=None):
+        self.start_time = time()
+        if message:
+            self.timer_D[message] = time()
+    def start_multi(self):
+        self.multi_start_time = time()
+
+    def print_multi(self, message):
+        time_taken = time() - self.multi_start_time
+        print(f"{message:20s}: {time_taken:.2f} seconds")
+
+    def start_sum(self, message):
+        self.timer_D[message] = time()
+
+    def add_sum(self, message):
+        time_taken = time() - self.timer_D[message]
+        current_sum = self.sum_D.get(message, 0)
+        self.sum_D[message] = current_sum + time_taken
+
+    def print_sum(self, message):
+        time_taken = self.sum_D[message]
+        print(f"{message:20s}: {time_taken:.2f} seconds")
+        del self.sum_D[message]
+
+    def print(self, message):
+        if self.no_print:
+            return
+        if self.timer_D.get(message) == None and self.start_time == None:
+            print("ERROR: Timer configured incorrectly")
+        time_taken = time() - self.timer_D.get(message, self.start_time)
+        print(f"{message:20s}: {time_taken:.2f} seconds")
+        if self.timer_D.get(message):
+            del self.timer_D[message]
+        else:
+            self.start_time = None
+# }}}
+
+# print_table {{{
+# Assumption: Columns have consistent type
+def print_table(dictionaries):
+    if len(dictionaries) == 0:
+        return
+    for D in dictionaries:
+        for key in D.keys():
+            value = D[key]
+            if type(value) != str and type(value) != int and type(value) != float:
+                D[key] = str(value)
+    # keys = ["basename", "file_read_time", "json_load_time", "total_time"]
+    keys = list(dictionaries[0].keys())
+    # keys = ["name", "cost", "count"]
+    max_length_D = {key:len(key) for key in keys}
+    types_D = { key: type(dictionaries[0][key]) for key in keys }
+    left_gutter_length = 2
+    vertical_padding = 1
+    left_gutter_string = " " * left_gutter_length
+    column_gap = 2
+    separator = " "  * column_gap
+    for key in keys:
+        max_length = max_length_D[key]
+        for D in dictionaries:
+            value = D[key]
+            if type(value) == str:
+                length = len(value)
+            if type(value) == int:
+                length = len(str(value))
+            if type(value) == float:
+                length = len("%.2f" % value)
+            if max_length < length:
+                max_length = length
+        max_length_D[key] = max_length
+
+    for i in range(vertical_padding):
+        print()
+    column_label_items = []
+    for key in keys:
+        if types_D[key] == str:
+            rep = key.ljust(max_length_D[key])
+        if types_D[key] == int:
+            rep = key.rjust(max_length_D[key])
+        if types_D[key] == float:
+            rep = key.rjust(max_length_D[key])
+        column_label_items.append(rep)
+    line = left_gutter_string + separator.join(column_label_items)
+    print(line)
+
+
+    for D in dictionaries:
+        line_items = []
+        for key in keys:
+            max_length = max_length_D[key]
+            value = D[key]
+            if type(value) == str:
+                rep = value.ljust(max_length)
+            if type(value) == int:
+                rep = str(value).rjust(max_length)
+            if type(value) == float:
+                rep = ("%.2f" % value).rjust(max_length)
+            line_items.append(rep)
+        line = left_gutter_string + separator.join(line_items)
+        print(line)
+    for i in range(vertical_padding):
+        print()
+        # }}}
+
+def head_file(file_contents, preview_lines_count=5):
+    lines = file_contents.split("\n")
+    preview_lines = lines[0:preview_lines_count]
+    return "\n".join(preview_lines)
+
+def head_list(L, preview_lines_count=5):
+    preview_L = L[0:preview_lines_count]
+    return "\n".join(preview_L)
+
+def head(inp, preview_lines_count=5):
+    if type(inp) == list:
+        return head_list(inp, preview_lines_count)
+    else:
+        return head_file(inp, preview_lines_count)
+
+
 
 def print_dict(D):
+    from columnar import columnar
     if type(D) != type({}):
         argument_type = str(type(D))
         str_representation = truncate(str(D), 40)
@@ -97,6 +348,7 @@ def read_stdin():
     file_contents = input_stream.read()
     return file_contents
 def read_pipe_or_file():
+    import argparse
     stream_is_interactive = sys.stdin.isatty()
     if stream_is_interactive:
         parser = argparse.ArgumentParser(description="Removes attributes from a HTML file")
@@ -108,9 +360,9 @@ def read_pipe_or_file():
         file_contents = read_stdin()
     return file_contents
 
-import re
 class Timestamp():
     def __init__(self, tstamp):
+        import re
         if type(tstamp) == str and re.match(r'^[0-9.]+$', tstamp):
             tstamp = int(tstamp)
         if type(tstamp) == str:
@@ -157,9 +409,11 @@ class Date:
     def __init__(self, dt_str):
         if isinstance(dt_str, datetime):
             dt_str = dt_str.isoformat()
-        INDIAN_TIMEZONE  = dateutil.tz.gettz("India Standard Time")
+        INDIAN_TIMEZONE  = dateutil.tz.gettz("Asia/Kolkata")
         self.dt = dateutil.parser.parse(dt_str).astimezone(INDIAN_TIMEZONE)
         self.string = self.dt.isoformat()
+    def __eq__(self, rhs_date):
+        return self.dt == rhs_date.dt
     def __add__(self, seconds_rhs):
         seconds = int(seconds_rhs)
         return Date(self.dt + timedelta(seconds=seconds))
@@ -186,9 +440,14 @@ class Date:
         now = datetime.now(timezone.utc)
         return timeago.format(self.dt, now)
 
+    def __str__(self):
+        return self.string
     def __repr__(self):
         timeago_str = self.timeago()
         return "{formatted_datetime} ({timeago_string})".format(
                 formatted_datetime=self.dt.strftime("%I:%M %p, %b %d"),
                 timeago_string=timeago_str)
+
+    def now():
+        return Date(datetime.now())
 
