@@ -64,7 +64,8 @@ class SqliteType(IntEnum):
     INTEGER = 3
 
     def from_text(arg):
-        D = { "TEXT": SqliteType.TEXT, "REAL": SqliteType.REAL, "INTEGER": SqliteType.INTEGER }
+        D = { "TEXT": SqliteType.TEXT, "REAL": SqliteType.REAL, "INTEGER": SqliteType.INTEGER,
+              "INT": SqliteType.INTEGER }
         return D[arg]
 
 def as_column_str(x):

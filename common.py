@@ -272,12 +272,6 @@ def print_dict(D):
     for key, value in D.items():
         trunc_val = truncate(str(value), 80)
         data.append([key, trunc_val])
-        # if len(str(value)) <= 80:
-        #     print("%s: %s" % (key, value))
-        # else:
-        #     short_value = str(value)[0:70] + " ... " + str(value)[-5:]
-        #     value_with_note = "%s // %d characters" % (short_value, len(str(value)))
-        #     print("%s: %s" % (key, value_with_note))
     headers = [ "key", "value" ]
     table = columnar(data, headers, no_borders=True)
     print(table)
