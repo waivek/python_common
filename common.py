@@ -2,6 +2,11 @@
 # import sys
 # sys.path = [ "C:/users/vivek/Documents/Python/" ] + sys.path
 
+# How to Install: 
+# 
+#   pip install https://github.com/waivek/python_common/archive/master.zip
+#    
+
 from colorama import init, Fore
 init(convert=True)
 import sys

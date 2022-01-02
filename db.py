@@ -311,6 +311,9 @@ def add_date_column(dictionaries):
     return dictionaries
 
 def insert_dictionaries(cursor, table_name, dictionaries, constraint_D={}):
+    if dictionaries == []:
+        return
+
     print_statements = False
 
     dictionaries = [ prepare_dict(D) for D in dictionaries ]
