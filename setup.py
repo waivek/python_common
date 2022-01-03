@@ -9,7 +9,8 @@ setup(name='common',
           'aiohttp==3.7.3',
           'requests==2.25.1',
           'timeago==1.0.14',
-          'python_dateutil==2.8.2'
+          'python_dateutil==2.8.2',
+          'pysqlite3-binary; platform_system="linux"'
       ]
 )
 
