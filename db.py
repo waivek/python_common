@@ -374,7 +374,10 @@ def insert_dictionaries(cursor, table_name, dictionaries, constraint_D={}):
     # 5. INSERT
     for D in dictionaries:
         insert_statement, values = get_insert_pair_with_on_conflict_clause(D, table_name)
-        cursor.execute(insert_statement, values )
+        try:
+            cursor.execute(insert_statement, values )
+        except Exception as e:
+            print("[ERROR]", insert_statement)
         if print_statements:
             print(insert_statement, make_string_green(truncate(str(values), 200)))
             print()
