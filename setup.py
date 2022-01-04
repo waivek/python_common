@@ -15,7 +15,7 @@ setup(name='common',
           'requests==2.25.1',
           'timeago==1.0.14',
           'python_dateutil==2.8.2',
-          'pysqlite3;platform_system=="Linux"'
+          'pysqlite3-binary;platform_system=="Linux"'
       ]
 )
 
