@@ -3,10 +3,15 @@
 # Red
 # Blue
 from common import rel2abs, print_red_line, make_string_green, truncate, Timer
-import sqlite3
 import json
 from enum import IntEnum
 timer = Timer()
+
+import platform
+if platform.system() == "Linux":
+    import pysqlite3 as sqlite3
+else:
+    import sqlite3
 
 def table_exists(cursor, table_name):
     statement = f"SELECT * FROM sqlite_master WHERE type='table' AND name='{table_name}'"
