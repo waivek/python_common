@@ -76,7 +76,7 @@ def enumerate_count(items):
         count_strings.append(f"[{count_str}/{item_count}]")
     return zip(count_strings, items)
 
-def print_error_information(error, watchlist=None):
+def print_error_information(error):
     import traceback
 
     tb = error.__traceback__
@@ -86,31 +86,30 @@ def print_error_information(error, watchlist=None):
 
 
     frames = [ frame for frame, _ in traceback.walk_tb(tb) ]
+
     summaries = traceback.extract_tb(tb)
     pairs = reversed(list(zip(frames, summaries)))
-    latest_locals = None
+    
+    from columnar import columnar
+    data = []
     for i, (frame, summary) in enumerate(pairs):
-        filename = summary.filename
+        filepath = os.path.relpath(os.path.abspath(summary.filename))
         line_number = summary.lineno
         line = summary.line
-        locals_D = frame.f_locals
-        if i == 0:
-            line = make_string_green(line)
-            latest_locals = locals_D
-        print(f"    {filename}:{line_number} ... {line}")
+        line = make_string_green(line) if i == 0 else line
+        lhs_string = f"{filepath}:{line_number}"
+        data.append([lhs_string, line])
+        # print(f"    {lhs_string} ... {line}")
+    table = columnar(data, headers=None, no_borders=True)
+    print(table)
 
     print()
-
-    if watchlist:
-        D = { k: latest_locals[k] for k in watchlist }
-        print_dict(D)
 
 def print_object(obj, hidden=False):
     if not hidden:
         keys = [ key for key in dir(obj) if not key.startswith("__") ]
     else:
         keys = dir(obj)
-
     D = { key : obj.__getattribute__(key) for key in keys }
     print_dict(D)
 
@@ -140,6 +139,7 @@ class Timer():
 
     def __init__(self, no_print=False):
         self.start_time = None
+        self.inc_start = None
         self.timer_D = {}
         self.no_print = no_print
         self.sum_D = {}
@@ -148,10 +148,24 @@ class Timer():
         self.start_time = time()
         if message:
             self.timer_D[message] = time()
+
+    def start_inc(self):
+        self.inc_start = time()
+    def print_inc(self, message):
+        if self.no_print:
+            return
+        time_taken = time() - self.inc_start
+        print(f"{message:20s}: {time_taken:.2f} seconds")
+        self.inc_start = time()
+
+
+
     def start_multi(self):
         self.multi_start_time = time()
 
     def print_multi(self, message):
+        if self.no_print:
+            return
         time_taken = time() - self.multi_start_time
         print(f"{message:20s}: {time_taken:.2f} seconds")
 
@@ -404,13 +418,34 @@ from datetime import timedelta
 from datetime import datetime
 from datetime import timezone
 import timeago
+datetime.now().isoformat()
 class Date:
-    def __init__(self, dt_str):
-        if isinstance(dt_str, datetime):
-            dt_str = dt_str.isoformat()
+    def __init__(self, string_or_datetime):
+        if isinstance(string_or_datetime, datetime):
+            dt_str = string_or_datetime.isoformat()
+        else:
+            dt_str = string_or_datetime
         INDIAN_TIMEZONE  = dateutil.tz.gettz("Asia/Kolkata")
-        self.dt = dateutil.parser.parse(dt_str).astimezone(INDIAN_TIMEZONE)
+        self.dt = dateutil.parser.parse(dt_str).astimezone(INDIAN_TIMEZONE).replace(microsecond=0)
         self.string = self.dt.isoformat()
+        self.epoch = int(self.dt.timestamp())
+
+    def timeago(self):
+        now = datetime.now(timezone.utc)
+        return timeago.format(self.dt, now)
+
+    def now():
+        return Date(datetime.now())
+
+    def pretty(self):
+        print_dict({
+            "ist": self.string,
+            "utc": self.dt.astimezone(dateutil.tz.gettz("UTC")).isoformat()[:-6],
+            "epoch": self.epoch,
+            "timeago": self.timeago()
+        })
+
+    # `=`, `+`, `-`, `<`, `>`, str, repr {{{
     def __eq__(self, rhs_date):
         return self.dt == rhs_date.dt
     def __add__(self, seconds_rhs):
@@ -435,18 +470,13 @@ class Date:
         return self.dt < other.dt
     def __gt_(self, other):
         return self.dt > other.dt
-    def timeago(self):
-        now = datetime.now(timezone.utc)
-        return timeago.format(self.dt, now)
-
     def __str__(self):
-        return self.string
-    def __repr__(self):
         timeago_str = self.timeago()
         return "{formatted_datetime} ({timeago_string})".format(
                 formatted_datetime=self.dt.strftime("%I:%M %p, %b %d"),
                 timeago_string=timeago_str)
-
-    def now():
-        return Date(datetime.now())
+    def __repr__(self):
+        repr_string = repr(self.string)
+        return f"Date({repr_string})"
+    # }}}
 

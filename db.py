@@ -367,14 +367,12 @@ def insert_dictionaries(cursor, table_name, dictionaries, constraint_D={}):
             print(f"DROP TRIGGER IF EXISTS {trigger_name}")
     trigger_exists = check_if_trigger_exists(cursor, table_name, trigger_name)
     if not trigger_exists:
-        try:
+        primary_key_supplied = len([ value for value in constraint_D.values() if value.index("PRIMARY KEY") > -1 ]) == 1
+        if primary_key_supplied:
             create_trigger_statement = get_create_trigger_statement(cursor, table_name, trigger_name, vcs_table_name)
-        except Exception as e:
-            error = e
-            breakpoint()
-        cursor.execute(create_trigger_statement)
-        if vcs_print_statements:
-            print(create_trigger_statement)
+            cursor.execute(create_trigger_statement)
+            if vcs_print_statements:
+                print(create_trigger_statement)
 
     # 5. INSERT
     for D in dictionaries:

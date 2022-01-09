@@ -7,7 +7,7 @@
 from distutils.core import setup
 setup(name='common',
       version='1.0',
-      py_modules=['common', 'db', 'print'],
+      py_modules=['common', 'db', 'print', 'ic'],
       install_requires = [
           'colorama==0.3.9',
           'Columnar==1.3.1',
