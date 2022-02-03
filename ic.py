@@ -7,15 +7,20 @@
 # 5. Autocomplete
 # 6. Coloring Strings
 
-from common import Timer, print_error_information, print_dict, truncate, Date, make_string_green
-
+from timer import Timer
 timer = Timer()
+timer.start("ic.py")
 
-import inspect
+from common import print_error_information, print_dict, truncate, Date
+from color import Code
+
+
+import inspect # Takes 110 ms main bottleneck, see usecases at ./inspect_use_cases.txt
 import os
 import os.path
 import types
 
+global_breakpoint_time = False
 
 # TextDoc.docroutine
 
@@ -102,14 +107,22 @@ def docroutine(object, name=None, mod=None, cl=None):
     # }}}
 
 def sig(frame_index=1):
-    import gc
 
-    frame_info = inspect.stack()[frame_index]
+    frame_stack = inspect.stack()
+    frame_info = frame_stack[frame_index]
     frame = frame_info[0]
 
     fname = frame_info.function
-    function_object = gc.get_referrers(frame.f_code)[0]
-    keys = inspect.getfullargspec(function_object).args
+
+    # Works in Python 3.8 but not 3.10
+    # import gc
+    # function_object = gc.get_referrers(frame.f_code)[0]
+
+    if fname != "<module>":
+        function_object = frame.f_globals[fname]
+        keys = inspect.getfullargspec(function_object).args
+    else:
+        keys = []
 
     # fname = frame_info.function
     # function_object = eval(fname)
@@ -253,20 +266,22 @@ def ib(obj):
     print_dict(D)
 
 def pdb_check():
-    import pdb
-    stack = inspect.stack()
+    stack = inspect.stack() # Takes 300 ms
     frames = [ frame_info.frame for frame_info in stack ]
-    modules = [ inspect.getmodule(frame) for frame in frames ]
-    return any(module == pdb for module in modules)
+    frame_names = [ frame.f_globals['__name__'] for frame in frames ]
+    if 'pdb' in frame_names or 'pydevd' in frame_names:
+        return True
+    else:
+        return False
+    # modules = [ inspect.getmodule(frame) for frame in frames ]
+    # return pdb in modules
 
 def ic(*values):
-    # import sys
-    # in_pdb = sys.gettrace() != None
-    in_pdb = pdb_check()
+    in_pdb = pdb_check() # Takes 300 ms
 
     if not values:
         if in_pdb:
-            print(make_string_green("IN (pdb)."))
+            print(Code.GREEN + "IN (pdb).")
             return
         callFrame = inspect.currentframe().f_back
         context_string = get_context(callFrame)
@@ -291,7 +306,7 @@ def ic(*values):
     arg_strings = [ for_frame.asttokens().get_text(arg) for arg in callNode.args ]
     pairs = list(zip(arg_strings, values))
     for arg_string, value in pairs:
-        s = make_string_green(str(value))
+        s = Code.GREEN + value
         print(f"{arg_string}: {s}")
 
 __all__ = [ "ic", "ib" ]
@@ -299,8 +314,7 @@ __all__ = [ "ic", "ib" ]
 class Table:
     def __init__(self):
         self.gutter = '  '
-        # self.separator = '  '
-        self.separator = ' : '
+        self.separator = '  '
         self.table = []
 
     def row(self, *args):
@@ -320,7 +334,7 @@ class Table:
             return [], L
         elif is_single_dict_table(table):
             items = list(table.items())
-            return [ "key", "value" ], items
+            return [ "KEY", "VALUE" ], items
         elif is_multi_dict_table(table):
             keys = table[0].keys()
             L = [ tuple(D[key] for key in keys) for D in table ]
@@ -337,13 +351,46 @@ class Table:
         column_tuples = [ ( max(len(str(cell)) for cell in column), get_column_just(column) ) for column in columns  ]
         if headers:
             column_tuples = [ (max(width, len(header)), just) for header, (width, just) in zip(headers, column_tuples) ]
+
+        # Distribute Column Widths given terminal size
+        initial_widths = [ width for width, _ in column_tuples ]
+        terminal_width, _ = os.get_terminal_size()
+        gutter_width = len(self.gutter) * 2
+        separator_width = len(self.separator) * (column_count-1)
+        column_width_total = terminal_width - gutter_width - separator_width
+        min_column_width = int(column_width_total / column_count)
+        small_indices = [ i for i, width in enumerate(initial_widths) if width <= min_column_width ]
+        big_indices = [ i for i, width in enumerate(initial_widths) if width > min_column_width ]
+        if len(big_indices) == 0:
+            return column_tuples
+        small_width_total = sum(width for width in initial_widths if width <= min_column_width)
+        remaining_width_total = column_width_total - small_width_total
+        big_width = int(remaining_width_total / len(big_indices))
+        remaining_width_total = remaining_width_total - big_width * len(big_indices)
+        final_big_width = big_width + remaining_width_total
+        for i in big_indices:
+            _, just = column_tuples[i]
+            column_tuples[i] = (big_width, just)
+            if i == len(big_indices)-1:
+                column_tuples[i] = (final_big_width, just)
+
+        final_widths = [ width for width, _ in column_tuples ]
+        calc_total_width = gutter_width + separator_width + sum(final_widths)
+        if calc_total_width != terminal_width:
+            print(Code.RED +  "calc_total_width != terminal_width")
+            print(Code.RED + f"           ({calc_total_width}) !=          ({terminal_width})")
+            print(f"Initial Widths                  : {initial_widths}")
+            print(f"Column Width All                : {column_width_total}")
+            print(f"Minimum Column Width            : {min_column_width}")
+            print(f"Final  Widths                   : {final_widths}")
+            breakpoint()
         return column_tuples
 
     def to_string(self):
         def fmt(cells, column_tuples):
             S = self.separator
             G = self.gutter
-            return G + S.join(just(str(cell), width) for cell, (width, just) in zip(cells, column_tuples))
+            return G + S.join(just(truncate(str(cell), width), width) for cell, (width, just) in zip(cells, column_tuples))
 
         headers, tuple_table = self.normalize_table()
         column_tuples = self.get_column_tuples(headers, tuple_table)
@@ -394,7 +441,6 @@ def joined_string(prefix, postfix, D, call_result, da):
     return " | ".join([ prefix, postfix, str(D), call_result, str(da)])
 
 def test_ic():
-
     table1 = tuple_table()
     table2 = multi_dict_table()
     table3 = single_dict_table()
@@ -412,9 +458,14 @@ def test_ic():
     ic()
     ic(joined_string(before, '!', {'cat': 'dog'}, fn_call(), Date.now()))
     ic(ret == before)
+    ic_locals = locals()
+    ic_locals = { str(key).strip(): str(value).strip() for key, value in ic_locals.items() }
+    # global global_breakpoint_time
+    # global_breakpoint_time = True
+    ic(ic_locals)
     print()
 
-    breakpoint()
+
     # }}}
 
 # IntelliJ: Replace VCS Buttons
@@ -423,17 +474,20 @@ def test_ic():
 # IntelliJ: Breakpoint Functionality
 # IntelliJ: Structure Functionality
 
-# Vim: https://github.com/jeetsukumaran/vim-pythonsense#stock-vim-vs-pythonsense-motions
-# Vim: https://github.com/wellle/context.vim
-# Vim: Jedi Intellisense
-# Vim: gd for class
-# Vim: go to end of function 
+# [DONE] Vim: https://github.com/jeetsukumaran/vim-pythonsense#stock-vim-vs-pythonsense-motions
+# [DONE] Vim: https://github.com/wellle/context.vim
+# [DONE] Vim: Jedi Intellisense
+# [DONE] Vim: gd for class
+# [DONE] Vim: go to end of function 
+
 def main():
     # _visit_after_children: C:\Users\vivek\AppData\Roaming\Python\Python37\site-packages\asttokens\mark_tokens.py :63
+    # test_ic()
     pass
 
 if __name__ == "__main__":
     try:
+        # ic()
         main()
     except Exception as e:
         import bdb
@@ -445,3 +499,4 @@ if __name__ == "__main__":
         else:
             print_error_information(e)
             pdb.post_mortem(e.__traceback__)
+timer.print("ic.py")

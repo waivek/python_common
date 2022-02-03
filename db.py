@@ -385,5 +385,3 @@ def insert_dictionaries(cursor, table_name, dictionaries, constraint_D={}):
         if print_statements:
             print(insert_statement, make_string_green(truncate(str(values), 200)))
             print()
-
-

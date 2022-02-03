@@ -6,15 +6,37 @@
 # 
 #   pip install https://github.com/waivek/python_common/archive/master.zip
 #    
+#    PHP FUNCTIONS:
+#       (list)  array_chunk
+#       (dict)  array_count_values
+#       (table) array_column
+#       (dict)  array_extrace
+#
+# Refactory:
+#
+#       abbr(number)
+#       trunc(string, length)
+#       pad_zero(current_value, max_value)
+#       pad_space(current_value, max_value)
+#       enumerate_count(items)
+#       rel2abs(relative_path)
+#
+from timer import Timer
+timer = Timer()
+def stub_quiet():
+    t = Timer()
+    print_error_information()
 
-from colorama import init, Fore
-init(convert=True)
 import sys
 import os.path
-import json
-from time import time
+
+def print_error_information(error):
+    from error import print_error_information as func
+    func(error)
+
 
 async def get_json(url, session, headers={}):
+    import json
     async with session.get(url, headers=headers) as response:
         json_content = await response.text()
         D = json.loads(json_content)
@@ -76,35 +98,6 @@ def enumerate_count(items):
         count_strings.append(f"[{count_str}/{item_count}]")
     return zip(count_strings, items)
 
-def print_error_information(error):
-    import traceback
-
-    tb = error.__traceback__
-
-    print()
-    print_red_line(repr(error))
-
-
-    frames = [ frame for frame, _ in traceback.walk_tb(tb) ]
-
-    summaries = traceback.extract_tb(tb)
-    pairs = reversed(list(zip(frames, summaries)))
-    
-    from columnar import columnar
-    data = []
-    for i, (frame, summary) in enumerate(pairs):
-        filepath = os.path.relpath(os.path.abspath(summary.filename))
-        line_number = summary.lineno
-        line = summary.line
-        line = make_string_green(line) if i == 0 else line
-        lhs_string = f"{filepath}:{line_number}"
-        data.append([lhs_string, line])
-        # print(f"    {lhs_string} ... {line}")
-    table = columnar(data, headers=None, no_borders=True)
-    print(table)
-
-    print()
-
 def print_object(obj, hidden=False):
     if not hidden:
         keys = [ key for key in dir(obj) if not key.startswith("__") ]
@@ -133,67 +126,6 @@ def rel2abs(relative_path):
 
 # "."
 
-# class Timer {{{
-# taken from 'covid.py'
-class Timer():
-
-    def __init__(self, no_print=False):
-        self.start_time = None
-        self.inc_start = None
-        self.timer_D = {}
-        self.no_print = no_print
-        self.sum_D = {}
-
-    def start(self, message=None):
-        self.start_time = time()
-        if message:
-            self.timer_D[message] = time()
-
-    def start_inc(self):
-        self.inc_start = time()
-    def print_inc(self, message):
-        if self.no_print:
-            return
-        time_taken = time() - self.inc_start
-        print(f"{message:20s}: {time_taken:.2f} seconds")
-        self.inc_start = time()
-
-
-
-    def start_multi(self):
-        self.multi_start_time = time()
-
-    def print_multi(self, message):
-        if self.no_print:
-            return
-        time_taken = time() - self.multi_start_time
-        print(f"{message:20s}: {time_taken:.2f} seconds")
-
-    def start_sum(self, message):
-        self.timer_D[message] = time()
-
-    def add_sum(self, message):
-        time_taken = time() - self.timer_D[message]
-        current_sum = self.sum_D.get(message, 0)
-        self.sum_D[message] = current_sum + time_taken
-
-    def print_sum(self, message):
-        time_taken = self.sum_D[message]
-        print(f"{message:20s}: {time_taken:.2f} seconds")
-        del self.sum_D[message]
-
-    def print(self, message):
-        if self.no_print:
-            return
-        if self.timer_D.get(message) == None and self.start_time == None:
-            print("ERROR: Timer configured incorrectly")
-        time_taken = time() - self.timer_D.get(message, self.start_time)
-        print(f"{message:20s}: {time_taken:.2f} seconds")
-        if self.timer_D.get(message):
-            del self.timer_D[message]
-        else:
-            self.start_time = None
-# }}}
 
 # print_table {{{
 # Assumption: Columns have consistent type
@@ -304,6 +236,7 @@ def file_to_string(file_path):
     return file_contents
 
 def read_json_cache(cache_path):
+    import json
     cache_contents = file_to_string(cache_path)
     if cache_contents == "":
         cache_contents = "{}"
@@ -311,6 +244,7 @@ def read_json_cache(cache_path):
     return cache_D
 
 def update_json_cache(cache_path, new_cache_D):
+    import json
     cache_contents = file_to_string(cache_path)
     if cache_contents == "":
         cache_contents = "{}"
@@ -325,8 +259,12 @@ def update_json_cache(cache_path, new_cache_D):
 
 
 def make_string_green(string):
+    from colorama import init, Fore
+    init(convert=True)
     return "{color_code}{string}{reset_code}".format(color_code=Fore.GREEN, string=string, reset_code=Fore.RESET)
 def make_string_red(string):
+    from colorama import init, Fore
+    init(convert=True)
     return "{color_code}{string}{reset_code}".format(color_code=Fore.RED, string=string, reset_code=Fore.RESET)
 def print_red_line(string):
     print(make_string_red(string))
@@ -334,7 +272,7 @@ def print_green_line(string):
     print(make_string_green(string))
 
 def truncate(string, length):
-    if len(string) < length:
+    if len(string) <= length:
         return string
 
     middle_string = "..."
@@ -413,14 +351,10 @@ class Timestamp():
         return "%d days %02d:%02d:%02d" % (d, hh, self.mm, self.ss)
 
 
-import dateutil.parser
-from datetime import timedelta
-from datetime import datetime
-from datetime import timezone
-import timeago
-datetime.now().isoformat()
 class Date:
     def __init__(self, string_or_datetime):
+        import dateutil.parser
+        from datetime import datetime
         if isinstance(string_or_datetime, datetime):
             dt_str = string_or_datetime.isoformat()
         else:
@@ -431,13 +365,18 @@ class Date:
         self.epoch = int(self.dt.timestamp())
 
     def timeago(self):
+        from datetime import timezone
+        import timeago
+        from datetime import datetime
         now = datetime.now(timezone.utc)
         return timeago.format(self.dt, now)
 
     def now():
+        from datetime import datetime
         return Date(datetime.now())
 
     def pretty(self):
+        import dateutil.parser
         print_dict({
             "ist": self.string,
             "utc": self.dt.astimezone(dateutil.tz.gettz("UTC")).isoformat()[:-6],
@@ -450,12 +389,15 @@ class Date:
         return self.dt == rhs_date.dt
     def __add__(self, seconds_rhs):
         seconds = int(seconds_rhs)
+        from datetime import timedelta
         return Date(self.dt + timedelta(seconds=seconds))
     def __sub__(self, rhs):
         # Date - int      = Date (earlier date)
         # Date - Date     = int  (total seconds)
         # Date - datetime = int  (total seconds)
 
+        from datetime import timedelta
+        from datetime import datetime
         if type(rhs) == int:
             difference_datetime = self.dt - timedelta(seconds=rhs)
             return Date(difference_datetime)
@@ -480,3 +422,5 @@ class Date:
         return f"Date({repr_string})"
     # }}}
 
+if __name__ == "__main__":
+    pass
