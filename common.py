@@ -209,19 +209,17 @@ def head(inp, preview_lines_count=5):
     else:
         return head_file(inp, preview_lines_count)
 
-
-
 def print_dict(D):
     from columnar import columnar
     if type(D) != type({}):
         argument_type = str(type(D))
-        str_representation = truncate(str(D), 40)
         print_red_line("Please pass a dictionary. Invalid type {arg_type} with str representation {str_rep}".format(
             arg_type=argument_type, str_rep=str_representation))
         return
     data = []
     for key, value in D.items():
         trunc_val = truncate(str(value), 80)
+        trunc_val = str(value)
         data.append([key, trunc_val])
     headers = [ "key", "value" ]
     table = columnar(data, headers, no_borders=True)

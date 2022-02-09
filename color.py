@@ -1,4 +1,14 @@
-
+#
+# SEARCH     : print_\(\w\+\)_line(\(.*\))
+# SUBSTITUTE : s/print_\(\w\+\)_line(\(.*\))/print(Code.\U\1 + \2)
+#
+# Doesn’t work for nested function calls example: 
+#
+#   offsets = [ make_string_green(offset) if offset == None else str(offset) for offset in offsets ]
+#
+# SEARCH     : make_string_\(\w\+\)(\(.*\))
+# SUBSTITUTE : s/make_string_\(\w\+\)(\(.*\))/Code.\U\1\E+\2
+#
 class Maker:
     RESET = '\x1b[39m'
     def __init__(self, code):
