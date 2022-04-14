@@ -421,4 +421,6 @@ class Date:
     # }}}
 
 if __name__ == "__main__":
+    error_table = [{'slug': 'ThankfulDeadMinkJonCarnage-A1wuckc0t442Zdzx', 'views': 384, 'user_id': '160504245', 'title': 'lacari playing gwen', 'thumbnail_url': 'https://clips-media-assets2.twitch.tv/AT-cm%7CtyYhdQNcLnJHNLeONmXc8Q-preview-480x272.jpg'}]
+    # ic(error_table)
     pass

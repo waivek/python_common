@@ -221,7 +221,7 @@ def handler():
             pass
         else:
             print_error_information(e)
-            print_variables_by_frame(e)
+            # print_variables_by_frame(e)
             import sys
             frames = Frames(error)
             print(Code.LIGHTBLUE_EX + "alias ic, ib | import sys, ic, ib")
