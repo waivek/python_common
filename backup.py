@@ -14,6 +14,7 @@ from ic import ib
 from ic import ic # Multi-Use, import time: 70ms - 110ms
 import git
 from common import Date
+import os
 import os.path
 import time
 import zmq
@@ -24,10 +25,46 @@ screen_lock = threading.Lock()
 commit_lock = threading.Lock()
 poll_rlock = threading.RLock()
 db_lock = threading.Lock()
+data_db_lock = threading.Lock()
 poll_event = threading.Event()
 keyboard_event = threading.Event()
 should_restart_watcher = False
 is_overlap = False
+
+
+
+
+class Directories:
+
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.dir2status = {}
+
+    def reset(self):
+        with self.lock:
+            self.dir2status = {}
+
+    def get(self, directory):
+        return self.dir2status.get(directory)
+
+    def set(self, directory, value):
+        if value not in [ 'CLEAN', 'DIRTY' ]:
+            error_message = f"'{value}' not in valid values [ 'CLEAN', 'DIRTY' ]"
+            raise ValueError(error_message)
+        with self.lock:
+            self.dir2status[directory] = value
+    
+    def values(self):
+        with self.lock:
+            return self.dir2status.values()
+
+    def keys(self):
+        with self.lock:
+            return self.dir2status.keys()
+
+    def items(self):
+        with self.lock:
+            return self.dir2status.items()
 
 
 def rel2abs(relative_path):
@@ -68,9 +105,58 @@ def sqlite_sink(message):
     lvl_name = record['level'].name
     lvl = record['level'].no
     with db_lock:
-        cursor.execute("CREATE TABLE IF NOT EXISTS errors (epoch REAL, lvl INTEGER, lvl_name TEXT, msg TEXT);")
         cursor.execute("INSERT INTO errors VALUES (?, ?, ?, ?);", (epoch, lvl, lvl_name, message))
         connection.commit()
+
+def log_db():
+    global cursor_1, connection_1
+    return cursor_1, connection_1
+
+def data_db():
+    global cursor_2, connection_2
+    return cursor_2, connection_2
+
+
+def update_paths_table(path, value):
+    global data_db_lock
+    lock = data_db_lock
+    cursor, connection = data_db()
+    if type(value) == int:
+        column = "'order'"
+    elif value in [ 'CLEAN', 'DIRTY' ]:
+        column = "status"
+    elif value.startswith("https://github.com"):
+        column = "url"
+    with lock:
+        cursor.execute(f"INSERT INTO paths (path, {column}) ON CONFLICT DO UPDATE SET {column}=excluded.{column};")
+        connection.commit()
+
+def db():
+    # --- data.db START --
+    cursor, connection = data_db()
+    cursor.execute("CREATE TABLE IF NOT EXISTS paths (path TEXT UNIQUE, url TEXT, order INTEGER, status TEXT);")
+    connection.commit()
+    # --- data.db END --
+
+    # --- log.db START --
+    cursor, connection = log_db()
+
+    cursor.execute("DROP TABLE IF EXISTS dirty_backup;")
+    cursor.execute("CREATE TABLE dirty_backup (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, date_string TEXT, epoch REAL, time_taken REAL, exception TEXT, path TEXT);")
+
+    cursor.execute("DROP TABLE IF EXISTS status;")
+    cursor.execute("CREATE TABLE IF NOT EXISTS status (directory TEXT UNIQUE ON CONFLICT REPLACE, status TEXT);")
+
+    cursor.execute("CREATE TABLE IF NOT EXISTS errors (epoch REAL, lvl INTEGER, lvl_name TEXT, msg TEXT);")
+
+    connection.commit()
+    # --- log.db END --
+
+
+db()
+
+cursor_1, connection_1 = db_init(get_log_db_path())
+cursor_2, connection_2 = db_init(get_data_db_path())
 
 format_string = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <5}</level> | <level>{message}</level>'
 log_out_file = rel2abs("backup-flask/log.txt")
@@ -78,6 +164,7 @@ logger.remove()
 logger.add(sys.stdout, format=format_string)
 logger.add(log_out_file, format=format_string, backtrace=True, diagnose=True)
 logger.add(sqlite_sink, format=format_string, level="ERROR")
+dir2status = Directories()
 
 def print_safe(*args, end="\n"):
     s = " ".join([ str(arg) for arg in args ])
@@ -97,6 +184,10 @@ def print_safe(*args, end="\n"):
 def unused_silencer():
     Code, ic, ib
 
+def is_dirty(directory):
+    repo = git.Repo(directory)
+    return repo.is_dirty()
+
 def is_git_repo(path):
     try:
         _ = git.Repo(path).git_dir
@@ -104,11 +195,21 @@ def is_git_repo(path):
     except git.exc.InvalidGitRepositoryError:
         return False
 
+def get_first_remote(path):
+    repo = git.Repo(path)
+    urls = list(repo.remotes[0].urls)
+    return urls[0]
+
 def no_remote(repo):
     if True in [ref.is_remote() for ref in repo.references]:
         return False
     else:
         return True
+
+def remote_is_behind(directory):
+    repo = git.Repo(directory)
+    commits = list(repo.iter_commits('origin/master..master'))
+    return len(commits) > 0
 
 
 def pipreqs(path):
@@ -147,20 +248,23 @@ def backup(path):
             print_safe(Code.RED + f"No remote for .git repository {path}")
             return
 
-        no_changes = repo.index.diff(None) == []
-
         requirements_path = os.path.join(path, "requirements.txt")
-        if not os.path.exists(requirements_path) and len(glob("*.py")) > 0:
+        glob_pattern = os.path.join(path, "*.py")
+        if not os.path.exists(requirements_path) and len(glob(glob_pattern)) > 0:
             pipreqs(path)
             repo.git.add(requirements_path)
             repo.git.commit('-m', '(auto-commit) requirements.txt')
 
-        if no_changes:
-            print_safe(f"[backup] No Changes, Exiting PATH='{path}'")
-            return
+        no_changes = repo.index.diff(None) == []
+        if not no_changes:
+            repo.git.commit('-am', '(auto-commit)')
 
-        repo.git.commit('-am', '(auto-commit)')
-        repo.remotes.origin.push()
+        if remote_is_behind(path):
+            has_internet = internet()
+            if not has_internet:
+                raise Exception("No internet.")
+            repo.remotes.origin.push()
+
         print_safe(f'[backup] Completed for PATH="{path}"')
     except Exception as e:
         exception = str(e)
@@ -195,20 +299,24 @@ def check_if_main_thread():
 def server():
     # https://gist.github.com/gmolveau/10c80785d499c2e2d4c447343a624664
     from flask import Flask, render_template, jsonify, request
+    from flask_cors import CORS
     import glob
-    data_dir = get_data_db_path()
-    cursor, connection = db_init(data_dir)
     poll_is_set = False
 
     root_folder = rel2abs('backup-flask')
     print_safe(Code.GREEN + "[server] " + root_folder)
     app = Flask(__name__, template_folder=root_folder, static_folder=root_folder)
+    cors = CORS(app)
+    app.config['CORS_HEADERS'] = 'Content-Type'
 
-    @app.route("/")
-    def hello_world():
+
+    def vue_dict():
         import os
-        rows = cursor.execute("SELECT path FROM paths").fetchall()
+        cursor, connection = data_db()
+        rows = cursor.execute("SELECT path, url FROM paths ORDER BY 'order' ASC").fetchall()
         paths = [ row['path'] for row in rows ]
+        path2url = { path: url for path, url in rows }
+        print_safe(Code.CYAN + str(path2url))
         test_location = r"C:\Users\vivek\Desktop\bkp"
 
         test_folders = [ folder for folder in glob.glob(test_location + "/*") if os.path.isdir(folder) ]
@@ -216,9 +324,17 @@ def server():
         remotes = [ f"https://www.github.com/waivek/bkp-{basename}" for basename in basenames ]
         folder_payload = [ { "path": A, "basename": B, "remote": C} for A, B, C in zip(test_folders, basenames, remotes) ]
         has_internet = internet()
-        # has_internet = True
-        
-        return render_template('gui.html', paths=paths, folder_payload=folder_payload, has_internet=has_internet)
+        return { 'paths': paths, 'folder_payload': folder_payload, 'has_internet': has_internet, 'path2url': path2url }
+
+    @app.route("/vue-json")
+    def vue_json():
+        D = vue_dict()
+        return jsonify(D), 200
+
+    @app.route("/")
+    def hello_world():
+        D = vue_dict()
+        return render_template('gui.html', paths=D['paths'], folder_payload=D['folder_payload'], has_internet=D['has_internet'], path2url=D['path2url'])
 
     def autocomplete_path(path):
         from pathlib import Path
@@ -238,7 +354,8 @@ def server():
             dirname, foldername = os.path.split(suggestion)
             dirname = Path(dirname).resolve()
             result = os.path.join(dirname, foldername)
-            results.append(result)
+            is_git_repository = os.path.exists(os.path.join(result, ".git"))
+            results.append({ "path": result, "is_git_repository": is_git_repository })
         return results
 
 
@@ -248,11 +365,14 @@ def server():
         suggestions = autocomplete_path(D["input_value"])
         return jsonify(suggestions)
 
+
     @app.route("/api/db_add", methods=[ "PUT" ])
     def db_add():
+        cursor, connection = data_db()
         D = request.json
         path = D["path"]
-        cursor.execute("REPLACE INTO paths VALUES (?);", (path,))
+        url = get_first_remote(path)
+        cursor.execute("INSERT INTO paths VALUES (?, ?);", (path, url))
         connection.commit()
 
         start_time = time.time()
@@ -263,6 +383,7 @@ def server():
 
     @app.route("/api/db_remove", methods=[ "DELETE" ])
     def db_remove():
+        cursor, connection = data_db()
         D = request.json
         path = D["path"]
         cursor.execute("DELETE FROM paths WHERE path=?;", (path,))
@@ -354,7 +475,24 @@ def server():
         else:
             return jsonify("Nothing to add!"), 200
 
-    @app.route("/poll", methods=["GET"])
+    @app.route("/poll", methods=["POST"])
+    def poll_2():
+        cursor, connection = log_db()
+
+        D = request.json
+        id = float(D["id"])
+        dirty_directories_current = D["dirty_directories"]
+
+        rows = []
+        dirty_directories = []
+        while rows == [] and (dirty_directories == [] or dirty_directories == dirty_directories_current):
+            time.sleep(0.1)
+            rows = [ dict(row) for row in cursor.execute("SELECT * FROM dirty_backup WHERE id >= ? ORDER BY id DESC;", (id,)).fetchall() ]
+            dirty_directories = [ directory  for directory, in cursor.execute("SELECT directory FROM status WHERE status == 'DIRTY'").fetchall() ]
+
+        return jsonify({ "rows": rows, "dirty_directories": dirty_directories }), 200
+
+    # @app.route("/poll", methods=["GET"])
     def poll():
         # global poll_event
         nonlocal poll_is_set
@@ -363,8 +501,7 @@ def server():
         if not poll_rlock._is_owned():
             poll_rlock.acquire()
 
-        log_dir = get_log_db_path()
-        cursor, connection = db_init(log_dir)
+        cursor, connection = log_db()
 
         epoch = float(request.args.get("epoch"))
         # while not poll_event.is_set():
@@ -382,7 +519,6 @@ def server():
         poll_rlock.acquire()
         poll_is_set = False
 
-        # cursor.execute("CREATE TABLE IF NOT EXISTS backup (date_string TEXT, epoch REAL time_taken, REAL, status TEXT, exception TEXT);")
         rows = [ dict(row) for row in cursor.execute(f"SELECT * FROM backup WHERE epoch >= {epoch} ORDER BY epoch DESC;").fetchall() ]
 
         D = {
@@ -398,10 +534,31 @@ def server():
         poll_is_set = True
         return jsonify("Done"), 200
 
+    @app.route("/api/open_cmd", methods=["POST"])
+    def open_cmd():
+        D = request.json
+        path = D['path']
+        os.system(f'start cmd /k cd "{path}"')
+        return "200"
 
-    def db():
-        cursor.execute("CREATE TABLE IF NOT EXISTS paths (path TEXT UNIQUE);")
+    @app.route("/api/open_explorer", methods=["POST"])
+    def open_explorer():
+        D = request.json
+        path = D['path']
+        os.system(f'explorer "{path}"')
+        return "200"
+
+    @app.route("/api/update_path_order", methods=["POST"])
+    def update_path_order():
+        cursor, connection = data_db()
+        D = request.json
+        paths = D['paths']
+
+        pairs = list(enumerate(paths))
+        cursor.executemany("REPLACE INTO paths ('order', path) VALUES (?, ?);", pairs)
         connection.commit()
+        return "200"
+
 
     context = zmq.Context()
     # print_safe("[zmq_client] Connecting to localhost:5555…")
@@ -413,7 +570,6 @@ def server():
         D = socket.recv_json()
         print_safe(D)
 
-    db()
     is_main_thread = check_if_main_thread()
     app.run(host='0.0.0.0', use_reloader=is_main_thread, port=5000, debug=True, threaded=True)
 
@@ -438,58 +594,6 @@ def get_tracked_filepaths(path):
     configFiles = repo.git.execute( ['git', 'ls-tree', '-r',  'master', '--name-only']).split()
     paths = [ os.path.normpath(os.path.join(path, file)) for file in configFiles ]
     return paths
-
-
-def watch(path):
-
-    from watchdog.events import FileSystemEventHandler
-    class BackupHandler(FileSystemEventHandler):
-
-        def __init__(self):
-            self.last_valid_mod_time = 0
-            self.unconsumed_events = []
-
-        def log_event(self, D):
-            self.unconsumed_events.append(D)
-
-        def on_modified(self, event):
-            abs_path = os.path.abspath(event.src_path)
-            mod_time = time.time()
-
-            abs_path = os.path.abspath(event.src_path)
-            if os.path.exists(abs_path):
-                not_vim_file = not abs_path.endswith("~")
-                if not_vim_file:
-                    mod_time = time.time()
-                    seconds_elapsed = mod_time - self.last_valid_mod_time
-                    if True or seconds_elapsed > 0.3:
-                        tracked_filepaths = get_tracked_filepaths(path)
-                        if abs_path in tracked_filepaths:
-                            repo = git.Repo(path)
-                            is_dirty = repo.is_dirty() # Takes 300ms
-                            if is_dirty:
-                                dt = Date(mod_time).dt.strftime("%b %d %H:%M:%S")
-                                elapsed_string = f"+{seconds_elapsed:.1f}s".rjust(len("+000.0s"))
-                                elapsed_string = Code.RED + elapsed_string if seconds_elapsed < 1 else Code.GREEN + elapsed_string
-                                print(dt, elapsed_string, abs_path) # Your code here
-                                self.last_valid_mod_time = mod_time
-
-
-    from watchdog.observers import Observer
-      
-    event_handler = BackupHandler()
-  
-    observer = Observer()
-    observer.schedule(event_handler, path, recursive=True)
-  
-    observer.start()
-    try:
-        print(f"Listening... [DIR={path}]")
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        observer.stop()
-    observer.join()
 
 async def async_watch(directory):
     import asyncio
@@ -532,22 +636,6 @@ def wait_till_keyboard_interrupt():
         time.sleep(1)
         print_thread_information()
 
-class Directories:
-
-    def __init__(self):
-        self.lock = threading.Lock()
-        self.dir2status = {}
-
-    def set_dirty(self, directory):
-        lock = self.lock
-        with lock:
-            self.dir2status[directory] = 'DIRTY'
-
-    def set_clean(self, directory):
-        lock = self.lock
-        with lock:
-            self.dir2status[directory] = 'CLEAN'
-
 def watch_fast(directories):
 
     def handle_event(path, rel_time, directory):
@@ -570,7 +658,8 @@ def watch_fast(directories):
                         dt = Date(mod_time).dt.strftime("%b %d %H:%M:%S")
                         elapsed_string = f"+{seconds_elapsed:.1f}s".rjust(len("+000.0s"))
                         elapsed_string = Code.RED + elapsed_string if seconds_elapsed < 1 else Code.GREEN + elapsed_string
-                        gui_queue.put({ "directory": directory, "status": "DIRTY" })
+                        # gui_queue.put({ "directory": directory, "status": "DIRTY" })
+                        set_dirty(directory)
                         print_safe(dt, elapsed_string, abs_path) # Your code here
 
     def expensive(changes, ref_time):
@@ -601,6 +690,57 @@ def watch_fast(directories):
                 continue
             expensive_thread = threading.Thread(target=expensive, args=argument_tuple, name="expensive-", daemon=True)
             expensive_thread.start()
+
+    # called by handle_event
+    # This can’t be blocking/slow as it is called every time handle_event is called
+    # synchronous draw_icon’s and poll’s ? 
+    def set_status(directory, status):
+        if dir2status.get(directory) == status:
+            return
+        poll = None
+        dir2status.set(directory, status)
+        update_paths_table(directory, status)
+        # with commit_lock:
+        #     cursor.execute("INSERT INTO status VALUES (?, ?);", (directory, status))
+        #     connection.commit()
+
+    def set_dirty(directory):
+        set_status(directory, 'DIRTY')
+
+    def set_clean(directory):
+        set_status(directory, 'CLEAN')
+
+    @logger.catch(reraise=True)
+    def do_backup_and_update_db(now, directory):
+        cursor, connection = log_db()
+        epoch = now.timestamp()
+        date_string = now.strftime("%H:%M:%S")
+        time_taken, exception = backup(directory)
+        status = 'DIRTY' if is_dirty(directory) or remote_is_behind(directory) else 'CLEAN'
+        if status == 'CLEAN':
+            set_clean(directory)
+        dirty_backup_D = { "id": None, "date_string": date_string, "epoch": epoch, "time_taken": time_taken, "exception": exception, "path": directory }
+        with commit_lock:
+            cursor.execute("INSERT INTO dirty_backup VALUES (:id, :date_string, :epoch, :time_taken, :exception, :path);", dirty_backup_D)
+            connection.commit()
+
+    def backup_periodic(directory):
+        from datetime import datetime
+        wait_time = 15
+        while not keyboard_event.is_set():
+            if should_restart_watcher:
+                break
+            now = datetime.now()
+            if now.second % wait_time == 0:
+                if dir2status.get(directory) == 'DIRTY':
+                    do_backup_and_update_db(now, directory)
+                while datetime.now().second % wait_time == 0:
+                    keyboard_event.wait(0.1)
+            else:
+                seconds_remaining = wait_time - (now.second % wait_time)
+                date_string = now.strftime("%b %d %H:%M:%S")
+                print_safe(f"[{date_string}] REM={seconds_remaining:02d}", end="\r")
+            keyboard_event.wait(0.1)
 
     # commit_periodic {{{
     @logger.catch(reraise=True)
@@ -684,9 +824,12 @@ def watch_fast(directories):
                 if is_stopped:
                     break
                 try:
-                    D = gui_queue.get(timeout=1)
-                    directory, status = D['directory'], D['status']
-                    dir2status[directory] = status
+
+                    # D = gui_queue.get(timeout=0.1)
+                    # directory, status = D['directory'], D['status']
+                    # set_status(directory, status)
+                    # print_safe(dir2status.items())
+                    time.sleep(0.1)
                     all_clean = all(status == 'CLEAN' for status in dir2status.values())
                     icon.icon = clean_icon if all_clean else dirty_icon
                     clean_count = len([ status for status in dir2status.values() if status == 'CLEAN' ])
@@ -695,6 +838,7 @@ def watch_fast(directories):
 
                 except queue.Empty:
                     continue
+
             icon.stop()
 
         def get_clean_directories_as_items(x):
@@ -714,7 +858,7 @@ def watch_fast(directories):
         ctypes.windll.shcore.SetProcessDpiAwareness(1)
         is_stopped = False
 
-        dir2status = { directory: 'CLEAN'  for directory in directories }
+        # dir2status = { directory: 'CLEAN'  for directory in directories }
         from pystray import Icon as icon, Menu as menu, MenuItem as item
         stop_item = item('Exit', stop_icon)
         gui_item = item('GUI', gui)
@@ -739,6 +883,7 @@ def watch_fast(directories):
     global screen_lock
     global keyboard_event
     global should_restart_watcher
+    global dir2status
     import requests
     session = requests.Session()
     import queue
@@ -748,22 +893,25 @@ def watch_fast(directories):
     commit_date_D = {}
 
     log_dir = get_log_db_path()
-    cursor, connection = db_init(log_dir)
-    cursor.execute("DROP TABLE backup;")
-    cursor.execute("CREATE TABLE IF NOT EXISTS backup (date_string TEXT, epoch REAL, time_taken REAL, status TEXT, exception TEXT, path TEXT);")
-    connection.commit()
+
+    for directory in directories:
+        if is_dirty(directory) or remote_is_behind(directory):
+            set_dirty(directory)
+        else:
+            set_clean(directory)
 
     producer_thread = threading.Thread(target=producer, name="producer", daemon=False)
     consumer_thread = threading.Thread(target=consumer, name="consumer", daemon=False)
     draw_icon_thread = threading.Thread(target=draw_icon, name="draw_icon", daemon=False)
 
-    commit_threads = [ threading.Thread(target=commit_periodic, args=(directory,), name=f"{os.path.basename(directory)}-commit") for directory in directories ]
+    # commit_threads = [ threading.Thread(target=commit_periodic, args=(directory,), name=f"{os.path.basename(directory)}-commit") for directory in directories ]
+    backup_threads = [ threading.Thread(target=backup_periodic, args=(directory,), name=f"{os.path.basename(directory)}-backup") for directory in directories ]
 
     producer_thread.start()
     consumer_thread.start()
     draw_icon_thread.start()
-    for commit_thread in commit_threads:
-        commit_thread.start()
+    for backup_thread in backup_threads:
+        backup_thread.start()
 
     # wait_till_keyboard_interrupt()
     try:
@@ -774,9 +922,9 @@ def watch_fast(directories):
                 # print_safe("Finished producer_thread")
                 consumer_thread.join()
                 print_safe("Finished consumer_thread")
-                for i, commit_thread in enumerate(commit_threads):
-                    commit_thread.join()
-                    print_safe(f"Finished commit_thread {i}")
+                for i, backup_thread in enumerate(backup_threads):
+                    backup_thread.join()
+                    print_safe(f"Finished backup_thread {i}")
                 break # This terminates watch_fast, restarting onus is on launcher
             keyboard_event.wait(0.1)
     except KeyboardInterrupt:
@@ -855,7 +1003,7 @@ def launcher(no_server=False):
             socket.send_json(response)
 
     def get_paths():
-        cursor, connection = db_init(get_data_db_path())
+        cursor, connection = data_db()
         paths = [ row['path'] for row in cursor.execute("SELECT * FROM paths").fetchall() ]
         paths = [ path for path in paths if is_git_repo(path) ]
         paths = [ path for path in paths if no_remote(git.Repo(path)) == False ]
