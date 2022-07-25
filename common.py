@@ -122,6 +122,20 @@ def rel2abs(relative_path):
     called_path      = frame.f_code.co_filename
     parent_directory = os.path.dirname(os.path.realpath(called_path))
     absolute_path    = os.path.realpath(os.path.join(parent_directory, relative_path))
+
+    # frames = []
+    # i = 0
+    # while True:
+    #     try:
+    #         frames.append(sys._getframe(i))
+    #         i = i + 1
+    #     except:
+    #         break
+    # from color import Code
+    # from ic import ic
+    # # print(Code.CYAN + absolute_path)
+    # ic(frames)
+    # breakpoint()
     return absolute_path
 
 # "."
@@ -350,13 +364,15 @@ class Timestamp():
 
 
 class Date:
-    def __init__(self, string_or_datetime):
+    def __init__(self, string_or_datetime_or_epoch):
         import dateutil.parser
         from datetime import datetime
-        if isinstance(string_or_datetime, datetime):
-            dt_str = string_or_datetime.isoformat()
+        if isinstance(string_or_datetime_or_epoch, datetime):
+            dt_str = string_or_datetime_or_epoch.isoformat()
+        elif isinstance(string_or_datetime_or_epoch, int) or isinstance(string_or_datetime_or_epoch, float):
+            dt_str = datetime.fromtimestamp(string_or_datetime_or_epoch).isoformat()
         else:
-            dt_str = string_or_datetime
+            dt_str = string_or_datetime_or_epoch
         INDIAN_TIMEZONE  = dateutil.tz.gettz("Asia/Kolkata")
         self.dt = dateutil.parser.parse(dt_str).astimezone(INDIAN_TIMEZONE).replace(microsecond=0)
         self.string = self.dt.isoformat()

@@ -5,7 +5,9 @@
 from common import rel2abs, print_red_line, make_string_green, truncate, Timer
 import json
 from enum import IntEnum
+import threading
 timer = Timer()
+lock = threading.Lock()
 
 import platform
 if platform.system() == "Linux":
@@ -56,9 +58,14 @@ def prepare_dict(D):
     D = jsonify_lists(D)           # 0.45, 25%
     return D
 
+def is_reserved(key):
+    # 147 Words "ABORT" ... "WITHOUT"
+    sqlite_reserved_words = [ "ABORT", "ACTION", "ADD", "AFTER", "ALL", "ALTER", "ALWAYS", "ANALYZE", "AND", "AS", "ASC", "ATTACH", "AUTOINCREMENT", "BEFORE", "BEGIN", "BETWEEN", "BY", "CASCADE", "CASE", "CAST", "CHECK", "COLLATE", "COLUMN", "COMMIT", "CONFLICT", "CONSTRAINT", "CREATE", "CROSS", "CURRENT", "CURRENT_DATE", "CURRENT_TIME", "CURRENT_TIMESTAMP", "DATABASE", "DEFAULT", "DEFERRABLE", "DEFERRED", "DELETE", "DESC", "DETACH", "DISTINCT", "DO", "DROP", "EACH", "ELSE", "END", "ESCAPE", "EXCEPT", "EXCLUDE", "EXCLUSIVE", "EXISTS", "EXPLAIN", "FAIL", "FILTER", "FIRST", "FOLLOWING", "FOR", "FOREIGN", "FROM", "FULL", "GENERATED", "GLOB", "GROUP", "GROUPS", "HAVING", "IF", "IGNORE", "IMMEDIATE", "IN", "INDEX", "INDEXED", "INITIALLY", "INNER", "INSERT", "INSTEAD", "INTERSECT", "INTO", "IS", "ISNULL", "JOIN", "KEY", "LAST", "LEFT", "LIKE", "LIMIT", "MATCH", "MATERIALIZED", "NATURAL", "NO", "NOT", "NOTHING", "NOTNULL", "NULL", "NULLS", "OF", "OFFSET", "ON", "OR", "ORDER", "OTHERS", "OUTER", "OVER", "PARTITION", "PLAN", "PRAGMA", "PRECEDING", "PRIMARY", "QUERY", "RAISE", "RANGE", "RECURSIVE", "REFERENCES", "REGEXP", "REINDEX", "RELEASE", "RENAME", "REPLACE", "RESTRICT", "RETURNING", "RIGHT", "ROLLBACK", "ROW", "ROWS", "SAVEPOINT", "SELECT", "SET", "TABLE", "TEMP", "TEMPORARY", "THEN", "TIES", "TO", "TRANSACTION", "TRIGGER", "UNBOUNDED", "UNION", "UNIQUE", "UPDATE", "USING", "VACUUM", "VALUES", "VIEW", "VIRTUAL", "WHEN", "WHERE", "WINDOW", "WITH", "WITHOUT" ]
+    key_upper = key.upper()
+    return key_upper in sqlite_reserved_words
 
 def escape_key_if_required(key):
-    if "." in key:
+    if "." in key or is_reserved(key):
         key = f'"{key}"'
     return key
 
@@ -295,7 +302,7 @@ BEGIN
 END;
     """.strip()
     if column_name_string == "":
-        print_red_line(f"column_name_string is EMPTY")
+        print_red_line("column_name_string is EMPTY")
         breakpoint()
     return create_trigger_statement
 
@@ -315,14 +322,18 @@ def add_date_column(dictionaries):
         D[date_column_name] = epoch_utc
     return dictionaries
 
-def insert_dictionaries(cursor, table_name, dictionaries, constraint_D={}):
+def insert_dictionaries(cursor, table_name, dictionaries, constraint_D={}, vcs=False):
     if dictionaries == []:
         return
 
+    global lock
+    lock.acquire()
     print_statements = False
 
     dictionaries = [ prepare_dict(D) for D in dictionaries ]
-    dictionaries = add_date_column(dictionaries)
+    if vcs:
+        dictionaries = add_date_column(dictionaries)
+
     dictionary_schema = Schema(dictionaries)
 
     table_schema = get_schema(cursor, table_name)
@@ -343,36 +354,37 @@ def insert_dictionaries(cursor, table_name, dictionaries, constraint_D={}):
     modify_column_statements = modify_existing_column_types(cursor, table_name, dictionary_schema, constraint_D=constraint_D)
     batch_execute(cursor, modify_column_statements, print_statements)
 
-    # 4.1. SETUP VCS TABLE {{{
-    vcs_print_statements = False
-    vcs_table_name = f"{table_name}_vcs"
-    vcs_table_schema = get_schema(cursor, vcs_table_name)
-    vcs_table_does_not_exist = len(vcs_table_schema) == 0
+    if vcs:
+        # 4.1. SETUP VCS TABLE {{{
+        vcs_print_statements = False
+        vcs_table_name = f"{table_name}_vcs"
+        vcs_table_schema = get_schema(cursor, vcs_table_name)
+        vcs_table_does_not_exist = len(vcs_table_schema) == 0
 
-    if vcs_table_does_not_exist:
-        create_vcs_table_statement = f"CREATE TABLE {vcs_table_name} ({dictionary_schema.column_definitions()});"
-        cursor.execute(create_vcs_table_statement)
-        if vcs_print_statements:
-            print(create_vcs_table_statement)
-    vcs_add_column_statements = add_new_columns(cursor, vcs_table_name, dictionary_schema)
-    batch_execute(cursor, vcs_add_column_statements, vcs_print_statements)
-    vcs_modify_column_statements = modify_existing_column_types(cursor, vcs_table_name, dictionary_schema)
-    batch_execute(cursor, vcs_modify_column_statements, vcs_print_statements)
-    # }}}
-    # 4.2. ADD VCS TRIGGER
-    trigger_name = f"update_trigger_{table_name}_vcs"
-    if len(vcs_add_column_statements) > 0 or len(vcs_modify_column_statements) > 0: # SNIPPET 1 for debug
-        cursor.execute(f"DROP TRIGGER IF EXISTS {trigger_name}")
-        if vcs_print_statements:
-            print(f"DROP TRIGGER IF EXISTS {trigger_name}")
-    trigger_exists = check_if_trigger_exists(cursor, table_name, trigger_name)
-    if not trigger_exists:
-        primary_key_supplied = len([ value for value in constraint_D.values() if value.index("PRIMARY KEY") > -1 ]) == 1
-        if primary_key_supplied:
-            create_trigger_statement = get_create_trigger_statement(cursor, table_name, trigger_name, vcs_table_name)
-            cursor.execute(create_trigger_statement)
+        if vcs_table_does_not_exist:
+            create_vcs_table_statement = f"CREATE TABLE {vcs_table_name} ({dictionary_schema.column_definitions()});"
+            cursor.execute(create_vcs_table_statement)
             if vcs_print_statements:
-                print(create_trigger_statement)
+                print(create_vcs_table_statement)
+        vcs_add_column_statements = add_new_columns(cursor, vcs_table_name, dictionary_schema)
+        batch_execute(cursor, vcs_add_column_statements, vcs_print_statements)
+        vcs_modify_column_statements = modify_existing_column_types(cursor, vcs_table_name, dictionary_schema)
+        batch_execute(cursor, vcs_modify_column_statements, vcs_print_statements)
+        # }}}
+        # 4.2. ADD VCS TRIGGER
+        trigger_name = f"update_trigger_{table_name}_vcs"
+        if len(vcs_add_column_statements) > 0 or len(vcs_modify_column_statements) > 0: # SNIPPET 1 for debug
+            cursor.execute(f"DROP TRIGGER IF EXISTS {trigger_name}")
+            if vcs_print_statements:
+                print(f"DROP TRIGGER IF EXISTS {trigger_name}")
+        trigger_exists = check_if_trigger_exists(cursor, table_name, trigger_name)
+        if not trigger_exists:
+            primary_key_supplied = len([ value for value in constraint_D.values() if value.index("PRIMARY KEY") > -1 ]) == 1
+            if primary_key_supplied:
+                create_trigger_statement = get_create_trigger_statement(cursor, table_name, trigger_name, vcs_table_name)
+                cursor.execute(create_trigger_statement)
+                if vcs_print_statements:
+                    print(create_trigger_statement)
 
     # 5. INSERT
     for D in dictionaries:
@@ -380,8 +392,10 @@ def insert_dictionaries(cursor, table_name, dictionaries, constraint_D={}):
         try:
             cursor.execute(insert_statement, values )
         except Exception as e:
+            print()
             print("[ERROR]", insert_statement)
             raise
         if print_statements:
             print(insert_statement, make_string_green(truncate(str(values), 200)))
             print()
+    lock.release()

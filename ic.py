@@ -176,7 +176,7 @@ def is_tuple_table(table):
     return common_type in [ tuple, list ]
 
 def is_single_dict_table(table):
-    return type(table) == dict
+    return type(table) == dict or hasattr(table, '__dict__')
 
 def is_multi_dict_table(table):
     if type(table) != list:
@@ -423,7 +423,7 @@ class Table:
         #
         # There is something very appealing about ic printing by default in black-and-white AS IS
         #
-        # truncate() also has to take into account length of asni escape characters
+        # truncate() also has to take into account length of ANSI escape characters
         #
 
         pass
