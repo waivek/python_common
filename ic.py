@@ -9,7 +9,6 @@
 # 5. Autocomplete
 # 6. Coloring Strings
 
-# one
 
 from timer import Timer
 timer = Timer()
