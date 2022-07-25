@@ -10,6 +10,7 @@
 # 6. Coloring Strings
 
 # new message
+# old message
 from timer import Timer
 timer = Timer()
 
