@@ -206,10 +206,17 @@ def print_loop():
         print(f"{ds} {index}")
         time.sleep(1)
 
+def path_test():
+    import os.path
+    path = r"C:\Users\vivek\Documents\Python\backup-flask\data_dev.db"
+    L = os.path.splitext(path)
+    ic(L)
+
+
 def main():
     from colorama import init
     init(convert=True)
-    print_loop()
+    path_test()
 
 if __name__ == "__main__":
     with handler():
