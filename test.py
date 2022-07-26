@@ -214,7 +214,7 @@ def path_test():
 
 def ic_test():
     for i in range(1, 5):
-        print(i)
+        hundred = i * 100
 
 def main():
     from colorama import init
