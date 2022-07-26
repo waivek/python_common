@@ -219,11 +219,11 @@ def ic_test():
     for i in range(1, 5):
         hundred = i * 20
         L = list(range(0, hundred))
-        print("---")
-        print()
-        print(L)
-        ic(L)
-        print()
+        # print("---")
+        # print()
+        # print(L)
+        # ic(L)
+        # print()
 
 
 def main():
