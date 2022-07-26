@@ -1,7 +1,3 @@
-timer.start("import inspect")
-import inspect
-timer.print("import inspect")
-
 # ./coc-enter.vim
 from timer import Timer   # Single Use
 from color import Code    # Multi-Use
