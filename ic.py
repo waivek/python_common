@@ -159,7 +159,7 @@ def is_function(value):
     result = type(value) in function_types
     return result
 
-# tuple_table:
+#  tuple_table:
 #     1. [ tuple | list ]
 #     2. all sublists are identical in length
 # single_dict_table:
