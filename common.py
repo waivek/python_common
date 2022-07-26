@@ -208,6 +208,19 @@ def print_table(dictionaries):
         print()
         # }}}
 
+def make_pretty(json_filepath):
+    import os.path
+    import json
+    with open(json_filepath, "r") as f:
+        dictionaries = json.load(f)
+    filepath, extension = os.path.splitext(json_filepath)
+    pretty_json_filepath = filepath + f"-pretty{extension}"
+    with open(pretty_json_filepath, "w") as f:
+        json.dump(dictionaries, f, indent=4)
+
+    message = f"{json_filepath} -> {pretty_json_filepath}"
+    print(message)
+
 def head_file(file_contents, preview_lines_count=5):
     lines = file_contents.split("\n")
     preview_lines = lines[0:preview_lines_count]
