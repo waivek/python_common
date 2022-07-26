@@ -12,22 +12,14 @@
 from timer import Timer
 timer = Timer()
 
-timer.start("import common")
 from common import print_error_information, print_dict, truncate, Date
-timer.print("import common")
-timer.start("import color")
 from color import Code
-timer.print("import color")
 
 
-timer.start("import inspect")
 import inspect # Takes 110 ms main bottleneck, see usecases at ./inspect_use_cases.txt
-timer.print("import inspect")
 import os
 import os.path
-timer.start("import types")
 import types
-timer.print("import types")
 
 global_breakpoint_time = False
 
