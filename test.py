@@ -213,9 +213,9 @@ def path_test():
     ic(L)
 
 def ic_test():
-    timer.start("import rich")
-    from rich import print
-    timer.print("import rich")
+    timer.start("import inspect")
+    import inspect
+    timer.print("import inspect")
     for i in range(1, 5):
         hundred = i * 20
         L = list(range(0, hundred))
