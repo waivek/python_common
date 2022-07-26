@@ -214,7 +214,7 @@ def path_test():
 
 def ic_test():
     for i in range(1, 5):
-        hundred = i * 100
+        hundred = i * 20
         L = list(range(0, hundred))
         print("---")
         print()
