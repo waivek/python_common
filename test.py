@@ -213,12 +213,13 @@ def path_test():
     ic(L)
 
 def ic_test():
+    form rich import pprint
     for i in range(1, 5):
         hundred = i * 20
         L = list(range(0, hundred))
         print("---")
         print()
-        ic(L)
+        pprint(L)
         print()
 
 
