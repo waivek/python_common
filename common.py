@@ -225,7 +225,6 @@ def to_json(obj, filepath):
     with open(filepath, "w") as fp:
         json.dump(obj, fp, indent=4)
 
-
 def head_file(file_contents, preview_lines_count=5):
     lines = file_contents.split("\n")
     preview_lines = lines[0:preview_lines_count]
