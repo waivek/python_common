@@ -212,11 +212,14 @@ def path_test():
     L = os.path.splitext(path)
     ic(L)
 
+def ic_test():
+    for i in range(1, 5):
+        print(i)
 
 def main():
     from colorama import init
     init(convert=True)
-    path_test()
+    ic_test()
 
 if __name__ == "__main__":
     with handler():
