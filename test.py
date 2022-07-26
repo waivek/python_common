@@ -216,7 +216,11 @@ def ic_test():
     for i in range(1, 5):
         hundred = i * 100
         L = list(range(0, hundred))
+        print("---")
+        print()
         ic(L)
+        print()
+
 
 def main():
     from colorama import init
