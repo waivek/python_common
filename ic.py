@@ -12,7 +12,7 @@
 from timer import Timer
 timer = Timer()
 
-# from common import print_error_information, print_dict, truncate, Date
+from common import print_error_information, print_dict, truncate, Date
 from color import Code
 
 
