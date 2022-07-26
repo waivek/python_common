@@ -214,7 +214,7 @@ def path_test():
 
 def ic_test():
     timer.start("import rich")
-    import rich
+    from rich import table
     timer.print("import rich")
     for i in range(1, 5):
         hundred = i * 20
