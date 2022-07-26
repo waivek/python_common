@@ -227,8 +227,7 @@ def print_dict(D):
     from columnar import columnar
     if type(D) != type({}):
         argument_type = str(type(D))
-        print_red_line("Please pass a dictionary. Invalid type {arg_type} with str representation {str_rep}".format(
-            arg_type=argument_type, str_rep=str_representation))
+        print_red_line("Please pass a dictionary. Invalid type {arg_type} with str representation {str_rep}".format(arg_type=argument_type, str_rep=str_representation))
         return
     data = []
     for key, value in D.items():
