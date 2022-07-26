@@ -220,6 +220,7 @@ def ic_test():
         print("---")
         print()
         print(L)
+        ic(L)
         print()
 
 
