@@ -209,7 +209,6 @@ def print_table(dictionaries):
         # }}}
 
 def make_pretty(json_filepath):
-    import os.path
     import json
     with open(json_filepath, "r") as f:
         dictionaries = json.load(f)
