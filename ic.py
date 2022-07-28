@@ -519,9 +519,9 @@ def data_source_multiline_long_colored_variables():
     table.add_column("value")
     table.add_column("type")
     for key, value in local_D.items():
-        if value == "mystuff":
+        if key == "mystuff":
             table.add_row(key, value, str(type(value)))
-        # table.add_row(key, str(value), str(type(value)))
+        table.add_row(key, str(value), str(type(value)))
     console = Console()
     console.print(table)
     r_print(local_D["mystuff"])
