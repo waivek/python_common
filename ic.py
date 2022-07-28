@@ -521,7 +521,7 @@ def data_source_multiline_long_colored_variables():
     local_D = locals()
     local_D["local_D"] = color_D_if_big(local_D)
     for key, value in local_D.items():
-        table.add_row(key, str(value), str(type(value)))
+        table.row(key, str(value), str(type(value)))
     print(table)
 
 
