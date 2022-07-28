@@ -501,8 +501,8 @@ def data_source_multiline_long_colored_variables():
     """
     select_sql = textwrap.dedent(select_sql_extra_space).strip()
 
-    local_D = locals()
-    mystuff = "\n".join(textwrap.wrap(color_D_if_big(local_D), 80))
+    # local_D = locals()
+    # mystuff = "\n".join(textwrap.wrap(color_D_if_big(local_D), 80))
     from rich import ansi
     decoder = ansi.AnsiDecoder()
 
@@ -512,6 +512,8 @@ def data_source_multiline_long_colored_variables():
     from rich.table import Table
     timer.print("import Table")
     table = Table(title="two-column display")
+    local_D = locals()
+    local_D["mystuff"] = color_D_if_big(local_D)
     table.add_column("key")
     table.add_column("value")
     table.add_column("type")
