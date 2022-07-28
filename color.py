@@ -1,3 +1,12 @@
+# Good Colors:
+#
+#     LIGHTRED_EX
+#     LIGHTBLUE_EX | CYAN | LIGHTCYAN_EX
+#     GREEN
+#     YELLOW 
+#     MAGENTA
+#
+
 #
 # SEARCH     : print_\(\w\+\)_line(\(.*\))
 # SUBSTITUTE : s/print_\(\w\+\)_line(\(.*\))/print(Code.\U\1 + \2)
@@ -8,15 +17,6 @@
 #
 # SEARCH     : make_string_\(\w\+\)(\(.*\))
 # SUBSTITUTE : s/make_string_\(\w\+\)(\(.*\))/Code.\U\1\E+\2
-
-# Good Colors:
-#
-#     LIGHTRED_EX
-#     LIGHTBLUE_EX | CYAN | LIGHTCYAN_EX
-#     GREEN
-#     YELLOW 
-#     MAGENTA
-#
 
 from timer import Timer
 timer = Timer()
