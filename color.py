@@ -132,6 +132,7 @@ def supports_color():
 #
 
 def enable_cmd_color_windows_10_1607():
+    # Black magic!
     # https://stackoverflow.com/a/39675059
     if supports_color() is False:
         os.system('') #enable VT100 Escape Sequence for WINDOWS 10 Ver. 1607
