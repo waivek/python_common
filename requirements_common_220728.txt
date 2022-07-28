@@ -1,5 +1,5 @@
 # color.py - colorma.init for windows cmd.exe
-# db.py - 
+# db.py
 #
 #     rel2abs
 #     truncate
