@@ -512,12 +512,12 @@ def data_source_multiline_long_colored_variables():
     from rich.table import Table
     timer.print("import Table")
     table = Table(title="two-column display")
-    local_D = locals()
-    local_D['mystuff'] = next(decoder.decode(color_D_if_big(local_D)))
+    mystuff = next(decoder.decode(color_D_if_big(locals())))
     table.add_column("key")
     table.add_column("value")
     table.add_column("type")
-    for key, value in local_D.items():
+    for key, value in locals().items():
+        print(key)
         if key == "mystuff":
             table.add_row(key, value, str(type(value)))
         else:
