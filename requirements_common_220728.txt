@@ -1,6 +1,6 @@
-# color.py - colorma.init
+# color.py - colorma.init for windows cmd.exe
 # common.py
-# db.py
+# db.py - rel2abs, truncate, green/red, pysqlite3 for linux
 # error.py
 # ic.py
 # timer.py
