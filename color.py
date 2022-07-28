@@ -10,8 +10,6 @@
 # SUBSTITUTE : s/make_string_\(\w\+\)(\(.*\))/Code.\U\1\E+\2
 #
 
-import platform
-
 class Maker:
     RESET = '\x1b[39m'
     def __init__(self, code):
@@ -122,7 +120,9 @@ def supports_color():
 # YELLOW 
 # MAGENTA
 if __name__ == "__main__":
+    timer.start("supports_color")
     if supports_color() is False:
+        timer.print("supports_color")
         from colorama import init
         init()
     print_samples()
