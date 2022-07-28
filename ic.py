@@ -514,6 +514,7 @@ def data_source_multiline_long_colored_variables():
     table = Table(title="two-column display")
     local_D = locals()
     local_D["mystuff"] = list(decoder.decode(color_D_if_big(local_D)))
+    breakpoint()
     table.add_column("key")
     table.add_column("value")
     table.add_column("type")
