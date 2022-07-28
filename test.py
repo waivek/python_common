@@ -439,7 +439,7 @@ def tracefunc(frame, event, arg, indent=[0]):
         filename = frame.f_code.co_filename
         short_filename = make_short(filename)
         if indent == [0]:
-            print("START-", end="")
+            print()
         print("-" * indent[0] + "> call function", frame.f_code.co_name, short_filename)
     elif event == "return":
         print("<" + "-" * indent[0], "exit function", frame.f_code.co_name)
