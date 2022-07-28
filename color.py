@@ -118,9 +118,9 @@ def supports_color():
         or vt_codes_enabled_in_windows_registry()
     )
 
-if supports_color() is False:
-    from colorama import init
-    init()
+# if supports_color() is False:
+#     from colorama import init
+#     init()
 
 # Good Colors:
 #
