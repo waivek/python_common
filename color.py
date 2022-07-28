@@ -132,6 +132,6 @@ def supports_color():
 #
 
 if __name__ == "__main__":
-    from colorama import winterm
+    # from colorama import winterm, 
     print_samples()
 
