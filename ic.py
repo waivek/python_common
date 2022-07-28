@@ -520,11 +520,11 @@ def data_source_multiline_long_colored_variables():
     table = Table()
     local_D = locals()
     local_D["mystuff"] = "\n".join(textwrap.wrap(color_D_if_big(local_D), 80))
-    for key, value in locals().items():
-        if key == 'table':
-            continue
-        table.row(key, str(value), str(type(value)))
-    print(table)
+    # for key, value in locals().items():
+    #     if key == 'table':
+    #         continue
+    #     table.row(key, str(value), str(type(value)))
+    # print(table)
 
 
     
