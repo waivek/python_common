@@ -401,11 +401,8 @@ class Date:
             dt_str = datetime.fromtimestamp(string_or_datetime_or_epoch).isoformat()
         else:
             dt_str = string_or_datetime_or_epoch
-        INDIAN_TIMEZONE  = dateutil.tz.gettz("Asia/Kolkata")
-
-ist_dateTime = datetime.now(timezone(timedelta(hours=5, minutes=30), 'IST'))
-
-
+        # INDIAN_TIMEZONE  = dateutil.tz.gettz("Asia/Kolkata")
+        INDIAN_TIMEZONE = timezone(timedelta(hours=5, minutes=30), 'IST')
 
         self.dt = dateutil.parser.parse(dt_str).astimezone(INDIAN_TIMEZONE).replace(microsecond=0)
         self.string = self.dt.isoformat()
