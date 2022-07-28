@@ -9,6 +9,9 @@
 # SEARCH     : make_string_\(\w\+\)(\(.*\))
 # SUBSTITUTE : s/make_string_\(\w\+\)(\(.*\))/Code.\U\1\E+\2
 #
+if supports_color() is False:
+    from colorama import init
+    init()
 
 from timer import Timer
 timer = Timer()
@@ -128,8 +131,5 @@ def supports_color():
 #
 
 if __name__ == "__main__":
-    if supports_color() is False:
-        from colorama import init
-        init()
     print_samples()
 
