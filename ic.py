@@ -192,7 +192,7 @@ def is_multi_dict_table(table):
 def table_friendly(table):
     return is_tuple_table(table) or is_single_dict_table(table) or is_multi_dict_table(table)
 
-    is_tuple_table, is_single_dict_table, is_multi_dict_table
+# is_tuple_table, is_single_dict_table, is_multi_dict_table
 def list_fmt(L):
     max_width, max_height = os.get_terminal_size()
     max_height = int(os.get_terminal_size().lines / 2)
