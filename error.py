@@ -11,7 +11,7 @@ def stub_quiet():
     ib
 
 def get_args(frame, summary):
-    import inspect
+    import inspect # builtin
     if summary.name == "<module>":
         # Line is not inside a function
         return []
@@ -19,7 +19,7 @@ def get_args(frame, summary):
         # Line is inside a GLOBAL function
         return inspect.getfullargspec(frame.f_globals[summary.name]).args
     # Line is inside a LOCAL function of a class
-    import gc
+    import gc # builtin
     # https://stackoverflow.com/a/52762678
     function_object = [obj for obj in gc.get_referrers(frame.f_code) if hasattr(obj, '__code__') and obj.__code__ is frame.f_code][0]
     return inspect.getfullargspec(function_object).args
