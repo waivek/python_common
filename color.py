@@ -95,7 +95,8 @@ if __name__ == "__main__":
     if platform.system() == "Windows":
         from timer import Timer
         timer = Timer()
-        print(f"{supports_color()=})
+        has_color = supports_color()
+        print(f"{supports_color():=})
         # timer.start("import init")
         # from colorama import init
         # timer.print("import init")
