@@ -155,7 +155,7 @@ def print_variables_by_frame(error):
     table_string = textwrap.indent(textwrap.dedent("\n".join(str(table).split("\n")[1:])), '    ')
     print(Code.LIGHTCYAN_EX + 'Variables by frame')
     print(table_string)
-    breakpoint()
+    # breakpoint()
 
 def print_error_information(error):
     # C:\Users\vivek\Documents\Python                               -> ~/Documents/Python
@@ -224,7 +224,7 @@ def handler():
             print_variables_by_frame(e)
             import sys
             frames = Frames(error)
-            return
+            # return
             print(Code.LIGHTBLUE_EX + "alias ic, ib | import sys, ic, ib")
             print()
             # try __builtins__.__dict__
