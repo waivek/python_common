@@ -225,6 +225,7 @@ def ic_test():
 def profile_rich_imports():
     from rich.table import Table
     from rich.console import Console
+    from rich import box
 
 
 def main():
