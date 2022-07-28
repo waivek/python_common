@@ -483,6 +483,7 @@ def data_source_mixed_dict():
     }
     return D
 
+# Required for error.print_variables_by_frame
 def data_source_multiline_long_colored_variables():
     # import pdb
     # tall_string = str(pdb.__doc__)
