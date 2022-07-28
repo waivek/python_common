@@ -221,12 +221,13 @@ def handler():
             pass
         else:
             print_error_information(e)
-            # print_variables_by_frame(e)
+            print_variables_by_frame(e)
             import sys
             frames = Frames(error)
             print(Code.LIGHTBLUE_EX + "alias ic, ib | import sys, ic, ib")
             print()
-            if "ipython" in sys.argv[0] or __builtins__.get("get_ipython", False):
+            # if "ipython" in sys.argv[0] or __builtins__.get("get_ipython", False):
+            if "ipython" in sys.argv[0]:
                 import ipdb
                 ipdb.post_mortem(e.__traceback__)
             else:
