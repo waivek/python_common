@@ -131,6 +131,9 @@ def supports_color():
 #     MAGENTA
 #
 
+def enable_cmd_color_windows_10_1607():
+    # https://stackoverflow.com/a/39675059
+
 if __name__ == "__main__":
     # from colorama import winterm, 
 
