@@ -512,6 +512,7 @@ def data_source_multiline_long_colored_variables():
     table.add_column("type")
     for key, value in local_D.items():
         table.add_row(key, str(value), str(type(value)))
+    print(table)
     console = Console()
     console.print(table)
 
