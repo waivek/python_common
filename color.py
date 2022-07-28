@@ -11,6 +11,7 @@
 #
 
 import os
+import sys
 from timer import Timer
 timer = Timer()
 
@@ -78,8 +79,6 @@ def print_samples():
     print()
 
 def supports_color():
-    import os
-    import sys
     """
     Return True if the running system's terminal supports color,
     and False otherwise.
