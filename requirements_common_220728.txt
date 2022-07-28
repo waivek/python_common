@@ -14,7 +14,7 @@
 #
 # ic.py
 print_dict ib
-truncate called 11 list_fmt [3], ib [1], Table.to_string [2]
+truncate called 6 list_fmt [3], ib [1], Table.to_string [2]
 # common.py
 # timer.py
 aiohttp==3.8.1
