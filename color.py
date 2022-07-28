@@ -18,10 +18,15 @@
 #     MAGENTA
 #
 
-import os
-import sys
 from timer import Timer
 timer = Timer()
+
+timer.start("import os")
+import os
+timer.print("import os")
+timer.start("import sys")
+import sys
+timer.print("import sys")
 
 class Maker:
     RESET = '\x1b[39m'
