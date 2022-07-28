@@ -522,7 +522,7 @@ def data_source_multiline_long_colored_variables():
     mystuff = "\n".join(textwrap.wrap(color_D_if_big(local_D), 80))
     from rich import ansi
     decoder = ansi.AnsiDecoder()
-    print(decoder.decode(mystuff))
+    print(list(decoder.decode(mystuff)))
     # for key, value in locals().items():
     #     if key == 'table':
     #         continue
