@@ -75,6 +75,17 @@ def print_samples():
     print(f"{'WHITE':16} This is the way {Code.WHITE + value}, I hope you understand")
     print()
 
+def supports_color():
+    """
+    Returns True if the running system's terminal supports color, and False
+    otherwise.
+    """
+    plat = sys.platform
+    supported_platform = plat != 'Pocket PC' and (plat != 'win32' or
+                                                  'ANSICON' in os.environ)
+    # isatty is not always implemented, #6223.
+    is_a_tty = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
+    return supported_platform and is_a_tty
 # LIGHTRED_EX
 # LIGHTBLUE_EX | CYAN | LIGHTCYAN_EX
 # GREEN
@@ -84,13 +95,7 @@ if __name__ == "__main__":
     if platform.system() == "Windows":
         from timer import Timer
         timer = Timer()
-        timer.start("import os, psutil")
-        import os, psutil  # Get the parent process name. 
-        timer.print("import os, psutil")
-        timer.start("Process")
-        pprocName = psutil.Process(os.getppid()).name()
-        timer.print("Process")
-        print(pprocName)
+        print(f"{supports_color()=}
         # timer.start("import init")
         # from colorama import init
         # timer.print("import init")
