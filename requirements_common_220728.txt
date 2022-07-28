@@ -8,15 +8,15 @@
 #
 # error.py - 
 #
-#     ic       Frame.printing, print_variables_by_frame
-#     truncate for Frames.printing
-#     ipdb     if in ipdb shell
+#     ic       : Frame.printing, print_variables_by_frame
+#     truncate : for Frames.printing
+#     ipdb     : if in ipdb shell
 #
 # ic.py
 #
-#     print_dict ib
-#     truncate   total [6] list_fmt [3], ib [1], Table.to_string [2]
-#     Date       checking if Date
+#     print_dict : ib
+#     truncate   : total [6] list_fmt [3], ib [1], Table.to_string [2]
+#     Date       : checking if Date
 #
 # common.py
 # timer.py
