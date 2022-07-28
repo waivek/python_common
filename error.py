@@ -226,6 +226,7 @@ def handler():
             frames = Frames(error)
             print(Code.LIGHTBLUE_EX + "alias ic, ib | import sys, ic, ib")
             print()
+            # try __builtins__.__dict__
             # if "ipython" in sys.argv[0] or __builtins__.get("get_ipython", False):
             if "ipython" in sys.argv[0]:
                 import ipdb
