@@ -82,6 +82,7 @@ def print_samples():
 # MAGENTA
 if __name__ == "__main__":
     if platform.system() == "Windows":
+        from Timer import timer
         from colorama import init
         init(convert=True)
     print_samples()
