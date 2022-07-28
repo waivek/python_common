@@ -421,6 +421,7 @@ class Date:
         return Date(datetime.now())
 
     def pretty(self):
+        from datetime import timezone
         print_dict({
             "ist": self.string,
             "utc": self.dt.astimezone(timezone.utc).isoformat()[:-6],
