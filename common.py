@@ -394,6 +394,7 @@ class Date:
     def __init__(self, string_or_datetime_or_epoch):
         import dateutil.parser
         from datetime import datetime
+        from datetime import timezone
         if isinstance(string_or_datetime_or_epoch, datetime):
             dt_str = string_or_datetime_or_epoch.isoformat()
         elif isinstance(string_or_datetime_or_epoch, int) or isinstance(string_or_datetime_or_epoch, float):
