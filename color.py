@@ -82,12 +82,18 @@ def print_samples():
 # MAGENTA
 if __name__ == "__main__":
     if platform.system() == "Windows":
-        from timer import Timer
-        timer = Timer()
-        timer.start("import init")
-        from colorama import init
-        timer.print("import init")
-        timer.start("init")
-        init(convert=True)
-        timer.print("init")
+
+        timer.start("import os, psutil")
+        import os, psutil  # Get the parent process name. 
+        timer.print("import os, psutil")
+        pprocName = psutil.Process(os.getppid()).name()
+        print(pprocName)
+        # from timer import Timer
+        # timer = Timer()
+        # timer.start("import init")
+        # from colorama import init
+        # timer.print("import init")
+        # timer.start("init")
+        # init(convert=True)
+        # timer.print("init")
     print_samples()
