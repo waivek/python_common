@@ -87,6 +87,7 @@ def print_samples():
     print()
 
 def supports_color():
+    # from django
     """
     Return True if the running system's terminal supports color,
     and False otherwise.
