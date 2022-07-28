@@ -117,7 +117,7 @@ def rel2abs(relative_path):
     #         break
     #     frames.append(frm)
         
-    frame            = sys._getframe(2)
+    frame            = sys._getframe(2) # 1 for threading, look at backup.py:rel2abs() implementation
 
     called_path      = frame.f_code.co_filename
     parent_directory = os.path.dirname(os.path.realpath(called_path))
