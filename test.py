@@ -423,7 +423,8 @@ def ic_test():
 def make_short(filename):
     D = { 
             r"C:\Users\vivek\AppData\Roaming\Python\Python310\site-packages": "site-packages",
-            r"C:\Users\vivek\Documents\Python": "common"
+            r"C:\Users\vivek\Documents\Python": "common",
+            r"C:\Program Files\Python310\lib": "builtin",
     }
     for string, replacement in D.items():
         filename = filename.replace(string, replacement)
