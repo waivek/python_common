@@ -1,7 +1,7 @@
 # color.py - colorma.init for windows cmd.exe
 # common.py
 # db.py - rel2abs, truncate, green/red, pysqlite3 for linux
-# error.py
+# error.py - ic for Frame.printing, truncate for Frames.printing
 # ic.py
 # timer.py
 aiohttp==3.8.1
