@@ -421,15 +421,16 @@ def ic_test():
         # print()
 
 def profile_rich_imports():
-    from rich.table import Table
-    from rich.console import Console
-    from rich import box
+    # from rich.table import Table
+    # from rich.console import Console
+    # from rich import box
+    pass
 
 
 def main():
     from colorama import init
     init(convert=True)
-    ic_test()
+    rich_movie()
 
 if __name__ == "__main__":
     with handler():
