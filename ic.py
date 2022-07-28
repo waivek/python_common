@@ -505,7 +505,6 @@ def data_source_multiline_long_colored_variables():
     mystuff = "\n".join(textwrap.wrap(color_D_if_big(local_D), 80))
     from rich import ansi
     decoder = ansi.AnsiDecoder()
-    print(list(decoder.decode(mystuff)))
 
 
     timer.start("import Table")
@@ -513,8 +512,6 @@ def data_source_multiline_long_colored_variables():
     from rich.table import Table
     timer.print("import Table")
     table = Table(title="two-column display")
-    local_D = locals()
-    local_D["local_D"] = color_D_if_big(local_D)
     table.add_column("key")
     table.add_column("value")
     table.add_column("type")
