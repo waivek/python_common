@@ -125,6 +125,7 @@ def supports_color():
 #     YELLOW 
 #     MAGENTA
 #
+
 if __name__ == "__main__":
     if supports_color() is False:
         from colorama import init
