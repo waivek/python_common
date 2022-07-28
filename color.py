@@ -122,10 +122,7 @@ def supports_color():
 # YELLOW 
 # MAGENTA
 if __name__ == "__main__":
-    if platform.system() == "Windows":
-        from timer import Timer
-        timer = Timer()
-        print(f"{supports_color()=}")
+    if supports_color() is False:
         from colorama import init
         init()
     print_samples()
