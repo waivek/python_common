@@ -1,4 +1,4 @@
-# color.py
+# color.py - colorma.init
 # common.py
 # db.py
 # error.py
