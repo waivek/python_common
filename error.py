@@ -224,7 +224,6 @@ def handler():
             # print_variables_by_frame(e)
             import sys
             frames = Frames(error)
-            # return
             print(Code.LIGHTBLUE_EX + "alias ic, ib | import sys, ic, ib")
             print()
             # try __builtins__.__dict__
