@@ -14,7 +14,7 @@ def day_name(dt):
 
 
 string = "tuesday 12pm pst"
-string = " ".join(sys.argv[1:])
+# string = " ".join(sys.argv[1:])
 # string_2 = "12pm pst tuesday"
 
 string = string.lower()
