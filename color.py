@@ -86,6 +86,8 @@ if __name__ == "__main__":
         timer = Timer()
         timer.start("import init")
         from colorama import init
-        init(convert=True)
         timer.print("import init")
+        timer.start("init")
+        init(convert=True)
+        timer.print("init")
     print_samples()
