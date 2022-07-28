@@ -1,4 +1,4 @@
-# color.py - colorma.init for windows cmd.exe
+# color.py
 # db.py
 #
 #     rel2abs
