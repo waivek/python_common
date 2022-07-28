@@ -120,6 +120,8 @@ def supports_color():
 # YELLOW 
 # MAGENTA
 if __name__ == "__main__":
+    from timer import Timer
+    timer = Timer()
     timer.start("supports_color")
     if supports_color() is False:
         timer.print("supports_color")
