@@ -9,6 +9,9 @@
 # SEARCH     : make_string_\(\w\+\)(\(.*\))
 # SUBSTITUTE : s/make_string_\(\w\+\)(\(.*\))/Code.\U\1\E+\2
 #
+
+import platform
+
 class Maker:
     RESET = '\x1b[39m'
     def __init__(self, code):
@@ -78,4 +81,8 @@ def print_samples():
 # YELLOW 
 # MAGENTA
 if __name__ == "__main__":
+    if platform.system == "Windows":
+        timer.start("import init")
+        from colorama import init
+        timer.print("import init")
     print_samples()
