@@ -178,7 +178,7 @@ def is_tuple_table(table):
     return common_type in [ tuple, list ]
 
 def is_single_dict_table(table):
-    return type(table) == dict or hasattr(table, '__dict__')
+    return type(table) == dict or (hasattr(table, '__dict__') and hasattr(table, 'items'))
 
 def is_multi_dict_table(table):
     if type(table) != list:
