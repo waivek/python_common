@@ -500,6 +500,9 @@ def data_source_multiline_long_colored_variables():
     ON id="vod.id";
     """
     select_sql = textwrap.dedent(select_sql_extra_space).strip()
+
+
+
     # timer.start("import Table")
     # from rich.console import Console
     # from rich.table import Table
@@ -517,12 +520,13 @@ def data_source_multiline_long_colored_variables():
 
 
 
-    table = Table()
     local_D = locals()
     mystuff = "\n".join(textwrap.wrap(color_D_if_big(local_D), 80))
     from rich import ansi
     decoder = ansi.AnsiDecoder()
     print(list(decoder.decode(mystuff)))
+
+    # table = Table()
     # for key, value in locals().items():
     #     if key == 'table':
     #         continue
