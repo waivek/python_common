@@ -10,6 +10,16 @@
 # SUBSTITUTE : s/make_string_\(\w\+\)(\(.*\))/Code.\U\1\E+\2
 #
 
+
+# Good Colors:
+#
+#     LIGHTRED_EX
+#     LIGHTBLUE_EX | CYAN | LIGHTCYAN_EX
+#     GREEN
+#     YELLOW 
+#     MAGENTA
+#
+
 import os
 import sys
 from timer import Timer
@@ -117,15 +127,6 @@ def supports_color():
         os.environ.get("TERM_PROGRAM") == "vscode"
         or vt_codes_enabled_in_windows_registry()
     )
-
-# Good Colors:
-#
-#     LIGHTRED_EX
-#     LIGHTBLUE_EX | CYAN | LIGHTCYAN_EX
-#     GREEN
-#     YELLOW 
-#     MAGENTA
-#
 
 def enable_cmd_color_windows_10_1607():
     # Black magic!
