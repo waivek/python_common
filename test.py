@@ -444,8 +444,9 @@ def tracefunc(frame, event, arg, indent=[0]):
         indent[0] -= 2
     return tracefunc
 
-import sys
-sys.setprofile(tracefunc)
+def trace_on():
+    import sys
+    sys.setprofile(tracefunc)
 
 
 
@@ -453,6 +454,7 @@ def main():
     from colorama import init
     init(convert=True)
     # rich_movie()
+    trace_on()
     ic_test()
 
 if __name__ == "__main__":
