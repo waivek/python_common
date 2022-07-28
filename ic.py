@@ -501,30 +501,30 @@ def data_source_multiline_long_colored_variables():
     """
     select_sql = textwrap.dedent(select_sql_extra_space).strip()
 
-
-
-    # timer.start("import Table")
-    # from rich.console import Console
-    # from rich.table import Table
-    # timer.print("import Table")
-    # table = Table(title="two-column display")
-    # local_D = locals()
-    # local_D["local_D"] = color_D_if_big(local_D)
-    # table.add_column("key")
-    # table.add_column("value")
-    # table.add_column("type")
-    # for key, value in local_D.items():
-    #     table.add_row(key, str(value), str(type(value)))
-    # console = Console()
-    # console.print(table)
-
-
-
     local_D = locals()
     mystuff = "\n".join(textwrap.wrap(color_D_if_big(local_D), 80))
     from rich import ansi
     decoder = ansi.AnsiDecoder()
     print(list(decoder.decode(mystuff)))
+
+
+    timer.start("import Table")
+    from rich.console import Console
+    from rich.table import Table
+    timer.print("import Table")
+    table = Table(title="two-column display")
+    local_D = locals()
+    local_D["local_D"] = color_D_if_big(local_D)
+    table.add_column("key")
+    table.add_column("value")
+    table.add_column("type")
+    for key, value in local_D.items():
+        table.add_row(key, str(value), str(type(value)))
+    console = Console()
+    console.print(table)
+
+
+
 
     # table = Table()
     # for key, value in locals().items():
