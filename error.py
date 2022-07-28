@@ -43,7 +43,7 @@ class Frame:
         for row in rows:
             table.row(row)
 
-        import textwrap
+        import textwrap # built-in
         if table.table:
             table_string = "\n".join(str(table).split("\n")[1:])
         else:
