@@ -238,11 +238,12 @@ def ic_one(value):
     if type(value) == list:
         return list_fmt(value)
     if type(value) == Date:
-        import dateutil.parser
+        # import dateutil.parser
+        from datetime import timezone
         table = Table()
         table.parse({
             "ist": value.string,
-            "utc": value.dt.astimezone(dateutil.tz.gettz("UTC")).isoformat()[:-6],
+            "utc": value.dt.astimezone(timezone.utc).isoformat()[:-6],
             "epoch": value.epoch,
             "relative": value.timeago()
         })
