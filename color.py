@@ -87,7 +87,9 @@ if __name__ == "__main__":
         timer.start("import os, psutil")
         import os, psutil  # Get the parent process name. 
         timer.print("import os, psutil")
+        timer.start("Process")
         pprocName = psutil.Process(os.getppid()).name()
+        timer.print("Process")
         print(pprocName)
         # timer.start("import init")
         # from colorama import init
