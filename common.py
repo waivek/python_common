@@ -395,6 +395,7 @@ class Date:
         import dateutil.parser
         from datetime import datetime
         from datetime import timezone
+        from datetime import timedelta
         if isinstance(string_or_datetime_or_epoch, datetime):
             dt_str = string_or_datetime_or_epoch.isoformat()
         elif isinstance(string_or_datetime_or_epoch, int) or isinstance(string_or_datetime_or_epoch, float):
