@@ -5,7 +5,7 @@ sys.path = [ "C:/users/vivek/Documents/Python/" ] + sys.path
 from common import print_red_line
 from datetime import datetime
 from datetime import timedelta
-import dateutil
+import dateutil.parser
 import re
 import timeago
 
