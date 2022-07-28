@@ -443,5 +443,4 @@ def main():
     ic_test()
 
 if __name__ == "__main__":
-    with handler():
-        main()
+    main()
