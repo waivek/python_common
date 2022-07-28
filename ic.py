@@ -521,6 +521,7 @@ def data_source_multiline_long_colored_variables():
         if key == "mystuff":
             table.add_row(key, value, str(type(value)))
         else:
+            continue
             table.add_row(key, str(value), str(type(value)))
     console = Console()
     console.print(table)
