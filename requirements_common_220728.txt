@@ -6,7 +6,7 @@
 #     Code.GREEN and Code.RED
 #     pysqlite3 for linux
 #
-# error.py - 
+# error.py
 #
 #     ic       : Frame.printing, print_variables_by_frame
 #     truncate : for Frames.printing
