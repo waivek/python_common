@@ -666,6 +666,7 @@ def main():
 if __name__ == "__main__":
     try:
         # ic()
+        # Required for error.print_variables_by_frame
         data_source_multiline_long_colored_variables()
     except Exception as e:
         import bdb
