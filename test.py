@@ -420,13 +420,24 @@ def ic_test():
         # ic(L)
         # print()
 
+def make_short(filename):
+    D = { 
+            r"C:\Users\vivek\AppData\Roaming\Python\Python310\site-packages": "site-packages",
+            r"C:\Users\vivek\Documents\Python": "common"
+    }
+    for string, replacement in D.items():
+        filename = filename.replace(string, replacement)
+    return filename
+
 f = None
 def tracefunc(frame, event, arg, indent=[0]):
     global f
     f = frame
     if event == "call":
         indent[0] += 2
-        print("-" * indent[0] + "> call function", frame.f_code.co_name, frame.f_code.co_filename)
+        filename = frame.f_code.co_filename
+        short_filename = make_short(filename)
+        print("-" * indent[0] + "> call function", frame.f_code.co_name, short_filename)
     elif event == "return":
         print("<" + "-" * indent[0], "exit function", frame.f_code.co_name)
         indent[0] -= 2
