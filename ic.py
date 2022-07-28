@@ -513,7 +513,7 @@ def data_source_multiline_long_colored_variables():
     timer.print("import Table")
     table = Table(title="two-column display")
     local_D = locals()
-    local_D["mystuff"] = color_D_if_big(local_D)
+    local_D["mystuff"] = list(decoder.decode(color_D_if_big(local_D)))
     table.add_column("key")
     table.add_column("value")
     table.add_column("type")
