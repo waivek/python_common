@@ -8,7 +8,7 @@
 #
 # error.py
 #
-#     ic       : Frame.printing, print_variables_by_frame
+#     ic       : print_error_information, Frame.printing, Frames.printing, print_variables_by_frame
 #     truncate : Frames.printing
 #     ipdb     : if in ipdb shell
 #
