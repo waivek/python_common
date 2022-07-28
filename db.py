@@ -20,10 +20,6 @@ def table_exists(cursor, table_name):
     D = cursor.execute(statement).fetchall()
     return True if D else False
 
-def flatten(unflattened_list):
-    from functools import reduce
-    return reduce(lambda a,b:a+b, unflattened_list)
-
 def db_init(db_path):
     db_path = rel2abs(db_path)
     connection = sqlite3.connect(db_path)
@@ -108,7 +104,6 @@ class Schema:
                 self.D = self.dictionaries_to_schema(items)
 
     def dictionaries_to_schema(self, dictionaries):
-        # items = flatten(list(D.items()) for D in dictionaries)
         items = []
         for D in dictionaries:
             for T in D.items():
