@@ -127,10 +127,5 @@ if __name__ == "__main__":
         timer = Timer()
         print(f"{supports_color()=}")
         from colorama import init
-        # timer.start("import init")
-        # from colorama import init
-        # timer.print("import init")
-        # timer.start("init")
-        # init(convert=True)
-        # timer.print("init")
+        init()
     print_samples()
