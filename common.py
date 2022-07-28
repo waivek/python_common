@@ -402,6 +402,11 @@ class Date:
         else:
             dt_str = string_or_datetime_or_epoch
         INDIAN_TIMEZONE  = dateutil.tz.gettz("Asia/Kolkata")
+
+ist_dateTime = datetime.now(timezone(timedelta(hours=5, minutes=30), 'IST'))
+
+
+
         self.dt = dateutil.parser.parse(dt_str).astimezone(INDIAN_TIMEZONE).replace(microsecond=0)
         self.string = self.dt.isoformat()
         self.epoch = int(self.dt.timestamp())
