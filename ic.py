@@ -519,7 +519,7 @@ def data_source_multiline_long_colored_variables():
 
     table = Table()
     local_D = locals()
-    # local_D["local_D"] = color_D_if_big(local_D)
+    local_D["local_D"] = color_D_if_big(local_D)
     for key, value in locals().items():
         if key == 'table':
             continue
