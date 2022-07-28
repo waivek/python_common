@@ -1,7 +1,7 @@
 # color.py - colorma.init for windows cmd.exe
 # db.py - 
 #
-#     rel2abs 
+#     rel2abs
 #     truncate
 #     Code.GREEN and Code.RED
 #     pysqlite3 for linux
