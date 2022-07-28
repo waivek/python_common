@@ -453,7 +453,6 @@ def trace_on():
 def main():
     from colorama import init
     init(convert=True)
-    # rich_movie()
     trace_on()
     ic_test()
 
