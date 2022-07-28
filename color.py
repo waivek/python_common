@@ -10,6 +10,7 @@
 # SUBSTITUTE : s/make_string_\(\w\+\)(\(.*\))/Code.\U\1\E+\2
 #
 
+import os
 from timer import Timer
 timer = Timer()
 
@@ -133,15 +134,11 @@ def supports_color():
 
 def enable_cmd_color_windows_10_1607():
     # https://stackoverflow.com/a/39675059
+    if supports_color() is False:
+        os.system('') #enable VT100 Escape Sequence for WINDOWS 10 Ver. 1607
 
 if __name__ == "__main__":
     # from colorama import winterm, 
 
-    import os
-    print(f"{supports_color()=}")
-    print('\033[35m'+'color-test'+'\033[39m'+" test end")
-    os.system('') #enable VT100 Escape Sequence for WINDOWS 10 Ver. 1607
-    print(f"{supports_color()=}")
-    print ('\033[35m'+'color-test'+'\033[39m'+" test end")
     print_samples()
 
