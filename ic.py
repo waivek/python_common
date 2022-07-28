@@ -178,6 +178,7 @@ def is_tuple_table(table):
     return common_type in [ tuple, list ]
 
 def is_single_dict_table(table):
+    # we add items check so that Date class doesn’t pass
     return type(table) == dict or (hasattr(table, '__dict__') and hasattr(table, 'items'))
 
 def is_multi_dict_table(table):
