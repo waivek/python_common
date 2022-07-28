@@ -222,6 +222,10 @@ def ic_test():
         # ic(L)
         # print()
 
+def profile_rich_imports():
+    from rich.table import Table
+    from rich.console import Console
+
 
 def main():
     from colorama import init
