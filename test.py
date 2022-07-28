@@ -453,6 +453,7 @@ def trace_on():
 
 
 def main():
+    ic("HELLO")
     # trace_on()
     # from colorama import init
     # init()
