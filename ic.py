@@ -503,6 +503,7 @@ def data_source_multiline_long_colored_variables():
 
     # local_D = locals()
     # mystuff = "\n".join(textwrap.wrap(color_D_if_big(local_D), 80))
+    from rich import print as r_print
     from rich import ansi
     decoder = ansi.AnsiDecoder()
 
@@ -521,6 +522,7 @@ def data_source_multiline_long_colored_variables():
         table.add_row(key, str(value), str(type(value)))
     console = Console()
     console.print(table)
+    r_print(local_D["mystuff"])
 
 
 
