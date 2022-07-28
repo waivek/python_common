@@ -135,6 +135,7 @@ def enable_cmd_color_windows_10_1607():
         os.system('') #enable VT100 Escape Sequence for WINDOWS 10 Ver. 1607
 
 enable_cmd_color_windows_10_1607()
+
 if __name__ == "__main__":
     print_samples()
 
