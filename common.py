@@ -299,6 +299,17 @@ def print_red_line(string):
 def print_green_line(string):
     print(make_string_green(string))
 
+# for copy-pasting into libraries
+def truncate_2(s, L):
+    # M: middle_part, S: slice_size, s: string, T: trunc_string, R: right_start, L: length
+    if len(s) <= L:
+        return s
+    M = "..."
+    S = int((L-len(M))/2)
+    R = S + int(L % 2 == 0)
+    T = s[0:S]+M+s[-R:]
+    return T if len(T) == L else s
+
 def truncate(string, length):
     if len(string) <= length:
         return string
