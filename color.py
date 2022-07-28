@@ -9,9 +9,6 @@
 # SEARCH     : make_string_\(\w\+\)(\(.*\))
 # SUBSTITUTE : s/make_string_\(\w\+\)(\(.*\))/Code.\U\1\E+\2
 #
-if supports_color() is False:
-    from colorama import init
-    init()
 
 from timer import Timer
 timer = Timer()
@@ -120,6 +117,10 @@ def supports_color():
         os.environ.get("TERM_PROGRAM") == "vscode"
         or vt_codes_enabled_in_windows_registry()
     )
+
+if supports_color() is False:
+    from colorama import init
+    init()
 
 # Good Colors:
 #
