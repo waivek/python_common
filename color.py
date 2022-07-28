@@ -8,7 +8,6 @@
 #
 # SEARCH     : make_string_\(\w\+\)(\(.*\))
 # SUBSTITUTE : s/make_string_\(\w\+\)(\(.*\))/Code.\U\1\E+\2
-#
 
 # Good Colors:
 #
