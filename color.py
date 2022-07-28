@@ -81,7 +81,7 @@ def print_samples():
 # YELLOW 
 # MAGENTA
 if __name__ == "__main__":
-    if platform.system == "Windows":
+    if platform.system() == "Windows":
         from colorama import init
         init(convert=True)
     print_samples()
