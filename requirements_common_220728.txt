@@ -6,8 +6,8 @@
 #     green/red, 
 #     pysqlite3 for linux
 # error.py - 
-#     ic for Frame.printing|print_variables_by_frame, 
-#     truncate for Frames.printing, 
+#     ic for Frame.printing, print_variables_by_frame
+#     truncate for Frames.printing
 #     ipdb if in ipdb shell
 # ic.py
 # timer.py
