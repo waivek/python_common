@@ -421,10 +421,9 @@ class Date:
         return Date(datetime.now())
 
     def pretty(self):
-        import dateutil.parser
         print_dict({
             "ist": self.string,
-            "utc": self.dt.astimezone(dateutil.tz.gettz("UTC")).isoformat()[:-6],
+            "utc": self.dt.astimezone(timezone.utc).isoformat()[:-6],
             "epoch": self.epoch,
             "timeago": self.timeago()
         })
