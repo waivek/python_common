@@ -455,7 +455,7 @@ def trace_on():
 def main():
     trace_on()
     from colorama import init
-    init(convert=True)
+    init()
 
 if __name__ == "__main__":
     main()
