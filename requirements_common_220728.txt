@@ -2,16 +2,16 @@
 # common.py
 # db.py - 
 #
-#     rel2abs, 
-#     truncate, 
-#     green/red, 
+#     rel2abs 
+#     truncate
+#     Code.GREEN and Code.RED
 #     pysqlite3 for linux
 #
 # error.py - 
 #
-#     ic for Frame.printing, print_variables_by_frame
+#     ic       Frame.printing, print_variables_by_frame
 #     truncate for Frames.printing
-#     ipdb if in ipdb shell
+#     ipdb     if in ipdb shell
 #
 # ic.py
 # timer.py
