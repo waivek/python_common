@@ -500,20 +500,29 @@ def data_source_multiline_long_colored_variables():
     ON id="vod.id";
     """
     select_sql = textwrap.dedent(select_sql_extra_space).strip()
-    timer.start("import Table")
-    from rich.console import Console
-    from rich.table import Table
-    timer.print("import Table")
-    table = Table(title="two-column display")
+    # timer.start("import Table")
+    # from rich.console import Console
+    # from rich.table import Table
+    # timer.print("import Table")
+    # table = Table(title="two-column display")
+    # local_D = locals()
+    # local_D["local_D"] = color_D_if_big(local_D)
+    # table.add_column("key")
+    # table.add_column("value")
+    # table.add_column("type")
+    # for key, value in local_D.items():
+    #     table.add_row(key, str(value), str(type(value)))
+    # console = Console()
+    # console.print(table)
+
+
+
+    table = Table()
     local_D = locals()
     local_D["local_D"] = color_D_if_big(local_D)
-    table.add_column("key")
-    table.add_column("value")
-    table.add_column("type")
     for key, value in local_D.items():
         table.add_row(key, str(value), str(type(value)))
-    console = Console()
-    console.print(table)
+    print(table)
 
 
     
