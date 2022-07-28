@@ -117,11 +117,14 @@ def supports_color():
         os.environ.get("TERM_PROGRAM") == "vscode"
         or vt_codes_enabled_in_windows_registry()
     )
-# LIGHTRED_EX
-# LIGHTBLUE_EX | CYAN | LIGHTCYAN_EX
-# GREEN
-# YELLOW 
-# MAGENTA
+# Good Colors:
+#
+#     LIGHTRED_EX
+#     LIGHTBLUE_EX | CYAN | LIGHTCYAN_EX
+#     GREEN
+#     YELLOW 
+#     MAGENTA
+#
 if __name__ == "__main__":
     if supports_color() is False:
         from colorama import init
