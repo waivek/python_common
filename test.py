@@ -432,13 +432,13 @@ def tracefunc(frame, event, arg, indent=[0]):
 import sys
 sys.setprofile(tracefunc)
 
-main()   # or whatever kicks off your script
 
 
 def main():
     from colorama import init
     init(convert=True)
-    rich_movie()
+    # rich_movie()
+    ic_test()
 
 if __name__ == "__main__":
     with handler():
