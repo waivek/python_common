@@ -76,6 +76,8 @@ def print_samples():
     print()
 
 def supports_color():
+    import os
+    import sys
     """
     Return True if the running system's terminal supports color,
     and False otherwise.
@@ -105,7 +107,6 @@ def supports_color():
 
     return is_a_tty and (
         sys.platform != "win32"
-        or HAS_COLORAMA
         or "ANSICON" in os.environ
         or
         # Windows Terminal supports VT codes.
