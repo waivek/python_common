@@ -420,8 +420,10 @@ def ic_test():
         # ic(L)
         # print()
 
+f = None
 def tracefunc(frame, event, arg, indent=[0]):
-    print(frame)
+    global f
+    f = frame
     breakpoint()
     if event == "call":
         indent[0] += 2
