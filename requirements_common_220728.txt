@@ -15,8 +15,8 @@
 # ic.py
 #
 #     print_dict ib
-#     truncate total [6] list_fmt [3], ib [1], Table.to_string [2]
-#     Date checking if Date
+#     truncate   total [6] list_fmt [3], ib [1], Table.to_string [2]
+#     Date       checking if Date
 #
 # common.py
 # timer.py
