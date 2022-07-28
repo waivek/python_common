@@ -1,5 +1,4 @@
 # color.py - colorma.init for windows cmd.exe
-# common.py
 # db.py - 
 #
 #     rel2abs 
@@ -14,6 +13,9 @@
 #     ipdb     if in ipdb shell
 #
 # ic.py
+print_dict ib
+truncate called 11 list_fmt [3], ib [1], Table.to_string [2]
+# common.py
 # timer.py
 aiohttp==3.8.1
 colorama==0.4.4
