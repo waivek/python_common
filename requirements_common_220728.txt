@@ -28,5 +28,5 @@ executing==0.8.2
 # ipdb==0.13.9, Not required because we only import if it is pre-installed
 pysqlite3==0.4.7
 python_dateutil==2.8.2
-rich==12.5.1
+# rich==12.5.1
 timeago==1.0.14
