@@ -23,12 +23,13 @@
 #
 from timer import Timer
 timer = Timer()
-def stub_quiet():
-    t = Timer()
-    print_error_information()
 
 import sys
 import os.path
+
+def stub_quiet():
+    t = Timer()
+    print_error_information()
 
 def print_error_information(error):
     from error import print_error_information as func
