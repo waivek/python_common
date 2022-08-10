@@ -6,6 +6,8 @@ from ic import ic         # Multi-Use
 import time
 timer = Timer()
 
+def function_call(item_1, key=[1, 2, 3], D={})
+
 def print_int(i):
     ic(Code.CYAN + i)
 
