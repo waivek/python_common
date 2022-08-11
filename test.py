@@ -455,7 +455,7 @@ def trace_on():
 
 def f_string():
     number = 3.2
-    value = f"{}"
+    value = f"{number}"
     print(value)
 
 
