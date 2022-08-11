@@ -454,7 +454,7 @@ def trace_on():
     sys.setprofile(tracefunc)
 
 def f_string():
-    pass
+    print( "f_string")
 
 
 def main():
