@@ -454,7 +454,9 @@ def trace_on():
     sys.setprofile(tracefunc)
 
 def f_string():
-    print( "f_string")
+    number = 3.2
+    value = f"{}"
+    print(value)
 
 
 def main():
