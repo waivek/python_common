@@ -453,10 +453,12 @@ def trace_on():
     import sys
     sys.setprofile(tracefunc)
 
+def f_string():
+    pass
 
 
 def main():
-    ic("HELLO")
+    f_string()
     # trace_on()
     # from colorama import init
     # init()
