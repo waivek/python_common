@@ -458,14 +458,120 @@ def f_string():
     value = f"{number}"
     print(value)
 
+def m_list(obj):
+    match obj:
+        case [x]:
+            string = f"One Item: {x}"
+        case [_, 4, _]:
+            string = "Contains 4"
+        case [x, y]:
+            string = f"Two Items: ({x}, {y})"
+        case [*items]:
+            string = f"Many Items: {items}"
+    print(string)
+        
+
+    # if type(obj) == dict and 'data' in obj:
+    #     # helix-global, helix-streamer
+    #     dictionaries = obj['data']
+    #     table = [ { 'name': D['name'], 'id': D['id'], 'api': 'helix' } for D in dictionaries ]
+    #     return table
+    # # case { 'channel_emotes': y, **kwargs }:
+    # if type(obj) == dict and 'channelEmotes' in obj:
+    #     # bttv-streamer
+    #     dictionaries = obj['channelEmotes'] + obj['sharedEmotes']
+    #     table = [ { 'name': D['code'], 'id': D['id'], 'api': 'bttv' } for D in dictionaries ]
+    #     return table
+
+def parse_emote_response(obj):
+    if obj == []:
+        # https://api.betterttv.net/3/cached/frankerfacez/users/twitch/59299632
+        return []
+    # case { 'data': y, **kwargs }:
+    match obj:
+        case { 'data': dictionaries }:
+            # helix-global, helix-streamer
+            table = [ { 'name': D['name'], 'id': D['id'], 'api': 'helix' } for D in dictionaries ]
+            return table
+        case { 'channelEmotes': [*L1], 'sharedEmotes': [*L2] }:
+            # bttv-streamer
+            dictionaries = L1 + L2
+            table = [ { 'name': D['code'], 'id': D['id'], 'api': 'bttv' } for D in dictionaries ]
+            return table
+
+    dictionaries = obj
+    match dictionaries[0]:
+        case { 'id': _, 'code': _, 'user': _ }:
+            # ffz-global, ffz-streamer
+            table = [ { 'name': D['code'], 'id': D['id'], 'api': 'ffz' } for D in dictionaries ]
+            return table
+        case { 'id': _, 'code': _ }:
+            # bttv-global
+            table = [ { 'name': D['code'], 'id': D['id'], 'api': 'bttv' } for D in dictionaries ]
+            return table
+        case { 'id': _, 'name': _ }:
+            # stv-global, stv-streamer
+            table = [ { 'name': D['name'], 'id': D['id'], 'api': 'stv' } for D in dictionaries ]
+            return table
+
+
+def m_dict(obj):
+    match obj:
+        case { 'data': dictionaries }:
+            string = dictionaries
+        case { 'channelEmotes': [*L1], 'sharedEmotes': [*L2] }:
+            string = L1 + L2
+
+    dictionaries = obj
+    # if D.get('id') and D.get('code') and D.get('user') is not None:
+    match dictionaries[0]:
+        case { 'id':_, 'code':_, 'user': _ }:
+            # ffz-global, ffz-streamer
+            table = [ { 'name': D['code'], 'id': D['id'], 'api': 'ffz' } for D in dictionaries ]
+            return table
+
+        # if D.get('id') and D.get('code') and D.get('user') is None:
+        case { 'id':_, 'code':_ }:
+            # bttv-global
+            table = [ { 'name': D['code'], 'id': D['id'], 'api': 'bttv' } for D in dictionaries ]
+            return table
+
+
+        # if D.get('id') and D.get('name'):
+        case { 'id': _, 'name': _ }:
+            # stv-global, stv-streamer
+            table = [ { 'name': D['name'], 'id': D['id'], 'api': 'stv' } for D in dictionaries ]
+            return table
+    print(string)
+        
+def test_bp():
+    print("Breakpoint!")
+    breakpoint()
+
+
+def test_handler():
+    [ 1/0 for i in range(5) ]
+
+def test_partition():
+    from common import create_partitions
+    numbers = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
+    pairs = create_partitions(len(numbers), 6)
+    for start, end in pairs:
+        list_slice = numbers[start:end]
+        print(f"    {list_slice}")
 
 def main():
-    f_string()
+    test_partition()
+    # m_list([1, 4])
+    # m_dict({ 'a': 'b', 'data': 'match_data', 'c': 'd' })
+    # m_dict({ 'a': 'b', 'channelEmotes': 'cemotes', 'sharedEmotes': ['semotes'], 'c': 'd' })
+    # case_match({ "a": "b"})
+
+    # f_string()
     # trace_on()
     # from colorama import init
     # init()
 
 if __name__ == "__main__":
-    main()
-    # with handler():
-    #     main()
+    with handler():
+        main()

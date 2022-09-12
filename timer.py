@@ -1,5 +1,5 @@
 
-from time import time, sleep
+from time import time
 class Timer():
 
     def __init__(self, no_print=False):
@@ -13,6 +13,8 @@ class Timer():
         self.start_time = time()
         if message:
             self.timer_D[message] = time()
+
+
 
     def start_inc(self):
         self.inc_start = time()
@@ -59,12 +61,13 @@ class Timer():
         else:
             self.start_time = None
 
-timer = Timer()
 
 # <space>T normal ToggleTimeFile
 # <space>t visual TimeSelection
 # <space>t normal on_timer_line ? DeleteTimer : TimeLine
 def cases():
+    from time import sleep
+    timer = Timer()
     # If there are multiple lines printed, only 1 can exist at a time,
     # otherwise somewhere we'll require two arguments
 

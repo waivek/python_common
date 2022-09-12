@@ -12,11 +12,14 @@
 from timer import Timer
 timer = Timer()
 
-from common import print_error_information, print_dict, truncate, Date
+from common import print_dict, truncate, Date
 from color import Code
 
 
-import inspect # Takes 110 ms main bottleneck, see usecases at ./inspect_use_cases.txt
+import sys
+# timer.start("ic.py- import inspect")
+# import inspect # Takes 110 ms main bottleneck, see usecases at ./inspect_use_cases.txt
+# timer.print("ic.py- import inspect")
 import os
 import os.path
 import types
@@ -35,6 +38,7 @@ def classname(object, modname):
 
 def getdoc(object):
     import re
+    import inspect
     """Get the doc string or comments for an object."""
     result = inspect.getdoc(object) or inspect.getcomments(object)
     return result and re.sub('^ *\n', '', result.rstrip()) or ''
@@ -49,6 +53,7 @@ def indent(text, prefix='    '):
     return '\n'.join(lines)
 
 def _is_bound_method(fn):
+    import inspect
     if inspect.ismethod(fn):
         return True
     if inspect.isbuiltin(fn):
@@ -57,6 +62,7 @@ def _is_bound_method(fn):
     return False
 
 def docroutine(object, name=None, mod=None, cl=None):
+    import inspect
     """Produce text documentation for a function or method object."""
     realname = object.__name__
     name = name or realname
@@ -110,6 +116,7 @@ def docroutine(object, name=None, mod=None, cl=None):
 
 
 def sig(frame_index=1):
+    import inspect
 
     frame_stack = inspect.stack()
     frame_info = frame_stack[frame_index]
@@ -139,9 +146,11 @@ def sig(frame_index=1):
     return value_string
 
 def get_context(callFrame=None):
-    callFrame = callFrame if callFrame else inspect.currentframe().f_back
+    import inspect
+    callFrame = callFrame if callFrame else sys._getframe().f_back
     frameInfo = inspect.getframeinfo(callFrame)
-    lineNumber = frameInfo.lineno
+    # lineNumber = frameInfo.lineno
+    lineNumber = callFrame.f_lineno
     # parentFunction = frameInfo.function
     filename = os.path.basename(frameInfo.filename)
     # if parentFunction != '<module>':
@@ -272,6 +281,7 @@ def ib(obj):
     print_dict(D)
 
 def pdb_check():
+    import inspect
     stack = inspect.stack() # Takes 300 ms
     frames = [ frame_info.frame for frame_info in stack ]
     frame_names = [ frame.f_globals['__name__'] for frame in frames ]
@@ -289,13 +299,14 @@ def ic(*values):
         if in_pdb:
             print(Code.GREEN + "IN (pdb).")
             return
-        callFrame = inspect.currentframe().f_back
+        callFrame = sys._getframe().f_back
         context_string = get_context(callFrame)
         print(context_string)
         return
 
     x = values[0]
     if len(values) == 1 and ic_one(x) != str(x):
+        # print("A")
         print(ic_one(x))
         return
 
@@ -305,7 +316,10 @@ def ic(*values):
         return
     
     import executing
-    callFrame = inspect.currentframe().f_back
+
+    
+    # callFrame = inspect.currentframe().f_back
+    callFrame = sys._getframe().f_back
     callNode = executing.Source.executing(callFrame).node
     for_frame = executing.Source.for_frame(callFrame)
     # asttokens() - 250ms Delay
@@ -323,6 +337,17 @@ def len_without_ansi_codes(s):
     ansi_codes = [ '\x1b[30m', '\x1b[31m', '\x1b[32m', '\x1b[33m', '\x1b[34m', '\x1b[35m', '\x1b[36m', '\x1b[37m', '\x1b[90m', '\x1b[91m', '\x1b[92m', '\x1b[93m', '\x1b[94m', '\x1b[95m', '\x1b[96m', '\x1b[97m' ]
     ansi_codes_joined = "".join(ansi_codes)
     return len(re.sub(f'[{ansi_codes_joined}]', '', s))
+
+def log(dictionaries):
+    from db import db_init
+    from time import time
+    import json
+    cursor, connection = db_init("errors/ic.db")
+    cursor.execute("CREATE TABLE IF NOT EXISTS errors (epoch INTEGER NOT NULL, list_json TEXT NOT NULL UNIQUE ON CONFLICT IGNORE);")
+    list_json = json.dumps(dictionaries)
+    epoch = int(time())
+    cursor.execute("INSERT INTO errors (epoch, list_json) VALUES (?, ?);", (epoch, list_json))
+    connection.commit()
 
 class Table:
     # Why we can’t use columnar
@@ -399,6 +424,7 @@ class Table:
         final_widths = [ width for width, _ in column_tuples ]
         calc_total_width = gutter_width + separator_width + sum(final_widths)
         if calc_total_width != terminal_width:
+            log(self.table)
             print(Code.RED +  "calc_total_width != terminal_width")
             print(Code.RED + f"           ({calc_total_width}) !=          ({terminal_width})")
             print(f"Initial Widths                  : {initial_widths}")
@@ -674,7 +700,6 @@ def wrap_test():
             print(small_part + "     " + list_part + "     " + tall_part)
 
 
-
 def main():
     # _visit_after_children: C:\Users\vivek\AppData\Roaming\Python\Python37\site-packages\asttokens\mark_tokens.py :63
     # test_ic()
@@ -682,19 +707,12 @@ def main():
     calc_len = len_without_ansi_codes(s)
     normal_len = len(s)
     ic(calc_len, normal_len)
+    # Required for error.print_variables_by_frame
+    # data_source_multiline_long_colored_variables()
+    message = "Hello, World!"
+    ic(message)
 
 if __name__ == "__main__":
-    try:
-        # ic()
-        # Required for error.print_variables_by_frame
-        data_source_multiline_long_colored_variables()
-    except Exception as e:
-        import bdb
-        import pdb
-        error = e
-        if type(e) == bdb.BdbQuit:
-            # Exit Via CTRL-D
-            pass
-        else:
-            print_error_information(e)
-            pdb.post_mortem(e.__traceback__)
+    from error import handler
+    with handler():
+        main()

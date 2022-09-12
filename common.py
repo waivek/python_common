@@ -27,38 +27,69 @@ timer = Timer()
 import sys
 import os.path
 
-def stub_quiet():
-    t = Timer()
-    print_error_information()
+RANGE_DEPTH = 8
+
+def rel2abs(relative_path):
+    from reltools import rel2abs as func
+    return func(relative_path)
 
 def print_error_information(error):
     from error import print_error_information as func
     func(error)
 
+def stub_quiet():
+    t = Timer()
 
-async def get_json(url, session, headers={}):
-    import json
-    async with session.get(url, headers=headers) as response:
-        json_content = await response.text()
-        D = json.loads(json_content)
-    return D
+# --- START
+def print_function(function_name, for_type, frame_index_strings):
+    from color import Code
+    for string in frame_index_strings:
+        left, right = string.split(" --- ")
+        if right == r"C:\Users\vivek\Desktop\Twitch\coffee-vps\code":
+            right = Code.GREEN + right
+        elif right != r"C:\Users\vivek\Documents\Python":
+            right = Code.RED + right
+        print(f"{for_type:4s}:{function_name:30s} --- {left:24s} : {right}")
+    print()
 
-async def get(url, session, headers={}):
-    async with session.get(url, headers=headers) as response:
-        content = await response.text()
-    return content
+def frame_index_to_directory(frame_index):
+    try:
+        frame            = sys._getframe(frame_index)
+    except Exception as e:
+        return "None --- None"
+    saved_frame = frame
+    called_path      = frame.f_code.co_filename
+    parent_directory = os.path.dirname(os.path.realpath(called_path))
+    co_name = frame.f_code.co_name
+    return f"{co_name} --- {parent_directory}"
 
-async def get_urls(urls, headers={}, is_json=False):
-    import asyncio
-    import aiohttp
-    response_dictionaries = []
-    async with aiohttp.ClientSession() as session:
-        if is_json:
-            cors = [ get_json(url, session, headers) for url in urls ]
-        else:
-            cors = [ get(url, session, headers) for url in urls ]
-        response_dictionaries = await asyncio.gather(*cors)
-    return response_dictionaries
+def tplib(tag):
+
+    lines = [ frame_index_to_directory(i) for i in range(RANGE_DEPTH) ]
+    print_function(tag + "-> tplib", "comp", lines)
+    lines = []
+    for i in range(RANGE_DEPTH):
+        lines.append(frame_index_to_directory(i))
+    print_function(tag + "-> tplib", "for", lines)
+
+
+
+def create_partitions_2(size, n):
+    starts = list(range(0, size, n))
+    ends = starts[1:] + [ size ]
+    return list(zip(starts, ends))
+
+def create_partitions_old(max_value, partition_value):
+    import math
+    number_of_partitions = math.ceil(float(max_value) / partition_value)
+    starts = [ i * partition_value for i in range(number_of_partitions) ]
+    ends = starts[1:] + [max_value]
+    return [(start, end) for start, end in zip(starts, ends)]
+
+def create_partitions(max_value, partition_value):
+    indices = list(range(0, max_value, partition_value)) + [ max_value ]
+    return list(zip(indices, indices[1:]))
+
 
 def abbreviate(number):
     number_int = int(number)
@@ -106,40 +137,6 @@ def print_object(obj, hidden=False):
         keys = dir(obj)
     D = { key : obj.__getattribute__(key) for key in keys }
     print_dict(D)
-
-def rel2abs(relative_path):
-    # import inspect
-    # called_path    = inspect.getfile(sys._getframe(1))
-    # frames = []
-    # for i in range(1000):
-    #     try:
-    #         frm = sys._getframe(i)
-    #     except:
-    #         break
-    #     frames.append(frm)
-        
-    frame            = sys._getframe(2) # 1 for threading, look at backup.py:rel2abs() implementation
-
-    called_path      = frame.f_code.co_filename
-    parent_directory = os.path.dirname(os.path.realpath(called_path))
-    absolute_path    = os.path.realpath(os.path.join(parent_directory, relative_path))
-
-    # frames = []
-    # i = 0
-    # while True:
-    #     try:
-    #         frames.append(sys._getframe(i))
-    #         i = i + 1
-    #     except:
-    #         break
-    # from color import Code
-    # from ic import ic
-    # # print(Code.CYAN + absolute_path)
-    # ic(frames)
-    # breakpoint()
-    return absolute_path
-
-# "."
 
 
 # print_table {{{
@@ -245,7 +242,7 @@ def print_dict(D):
     from columnar import columnar
     if type(D) != type({}):
         argument_type = str(type(D))
-        print_red_line("Please pass a dictionary. Invalid type {arg_type} with str representation {str_rep}".format(arg_type=argument_type, str_rep=str_representation))
+        print_red_line("Please pass a dictionary. Invalid type {arg_type} with str representation {str_rep}".format(arg_type=argument_type, str_rep=str(D)))
         return
     data = []
     for key, value in D.items():

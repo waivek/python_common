@@ -51,6 +51,14 @@ class Code:
     LIGHTCYAN_EX    = Maker('\x1b[96m')
     LIGHTWHITE_EX   = Maker('\x1b[97m')
 
+def color_filepath(filepath):
+    import os.path
+    dirname = Code.LIGHTBLACK_EX + (os.path.dirname(filepath) + os.path.sep)
+    basename = Code.LIGHTCYAN_EX + os.path.basename(filepath)
+    result = dirname + basename 
+    return result
+
+
 def print_samples():
     value = [1, 2,3, 4]
 
@@ -131,8 +139,21 @@ def supports_color():
 def enable_cmd_color_windows_10_1607():
     # Black magic!
     # https://stackoverflow.com/a/39675059
+
+    # To enable: https://superuser.com/questions/413073/windows-console-with-ansi-colors-handling
+    # Go to regedit
+    #
+    # dword is 32-bit
+    # [HKEY_CURRENT_USER\Console]
+    # "VirtualTerminalLevel"=dword:00000001
+    #
+    return
     if supports_color() is False:
         os.system('') #enable VT100 Escape Sequence for WINDOWS 10 Ver. 1607
+        timer.start("import ctypes")
+        from ctypes import windll
+        timer.print("import ctypes")
+        windll.kernel32.SetConsoleMode(windll.kernel32.GetStdHandle(-11), 7)
 
 enable_cmd_color_windows_10_1607()
 

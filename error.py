@@ -1,18 +1,17 @@
 
 from color import Code
-from timer import Timer
-timer = Timer()
-from ic import ic, ib
+# from ic import ic, ib
 
 from contextlib import contextmanager
 
 def stub_quiet():
+    from ic import ic, ib
     ic
     ib
 
 def get_args(frame, summary):
     import inspect # builtin
-    if summary.name == "<module>":
+    if summary.name in [ "<module>", "<listcomp>" ]:
         # Line is not inside a function
         return []
     if summary.name in frame.f_globals.keys():
@@ -21,7 +20,10 @@ def get_args(frame, summary):
     # Line is inside a LOCAL function of a class
     import gc # builtin
     # https://stackoverflow.com/a/52762678
-    function_object = [obj for obj in gc.get_referrers(frame.f_code) if hasattr(obj, '__code__') and obj.__code__ is frame.f_code][0]
+    try:
+        function_object = [obj for obj in gc.get_referrers(frame.f_code) if hasattr(obj, '__code__') and obj.__code__ is frame.f_code][0]
+    except Exception as e:
+        error = e
     return inspect.getfullargspec(function_object).args
 
 class Frame:
@@ -71,7 +73,12 @@ class Frames:
         frames = [ frame for frame, _ in traceback.walk_tb(tb) ]
         summaries = traceback.extract_tb(tb)
         pairs = list(reversed(list(zip(frames, summaries))))
-        self.frames = [ Frame(frame, summary) for frame, summary in pairs ]
+        self.frames = []
+        for frame, summary in pairs:
+
+            frm = Frame(frame, summary)
+            self.frames.append(frm)
+        # self.frames = [ Frame(frame, summary) for frame, summary in pairs ]
 
     def __getitem__(self, index):
         return self.frames[index]
@@ -130,7 +137,6 @@ def print_variables_by_frame(error):
         except Exception as e:
             error = e
             print(Code.RED + repr(error))
-            breakpoint()
         signature = "(" + ", ".join(keys) + ")"
         method = summary.name
         method_line = method + signature if summary.name != "<module>" else "<module>"
@@ -155,7 +161,6 @@ def print_variables_by_frame(error):
     table_string = textwrap.indent(textwrap.dedent("\n".join(str(table).split("\n")[1:])), '    ')
     print(Code.LIGHTCYAN_EX + 'Variables by frame')
     print(table_string)
-    # breakpoint()
 
 def print_error_information(error):
     # C:\Users\vivek\Documents\Python                               -> ~/Documents/Python
@@ -224,6 +229,11 @@ def handler():
             # print_variables_by_frame(e)
             import sys
             frames = Frames(error)
+
+            # for frame in frames:
+            #
+            #     print(frame.method)
+
             print(Code.LIGHTBLUE_EX + "alias ic, ib | import sys, ic, ib")
             print()
             # try __builtins__.__dict__
@@ -263,5 +273,7 @@ def table_wide():
 
 
 if __name__ == "__main__":
+    from timer import Timer
+    timer = Timer()
     with handler():
         level_2()

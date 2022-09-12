@@ -2,15 +2,15 @@
 # Hello
 # Red
 # Blue
-from common import rel2abs, print_red_line, make_string_green, truncate, Timer
-import json
-from enum import IntEnum
-import threading
+from timer import Timer
 timer = Timer()
-lock = threading.Lock()
+from common import rel2abs, print_red_line, make_string_green, truncate, Timer
+from enum import IntEnum
+timer = Timer()
 
-import platform
-if platform.system() == "Linux":
+import sys
+
+if sys.platform != "win32":
     import pysqlite3 as sqlite3
 else:
     import sqlite3
@@ -21,13 +21,16 @@ def table_exists(cursor, table_name):
     return True if D else False
 
 def db_init(db_path):
+    import os
     db_path = rel2abs(db_path)
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
     connection = sqlite3.connect(db_path)
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
     return cursor, connection
 
 def jsonify_lists(D):
+    import json
     list_keys = [ key for key, value in D.items() if type(value) == list ]
     for key in list_keys:
         L = D[key]
@@ -321,7 +324,9 @@ def insert_dictionaries(cursor, table_name, dictionaries, constraint_D={}, vcs=F
     if dictionaries == []:
         return
 
+    import threading
     global lock
+    lock = threading.Lock()
     lock.acquire()
     print_statements = False
 
