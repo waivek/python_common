@@ -4,7 +4,8 @@
 # Blue
 from timer import Timer
 timer = Timer()
-from common import rel2abs, print_red_line, make_string_green, truncate, Timer
+from common import print_red_line, make_string_green, truncate, Timer
+from reltools import rel2abs
 from enum import IntEnum
 timer = Timer()
 
@@ -20,11 +21,32 @@ def table_exists(cursor, table_name):
     D = cursor.execute(statement).fetchall()
     return True if D else False
 
+def dump_list(L):
+    print("dump_list", L)
+    import json
+    if L is None:
+        return '[]'
+    else:
+        return json.dumps(L)
+
+def load_json_bytes(json_bytes):
+    print("load_json_bytes", json_bytes, type(json_bytes))
+    import json
+    if json_bytes is None:
+        return []
+    else:
+        return json.loads(json_bytes)
+
+
 def db_init(db_path):
+    sqlite3.register_adapter(list, dump_list)
+    sqlite3.register_converter("LIST", load_json_bytes)
+
     import os
     db_path = rel2abs(db_path)
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
-    connection = sqlite3.connect(db_path)
+    connection = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES)
+    # connection = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_COLNAMES)
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
     return cursor, connection
@@ -54,7 +76,7 @@ def flatten_dict(D, parent_keys=[]):
 def prepare_dict(D):
     pairs = flatten_dict(D)        # 1.10, 60%
     D = { k: v for k, v in pairs } # 0.26, 15%
-    D = jsonify_lists(D)           # 0.45, 25%
+    # D = jsonify_lists(D)           # 0.45, 25%
     return D
 
 def is_reserved(key):
@@ -77,14 +99,19 @@ class SqliteType(IntEnum):
     REAL = 2
     INTEGER = 3
 
+    BLOB = 4 # ideally 2 but confuses from_text
+    LIST = 5 # ideally 2 but confuses from_text
+
     def from_text(arg):
-        D = { "TEXT": SqliteType.TEXT, "REAL": SqliteType.REAL, "INTEGER": SqliteType.INTEGER,
-              "INT": SqliteType.INTEGER }
+        D = { "TEXT"    : SqliteType.TEXT,    "REAL" : SqliteType.REAL, 
+              "INTEGER" : SqliteType.INTEGER, "INT"  : SqliteType.INTEGER, 
+              "BLOB"    : SqliteType.BLOB,    "LIST" : SqliteType.LIST }
         return D[arg]
 
 def as_column_str(x):
-    D = { str             : "TEXT", float           : "REAL", int                : "INTEGER", type(None) : "TEXT", bool: "INTEGER",
-          SqliteType.TEXT : "TEXT", SqliteType.REAL : "REAL", SqliteType.INTEGER : "INTEGER" }
+    D = { str             : "TEXT", float           : "REAL", int                : "INTEGER", bytes          : "BLOB", list            : "LIST", 
+          SqliteType.TEXT : "TEXT", SqliteType.REAL : "REAL", SqliteType.INTEGER : "INTEGER", SqliteType.BLOB: "BLOB", SqliteType.LIST : "LIST",
+          type(None)      : "TEXT", bool            : "INTEGER" }
     if x not in D.keys():
         x = type(x)
     return D[x]
@@ -94,6 +121,8 @@ class Schema:
     "TEXT (genuine)"
     "INTEGER"
     "REAL"
+    "BLOB"
+    "LIST"
 
     def __init__(self, arg=None):
         if arg == [] or arg == None:
@@ -128,7 +157,7 @@ class Schema:
         # timer.print("Implementation 1")
 
         finalized_column_names = []
-        type2sqlite = { type(None): SqliteType.TEXT, str: SqliteType.TEXT, float: SqliteType.REAL, int: SqliteType.INTEGER, bool: SqliteType.INTEGER }
+        type2sqlite = { type(None): SqliteType.TEXT, str: SqliteType.TEXT, float: SqliteType.REAL, int: SqliteType.INTEGER, bool: SqliteType.INTEGER, bytes: SqliteType.BLOB, list: SqliteType.LIST }
         schema_D = {}
         for column_name, value in items:
             if column_name in finalized_column_names:
@@ -399,3 +428,22 @@ def insert_dictionaries(cursor, table_name, dictionaries, constraint_D={}, vcs=F
             print(insert_statement, make_string_green(truncate(str(values), 200)))
             print()
     lock.release()
+
+def version():
+    pysqlite_version = sqlite3.version
+    sqlite_version = sqlite3.sqlite_version
+    print(f"PYSQLITE: {pysqlite_version}")
+    print(f"SQLITE  : {sqlite_version}")
+
+def main():
+    from tdd import test_ic_custom_types
+    test_ic_custom_types()
+    pass
+    # list_type()
+
+if __name__ == "__main__":
+    # import sys; main(); sys.exit(1)
+    from error import handler
+    with handler():
+        main()
+

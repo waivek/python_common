@@ -1,10 +1,13 @@
 # ./coc-enter.vim
 from timer import Timer   # Single Use
+timer = Timer()
+timer.start("test.py")
 from color import Code    # Multi-Use
 from error import handler # Single Use
+timer.start("import ic")
 from ic import ic         # Multi-Use
+timer.print("import ic")
 import time
-timer = Timer()
 
 def function_call(item_1, key=[1, 2, 3], D={}):
     pass
@@ -34,6 +37,7 @@ def caller():
     import inspect
     stack = inspect.stack()
     frame2 = sys._getframe(1)
+
 
 
 def git_is_dirty():
@@ -115,16 +119,6 @@ def insert_dictionaries_test():
     connection.commit()
     rows = [ dict(row) for row in cursor.execute("SELECT * FROM paths;").fetchall() ]
     ic(rows)
-
-from multiprocessing import Lock
-from threading import Event
-screen_lock = Lock()
-threading_event = Event()
-def lprint(string):
-    global screen_lock
-    # with screen_lock:
-    print(string)
-
 
 def print_string(string):
     for i in range(1000):
@@ -559,19 +553,71 @@ def test_partition():
     for start, end in pairs:
         list_slice = numbers[start:end]
         print(f"    {list_slice}")
+    # end
+    pass
+
+def test_pathlib_ib():
+    from pathlib import Path
+    path = Path("C:/Users/file.txt")
+    # ib(path)
+    keys = [ key for key in dir(path) if not key.startswith("__") ]
+    missing_attributes = []
+    for key in keys:
+        try:
+            getattr(path, key)
+        except Exception as e:
+            missing_attributes.append(key)
+    ic(missing_attributes)
+    breakpoint()
+
+def baz(string):
+    return string.upper()
+
+def bar(L):
+    return ", ".join(str(item) for item in L)
+
+def foo(x, y):
+    return x+y
+
+def rec(n):
+    if n == 2:
+        return
+    return rec(n+1)
+
+def test_trace():
+    from trace import trace
+    from trace import rerun
+    trace([ "foo", "bar", "rec", "baz" ])
+    ic(baz('latin'))
+    ic(foo(1, 2))
+    ic(bar(range(10)))
+    ic(foo(3, 4))
+    rec(0)
+    rerun()
+
+def get_frames():
+    import sys
+    import inspect
+    inspect.stack()
+
+    frames = []
+    frame = sys._getframe()
+    while frame:
+        frames.append(frame)
+        frame = frame.f_back
+    ic(frames)
 
 def main():
-    test_partition()
+    get_frames()
+    # ic({ "a": 100, "b": 1, "c": 100_000_000})
+    # test_trace()
+    # test_pathlib_ib()
     # m_list([1, 4])
     # m_dict({ 'a': 'b', 'data': 'match_data', 'c': 'd' })
     # m_dict({ 'a': 'b', 'channelEmotes': 'cemotes', 'sharedEmotes': ['semotes'], 'c': 'd' })
-    # case_match({ "a": "b"})
-
-    # f_string()
-    # trace_on()
-    # from colorama import init
-    # init()
 
 if __name__ == "__main__":
     with handler():
         main()
+
+timer.print("test.py")

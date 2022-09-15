@@ -29,6 +29,10 @@ import os.path
 
 RANGE_DEPTH = 8
 
+def simple_repr(self):
+    items = ("%s=%r" % (k, v) for k, v in self.__dict__.items())
+    return "%s(%s)" % (self.__class__.__name__, ', '.join(items))
+
 def rel2abs(relative_path):
     from reltools import rel2abs as func
     return func(relative_path)
@@ -463,6 +467,8 @@ class Date:
     def __repr__(self):
         repr_string = repr(self.string)
         return f"Date({repr_string})"
+    def __format__(self, string):
+        return self.dt.strftime(string)
     # }}}
 
 if __name__ == "__main__":

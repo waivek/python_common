@@ -7,7 +7,7 @@
 # 3. Printing variables
 # 4. Printing dictionaries and tables
 # 5. Autocomplete
-# 6. Coloring Strings
+# 6. Coloring Strings <externalized to color.py>
 
 from timer import Timer
 timer = Timer()
@@ -15,14 +15,13 @@ timer = Timer()
 from common import print_dict, truncate, Date
 from color import Code
 
-
 import sys
-# timer.start("ic.py- import inspect")
-# import inspect # Takes 110 ms main bottleneck, see usecases at ./inspect_use_cases.txt
-# timer.print("ic.py- import inspect")
 import os
 import os.path
 import types
+
+import linecache
+import ast
 
 global_breakpoint_time = False
 
@@ -276,14 +275,29 @@ def ib(obj):
         else:
             return truncate(str(v), 160)
     keys = [ key for key in dir(obj) if not key.startswith("__") ]
+
     keys.sort(key=lambda key: not is_function(getattr(obj, key)))
     D = { key : custom_str(getattr(obj, key)) for key in keys }
     print_dict(D)
 
+def inspect_dot_stack():
+    frame_index = 1
+    frames = []
+    while True:
+        try:
+            frame = sys._getframe(frame_index)
+        except ValueError: 
+            break
+        frames.append(frame)
+        frame_index = frame_index + 1
+    return frames
+
 def pdb_check():
-    import inspect
-    stack = inspect.stack() # Takes 300 ms
-    frames = [ frame_info.frame for frame_info in stack ]
+    # import inspect
+    # stack = inspect.stack() # Takes 300 ms
+    # frames = [ frame_info.frame for frame_info in stack ]
+
+    frames = inspect_dot_stack()
     frame_names = [ frame.f_globals['__name__'] for frame in frames ]
     if 'pdb' in frame_names or 'pydevd' in frame_names:
         return True
@@ -293,7 +307,10 @@ def pdb_check():
     # return pdb in modules
 
 def ic(*values):
+    timer.start("ic")
+    timer.start_inc()
     in_pdb = pdb_check() # Takes 300 ms
+    timer.print_inc("pdb_check")
 
     if not values:
         if in_pdb:
@@ -310,24 +327,50 @@ def ic(*values):
         print(ic_one(x))
         return
 
+    # in_pdb = False
     if in_pdb:
         for value in values:
             print(str(value))
         return
-    
-    import executing
 
-    
-    # callFrame = inspect.currentframe().f_back
-    callFrame = sys._getframe().f_back
-    callNode = executing.Source.executing(callFrame).node
-    for_frame = executing.Source.for_frame(callFrame)
-    # asttokens() - 250ms Delay
-    arg_strings = [ for_frame.asttokens().get_text(arg) for arg in callNode.args ]
-    pairs = list(zip(arg_strings, values))
-    for arg_string, value in pairs:
-        s = Code.GREEN + value
-        print(f"{arg_string}: {s}")
+    timer.print_inc("conditionals")
+
+    # Implementation 3:
+    # =================
+    frame = sys._getframe(1)
+    line = linecache.getline(frame.f_code.co_filename, frame.f_lineno).strip()
+    node = ast.parse(line).body[0].value
+    for arg, value in zip(node.args, values):
+        print(f"{ast.unparse(arg)}: {Code.LIGHTCYAN_EX+value}")
+
+    # from executing import Source
+    # timer.print_inc("import executing")
+    # # callFrame = inspect.currentframe().f_back
+    # callFrame = sys._getframe(1)
+    # callNode = Source.executing(callFrame).node
+    # timer.print_inc("Source.executing")
+    # Implementation 2:
+    # =================
+    # import ast
+    # # arg_string = ast.unparse(callNode)
+    # for arg, value in zip(callNode.args, values):
+    #     print(f"{ast.unparse(arg)}: {Code.LIGHTCYAN_EX+value}")
+
+
+    # Implementation 1:
+    # =================
+    #
+    # for_frame = executing.Source.for_frame(callFrame)
+    # timer.print_inc("Source.for_frame")
+    # # asttokens() - 250ms Delay
+    # arg_strings = [ for_frame.asttokens().get_text(arg) for arg in callNode.args ]
+    # timer.print_inc("asttokens")
+    # pairs = list(zip(arg_strings, values))
+    # for arg_string, value in pairs:
+    #     s = Code.LIGHTCYAN_EX + value
+    #     print(f"{arg_string}: {s}")
+    # timer.print_inc("print-pairs")
+    timer.print("ic")
 
 __all__ = [ "ic", "ib" ]
 
@@ -699,20 +742,65 @@ def wrap_test():
         else:
             print(small_part + "     " + list_part + "     " + tall_part)
 
+def foo(x, y):
+    return x + y
+
+
+def baz(string):
+    return string.upper()
+
+def get_args(*values):
+    import executing
+    # import inspect
+    import ast
+    stack = inspect_dot_stack()
+    frame = sys._getframe(1)
+    
+    node = executing.Source.executing(frame).node
+    print(ast.unparse(node))
+    import inspect
+    import linecache
+    source = inspect.getsource(frame)
+    mod = ast.parse(''.join(linecache.getlines(frame.f_code.co_filename)))
+    breakpoint()
+    # nodes = ast.parse(source)
+    # for node in ast.walk(nodes):
+    #     try:
+    #         if node.value.func.id == 'get_args':
+    #             print("---")
+    #             print(ast.unparse(node))
+    #     except:
+    #         pass
+
+    print(frame.f_lineno)
+    # print(ast.unparse(nodes))
+    print()
+
 
 def main():
+    # ic(1)
+    string = '1'
+    ic(string)
+    ic(foo(1,2), 3)
+    # get_args(foo(1, 2), 'Three')
+    return
+    string = 'Hey'
+    get_args(baz(string))
+    return
     # _visit_after_children: C:\Users\vivek\AppData\Roaming\Python\Python37\site-packages\asttokens\mark_tokens.py :63
     # test_ic()
-    s = Code.GREEN + "HELLO"
-    calc_len = len_without_ansi_codes(s)
-    normal_len = len(s)
-    ic(calc_len, normal_len)
-    # Required for error.print_variables_by_frame
-    # data_source_multiline_long_colored_variables()
-    message = "Hello, World!"
-    ic(message)
+    # calc_len = len_without_ansi_codes(s)
+    # normal_len = len(s)
+    # ic(calc_len, normal_len)
+    # # Required for error.print_variables_by_frame
+    # # data_source_multiline_long_colored_variables()
+
+# main()
+
+timer.no_print = True
 
 if __name__ == "__main__":
+
     from error import handler
     with handler():
         main()
