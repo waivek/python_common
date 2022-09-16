@@ -173,7 +173,7 @@ def print_error_information(error):
     tb = error.__traceback__
 
     print()
-    print(Code.RED + repr(error))
+    print(Code.LIGHTRED_EX + repr(error))
 
     frames = [ frame for frame, _ in traceback.walk_tb(tb) ]
 
@@ -195,7 +195,7 @@ def print_error_information(error):
 
         line_number = summary.lineno
         line = summary.line
-        line = Code.GREEN + line if i == 0 else line
+        line = Code.LIGHTGREEN_EX + line if i == 0 else line
         lhs_string = f"{filepath}:{line_number}"
         table.row([lhs_string, line])
     table_string = str(table)
@@ -234,7 +234,7 @@ def handler():
             #
             #     print(frame.method)
 
-            print(Code.LIGHTBLUE_EX + "alias ic, ib | import sys, ic, ib")
+            print(Code.LIGHTCYAN_EX + "alias ic, ib | import sys, ic, ib")
             print()
             # try __builtins__.__dict__
             # if "ipython" in sys.argv[0] or __builtins__.get("get_ipython", False):

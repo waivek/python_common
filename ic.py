@@ -1,4 +1,4 @@
-
+# See `IMPORT INFORMATION` section in ic()
 
 
 # Brief:
@@ -19,11 +19,6 @@ import sys
 import os
 import os.path
 import types
-
-import linecache
-import ast
-
-global_breakpoint_time = False
 
 # TextDoc.docroutine
 
@@ -111,7 +106,6 @@ def docroutine(object, name=None, mod=None, cl=None):
         doc = getdoc(object) or ''
         return '\n' + decl + '\n' + (doc and indent(doc).rstrip() + '\n')
     # }}}
-
 
 
 def sig(frame_index=1):
@@ -306,11 +300,30 @@ def pdb_check():
     # modules = [ inspect.getmodule(frame) for frame in frames ]
     # return pdb in modules
 
+path_to_lines = {}
+def frame_to_line(frame):
+    # Implementation 1
+    # ================
+    # import linecache
+    # linecache.getline(frame.f_code.co_filename, frame.f_lineno).strip()
+    path = frame.f_code.co_filename
+    if path not in path_to_lines:
+        with open(path, "r") as f:
+            lines = f.readlines()
+        path_to_lines[path] = lines
+    lines = path_to_lines[path]
+    line = lines[frame.f_lineno-1]
+    return line
+
 def ic(*values):
+    # IMPORT INFORMATION
+    # ==================
+    #
+    # ast     : Only import ast for instances like ic(1, 2) or ic(foo(a), [1,2,3]) and not of ic(1) ic(2) which is most common use case
+    # inspect : Only import for ic() / ic(function) / ic(module) / sig()
+
     timer.start("ic")
-    timer.start_inc()
-    in_pdb = pdb_check() # Takes 300 ms
-    timer.print_inc("pdb_check")
+    in_pdb = pdb_check()
 
     if not values:
         if in_pdb:
@@ -327,49 +340,24 @@ def ic(*values):
         print(ic_one(x))
         return
 
-    # in_pdb = False
     if in_pdb:
         for value in values:
             print(str(value))
         return
 
-    timer.print_inc("conditionals")
 
     # Implementation 3:
     # =================
     frame = sys._getframe(1)
-    line = linecache.getline(frame.f_code.co_filename, frame.f_lineno).strip()
-    node = ast.parse(line).body[0].value
-    for arg, value in zip(node.args, values):
-        print(f"{ast.unparse(arg)}: {Code.LIGHTCYAN_EX+value}")
+    line = frame_to_line(frame).strip()
+    if len(values) == 1:
+        print(f"{line[3:-1]}: {Code.LIGHTCYAN_EX+values[0]}")
+    else:
+        import ast
+        node = ast.parse(line).body[0].value
+        for arg, value in zip(node.args, values):
+            print(f"{ast.unparse(arg)}: {Code.LIGHTCYAN_EX+value}")
 
-    # from executing import Source
-    # timer.print_inc("import executing")
-    # # callFrame = inspect.currentframe().f_back
-    # callFrame = sys._getframe(1)
-    # callNode = Source.executing(callFrame).node
-    # timer.print_inc("Source.executing")
-    # Implementation 2:
-    # =================
-    # import ast
-    # # arg_string = ast.unparse(callNode)
-    # for arg, value in zip(callNode.args, values):
-    #     print(f"{ast.unparse(arg)}: {Code.LIGHTCYAN_EX+value}")
-
-
-    # Implementation 1:
-    # =================
-    #
-    # for_frame = executing.Source.for_frame(callFrame)
-    # timer.print_inc("Source.for_frame")
-    # # asttokens() - 250ms Delay
-    # arg_strings = [ for_frame.asttokens().get_text(arg) for arg in callNode.args ]
-    # timer.print_inc("asttokens")
-    # pairs = list(zip(arg_strings, values))
-    # for arg_string, value in pairs:
-    #     s = Code.LIGHTCYAN_EX + value
-    #     print(f"{arg_string}: {s}")
-    # timer.print_inc("print-pairs")
     timer.print("ic")
 
 __all__ = [ "ic", "ib" ]
@@ -644,8 +632,6 @@ def test_ic():
     ic(ret == before)
     ic_locals = locals()
     ic_locals = { str(key).strip(): str(value).strip() for key, value in ic_locals.items() }
-    # global global_breakpoint_time
-    # global_breakpoint_time = True
     ic(ic_locals)
     print()
 
@@ -780,8 +766,8 @@ def get_args(*values):
 def main():
     # ic(1)
     string = '1'
-    ic(string)
-    ic(foo(1,2), 3)
+    # ic(string)
+    # ic(foo(1,2), 3)
     # get_args(foo(1, 2), 'Three')
     return
     string = 'Hey'
@@ -797,7 +783,7 @@ def main():
 
 # main()
 
-timer.no_print = True
+timer.no_print = False
 
 if __name__ == "__main__":
 

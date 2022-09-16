@@ -607,8 +607,15 @@ def get_frames():
         frame = frame.f_back
     ic(frames)
 
+def test_sys():
+    import sys
+    L = [1, 2, 3]
+    M = L + [ 4, 5, 6]
+    print(sys.getrefcount(L))
+
+
 def main():
-    get_frames()
+    test_sys()
     # ic({ "a": 100, "b": 1, "c": 100_000_000})
     # test_trace()
     # test_pathlib_ib()
