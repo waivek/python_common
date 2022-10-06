@@ -162,6 +162,84 @@ def print_variables_by_frame(error):
     print(Code.LIGHTCYAN_EX + 'Variables by frame')
     print(table_string)
 
+def color_error_repr_old(error):
+    string = repr(error)
+    lhs, rhs = string.split("'", 1)
+    rhs = "'" + rhs[:-1]
+    lhs = Code.LIGHTRED_EX + lhs 
+    rhs = (Code.YELLOW + rhs) + (Code.LIGHTRED_EX + ')')
+    colored_string = lhs + rhs
+    return colored_string
+
+def color_error_regex(error):
+    string = repr(error)
+    import re
+    m = re.match(r"""(\w+\(["'])(.*)(["']\))""", string)
+    
+    lhs = Code.LIGHTRED_EX + m.group(1) 
+    middle =  Code.YELLOW + m.group(2) 
+    # middle = re.sub(r"('\w+')", Code.LIGHTCYAN_EX + r'\1', middle)
+    rhs = Code.LIGHTRED_EX + m.group(3)
+    colored_string = lhs + middle + rhs
+    return colored_string
+
+def color_arg(arg):
+    BLACK           = '\x1b[30m'
+    RED             = '\x1b[31m'
+    GREEN           = '\x1b[32m'
+    YELLOW          = '\x1b[33m'
+    BLUE            = '\x1b[34m'
+    MAGENTA         = '\x1b[35m'
+    CYAN            = '\x1b[36m'
+    WHITE           = '\x1b[37m'
+    LIGHTBLACK_EX   = '\x1b[90m'
+    LIGHTRED_EX     = '\x1b[91m'
+    LIGHTGREEN_EX   = '\x1b[92m'
+    LIGHTYELLOW_EX  = '\x1b[93m'
+    LIGHTBLUE_EX    = '\x1b[94m'
+    LIGHTMAGENTA_EX = '\x1b[95m'
+    LIGHTCYAN_EX    = '\x1b[96m'
+    LIGHTWHITE_EX   = '\x1b[97m'
+    RESET = '\x1b[39m'
+
+    if type(arg) == str:
+        arg = YELLOW + repr(arg)
+    else:
+        arg = CYAN + repr(arg)
+    return arg
+
+
+def color_error_repr(error):
+    BLACK           = '\x1b[30m'
+    RED             = '\x1b[31m'
+    GREEN           = '\x1b[32m'
+    YELLOW          = '\x1b[33m'
+    BLUE            = '\x1b[34m'
+    MAGENTA         = '\x1b[35m'
+    CYAN            = '\x1b[36m'
+    WHITE           = '\x1b[37m'
+    LIGHTBLACK_EX   = '\x1b[90m'
+    LIGHTRED_EX     = '\x1b[91m'
+    LIGHTGREEN_EX   = '\x1b[92m'
+    LIGHTYELLOW_EX  = '\x1b[93m'
+    LIGHTBLUE_EX    = '\x1b[94m'
+    LIGHTMAGENTA_EX = '\x1b[95m'
+    LIGHTCYAN_EX    = '\x1b[96m'
+    LIGHTWHITE_EX   = '\x1b[97m'
+    RESET = '\x1b[39m'
+
+    string = repr(error)
+    args = ', '.join(color_arg(arg) for arg in error.args)
+    colored_string = f"{LIGHTRED_EX}{error.__class__.__name__}({YELLOW}{args}{LIGHTRED_EX}){RESET}"
+    return colored_string
+    # lhs = Code.LIGHTRED_EX + m.group(1) 
+    # middle =  Code.YELLOW + m.group(2) 
+    # # middle = re.sub(r"('\w+')", Code.LIGHTCYAN_EX + r'\1', middle)
+    # rhs = Code.LIGHTRED_EX + m.group(3)
+    # colored_string = lhs + middle + rhs
+    return colored_string
+
+
 def print_error_information(error):
     # C:\Users\vivek\Documents\Python                               -> ~/Documents/Python
     # C:\Users\vivek\AppData\Roaming\Python\Python310\site-packages -> $APPDATA/Python/site-packages
@@ -173,7 +251,13 @@ def print_error_information(error):
     tb = error.__traceback__
 
     print()
-    print(Code.LIGHTRED_EX + repr(error))
+    print(color_error_repr(error))
+    # print(Code.LIGHTRED_EX + repr(error))
+
+    from frame import frame_gen
+    from ic import ic; ic
+    call_frames = list(frame_gen())
+    call_file = call_frames[3].f_code.co_filename
 
     frames = [ frame for frame, _ in traceback.walk_tb(tb) ]
 
@@ -184,6 +268,8 @@ def print_error_information(error):
     table = Table()
     table.gutter = '    '
     table.separator = ' ... '
+
+    green_done = False
     for i, (frame, summary) in enumerate(pairs):
         filepath = summary.filename
         filepath = str(Path(filepath).resolve()) # C:\users -> C:\Users
@@ -195,7 +281,10 @@ def print_error_information(error):
 
         line_number = summary.lineno
         line = summary.line
-        line = Code.LIGHTGREEN_EX + line if i == 0 else line
+        # line = Code.LIGHTGREEN_EX + line if i == 0 else line
+        if green_done is False and frame.f_code.co_filename == call_file:
+            line = Code.LIGHTGREEN_EX + line
+            green_done = True
         lhs_string = f"{filepath}:{line_number}"
         table.row([lhs_string, line])
     table_string = str(table)
@@ -214,21 +303,54 @@ def print_variables(D):
               if type(v) not in exclude_types and k[0:2] != "__" and str(v)[0] != "<"  and not isinstance(v, Exception) ]
     ic(table)
 
+def write_vim_error_file(error: Exception):
+    # test.py:34:5:    import sys
+    import linecache
+    import traceback
+    import re
+    from ic import ic; ic
+    import os
+
+    from reltools import frame
+    call_frames = list(frame_gen())
+    call_file = call_frames[3].f_code.co_filename
+
+    filepath = os.path.abspath(os.path.expanduser("~/vimfiles/temp/handler_error.txt"))
+    frames = [ frame for frame, _ in reversed(list(traceback.walk_tb(error.__traceback__))) ]
+    error_lines = []
+    cc_nr = -1
+    for index, frame in enumerate(frames):
+        path = frame.f_code.co_filename
+        lineno = frame.f_lineno
+        line = linecache.getline(path, lineno)
+        if cc_nr == -1 and path == call_file:
+            cc_nr = index + 1
+        column = re.search(r"\S", line).start() + 1
+        error_line = f"{path}:{lineno}:{column}:{line}".rstrip()
+        error_lines.append(error_line)
+    with open(filepath, "w") as f:
+        f.write("\n".join(error_lines))
+    # we use threading to make os\.system call not take up 0.08 seconds
+    gvim_command = lambda : os.system(f'''start gvim --servername GVIM --remote-send ":call RHEF('{filepath}', {cc_nr})<CR>" ''')
+    import threading
+    threading.Thread(target=gvim_command).start()
+
+
 @contextmanager
 def handler():
     try:
         yield
     except Exception as e:
-        import bdb
         error = e
-        if type(e) == bdb.BdbQuit:
+        if type(e).__name__ == 'bdb.BdbQuit':
             # Exit Via CTRL-D
             pass
         else:
+            write_vim_error_file(e)
             print_error_information(e)
             # print_variables_by_frame(e)
             import sys
-            frames = Frames(error)
+            # frames = Frames(error)
 
             # for frame in frames:
             #
@@ -246,16 +368,27 @@ def handler():
                 pdb.post_mortem(e.__traceback__)
 
 def divide_by_zero():
-    upper = 5
-    lower = 0
-    result = upper / lower
+
+    # Error 1:
+    # ========
+    # upper = 5
+    # lower = 0
+    # result = upper / lower
+
+    # Error 2:
+    # ========
+    # item = bytes()
+    # bytes.encode()
+
+
+    # Error 3:
+    # ========
+    from reltools import here
+    path = here() / "f1/f2/f3/item.txt"
+    path.mkdir(exist_ok=True)
+
+    result = 1
     return result
-
-def level_2():
-    return divide_by_zero()
-
-def level_1():
-    level_2()
 
 def table_wide():
     pass
@@ -269,11 +402,13 @@ def table_wide():
     #     row = (w_name, color_D_if_big(D))
     #     table.row(row)
     # print(table)
-
-
+    #
+def main():
+    return divide_by_zero()
 
 if __name__ == "__main__":
     from timer import Timer
+    from ic import ic; ic
     timer = Timer()
     with handler():
-        level_2()
+        main()

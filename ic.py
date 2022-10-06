@@ -322,7 +322,6 @@ def ic(*values):
     # ast     : Only import ast for instances like ic(1, 2) or ic(foo(a), [1,2,3]) and not of ic(1) ic(2) which is most common use case
     # inspect : Only import for ic() / ic(function) / ic(module) / sig()
 
-    timer.start("ic")
     in_pdb = pdb_check()
 
     if not values:
@@ -358,7 +357,6 @@ def ic(*values):
         for arg, value in zip(node.args, values):
             print(f"{ast.unparse(arg)}: {Code.LIGHTCYAN_EX+value}")
 
-    timer.print("ic")
 
 __all__ = [ "ic", "ib" ]
 

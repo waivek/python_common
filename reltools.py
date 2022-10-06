@@ -1,6 +1,5 @@
-
 # IMPORTANT:
-# 1. HAS TO BE IN THE SAME DIRECTORY AS COMMON IF YOU ARE IMPORTING THROUGH COMMON
+# 1. FILE HAS TO BE IN THE SAME DIRECTORY AS COMMON IF YOU ARE IMPORTING THROUGH COMMON
 # 2. get_caller_parent HAS TO BE IN SAME FILE AS rel2abs
 
 # TODO:
@@ -54,4 +53,7 @@ def rel2abs(relative_path):
     absolute_path    = os.path.realpath(os.path.join(parent_directory, relative_path))
     return absolute_path
 
-
+def here():
+    # importing pathlib is slow as shit
+    from pathlib import Path
+    return Path(sys._getframe(1).f_code.co_filename).parent

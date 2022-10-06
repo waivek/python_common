@@ -8,6 +8,61 @@ from color import Code    # Multi-Use
 from error import handler # Single Use
 from ic import ic, ib     # Multi-Use, import time: 70ms - 110ms
 
+from types import FrameType
+
+path2lines: dict[str, list[str]] = {}
+
+class Frame:
+    def __init__(self, frame: FrameType):
+        self.path = frame.f_code.co_filename
+        self.lineno = frame.f_lineno
+        self.line = getline(self.path, self.lineno)
+        self.raw = frame
+        # frame.f_back, frame.f_locals, frame.f_globals
+
+def getline(path: str, lineno: int):
+    global path2lines
+    if path not in path2lines:
+        with open(path, "rb") as f:
+            lines = f.read().decode("utf-8").split("\n")
+            path2lines[path] = lines
+    index = lineno-1
+    lines = path2lines[path]
+    return lines[index]
+
+def inspect_dot_stack():
+    frames = [ sys._getframe(1) ]
+    while frame := frames[-1].f_back:
+        frames.append(frame)
+    return [ Frame(frame) for frame in frames ]
+
+def frame_gen():
+    frame = sys._getframe(1)
+    while frame:
+        yield frame
+        frame = frame.f_back
+
+
+# IMPLEMENTATION 1:
+# =================
+def to_dict(*variables):
+    current_function_name = sys._getframe(0).f_code.co_name
+    frame = sys._getframe(1)
+    line = linecache.getline(frame.f_code.co_filename, frame.f_lineno).strip()
+    # inside_string = line.split(current_function_name)[1][1:-1]
+    inside_string = line.replace(current_function_name, "")[1:-1]
+    names = [ name.strip() for name in inside_string.split(",") ]
+    D = { name: frame.f_locals[name] for name in names }
+    return D
+
+# IMPLEMENTATION 2:
+# =================
+def create_dict(*args):
+    frame = sys._getframe(1)
+    node = ast.parse(linecache.getline(frame.f_code.co_filename, frame.f_lineno).strip()).body[0].value
+    return { arg.id: frame.f_locals[arg.id] for arg in node.args }
+
+
 
 def repr_exists(obj):
     string = repr(obj)
@@ -44,10 +99,6 @@ def call_node_to_string(node, local_D):
     # print(ast.unparse(node))
     return node
 
-def create_dict(*args):
-    frame = sys._getframe(1)
-    node = ast.parse(linecache.getline(frame.f_code.co_filename, frame.f_lineno).strip()).body[0].value
-    return { arg.id: frame.f_locals[arg.id] for arg in node.args }
 
 def frame_pretty():
 
@@ -93,7 +144,13 @@ def foo(x, y, u,     z, result,               L,  dt, pt, string='Hello'):
 
 def main():
 
+    ic(getline(__file__, 6))
+    return
+
     from datetime import datetime
+    import re
+    result = re.split('a', 'bab')
+    datetime.now()
     x = 1
     y = 2
     z = 3
@@ -104,10 +161,10 @@ def main():
     # ic(repr_exists(pt))
     L = [1, 2, 3, 4, 5]
     foo(x, y, 1, 'Sup', bar(z), [1, 2, 3, 4, 5], now, pt)
+
     # create_dict(x, y)
 
 if __name__ == "__main__":
-
     with handler():
         main()
 timer.print("frame.py")

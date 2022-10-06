@@ -1,11 +1,11 @@
 # Good Colors:
 #
 #     LIGHTRED_EX
-#     LIGHTBLUE_EX | CYAN | LIGHTCYAN_EX
-#     GREEN
+#     CYAN | LIGHTCYAN_EX
+#     LIGHTBLUE_EX 
+#     LIGHTGREEN_EX
 #     YELLOW 
 #     MAGENTA
-#
 
 #
 # SEARCH     : print_\(\w\+\)_line(\(.*\))

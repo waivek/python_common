@@ -1,3 +1,16 @@
+
+# SETTRACE vs. SETPROFILE
+# =======================
+#
+# https://stackoverflow.com/a/59088868
+#
+# sys.settrace() only reports on Python code, not built-in callables or those defined in compiled extensions
+#
+# When using sys.settrace() returning a function object instead of None lets you trace other events within the frame,
+# this is the 'local' trace function. You can re-use the same function object for this. You can disable per-line events
+# by setting `frame.f_trace_lines = False`.
+
+
 """
 
 
@@ -24,17 +37,12 @@ from datetime import datetime
 import sys
 import pickle
 from time import time
+import os.path
 
 gf = None
-done = False
-hash_to_trace_D = {}
 path_function_pairs = []
 trace_dictionaries = []
-staging_D = {}
-
-hashes = []
-def frame_hash_to_trace_dictionaries_index(frame_hash):
-    pass
+total_time = 0
 
 def path_to_module_name(path):
     frame_index = 1
@@ -55,8 +63,8 @@ def trace(function_names):
         pair = (filepath, function_name)
         path_function_pairs.append(pair)
     path_function_pairs = list(set(path_function_pairs))
-    # import threading
-    # threading.settrace(handle_trace_event)
+    import threading
+    threading.settrace(handle_trace_event)
     sys.settrace(handle_trace_event)
 
 def rerun():
@@ -76,49 +84,6 @@ def rerun():
         else:
              print(Code.RED + "✗", cmp_string)
 
-import os.path
-def handle_trace_event(frame, event, arg):
-    print("handle_trace_event", event, os.path.basename(frame.f_code.co_filename), frame.f_code.co_name)
-    global done
-    global gf
-    global hash_to_trace_D
-    global path_function_pairs
-    gf = frame
-    if event.startswith("c_"):
-        return
-
-    # if frame.f_code.co_filename != __file__:
-    #     return
-    pair = (frame.f_code.co_filename, frame.f_code.co_name)
-    if pair not in path_function_pairs:
-        return
-   
-    if done:
-        return
-
-    frame_hash = hex(hash(frame))
-    # ic(frame_hash)
-
-    # function_D = hash_to_trace_D.get(frame_hash, {})
-    function_D = staging_D.get(frame_hash, {})
-    function_D["function_name"] = frame.f_code.co_name
-    function_D["filepath"] = frame.f_code.co_filename
-    if event == 'call':
-        function_D["start_epoch"] = time()
-        function_D["end_epoch"] = None
-        function_D["kwargs_pkl"] = pickle.dumps(frame.f_locals)
-        index = len(trace_dictionaries)
-    elif event == 'return':
-        function_D["end_epoch"] = time()
-        function_D["result_pkl"] = pickle.dumps(arg)
-
-
-    # hash_to_trace_D[frame_hash] = function_D
-    if event == 'call':
-        staging_D[frame_hash] = function_D
-    elif event == 'return':
-        trace_dictionaries.append(function_D)
-        del staging_D[frame_hash]
 
 
 
@@ -150,51 +115,76 @@ def get_function(path, function_name):
     function = getattr(module, function_name)
     return function
 
-def old_implementation():
-    sys.setprofile(handle_trace_event)
-    kwargs =  { "name" : "Vivek Bose", "age" : 27, "dob" : datetime(1994, 11, 7), "face_bytes" : bytes("FACE".encode("utf-8")), "items" : [ "Avocado", "Banana" ], "maps" : { "India": "Ruppee", "USA": "Dollar" } }
-    # target(name="Vivek Bose", age=27, dob=datetime(1994, 11, 7), face_bytes=bytes("FACE".encode("utf-8")), items=[ "Avocado", "Banana" ], maps={ "India": "Ruppee", "USA": "Dollar" })
-    target(**kwargs)
-
-    global done
-    done = True
-    table = [ {
-        'frame_hash': frame_hash,
-        'function_name': trace_D['function_name'],
-        'filepath': trace_D['filepath'],
-        'start_epoch': trace_D['start_epoch'],
-        'end_epoch': trace_D['end_epoch'],
-        'result': pickle.loads(trace_D['result_pkl']),
-        'kwargs': to_table(pickle.loads(trace_D['kwargs_pkl']))
-    } for frame_hash, trace_D in hash_to_trace_D.items() ]
-
-    # frame_hash = list(hash_to_trace_D.keys())[0]
-    # ic(hash_to_trace_D[frame_hash])
-    for frame_hash, trace_D in hash_to_trace_D.items():
-        result = pickle.loads(trace_D['result_pkl'])
-        kwargs = pickle.loads(trace_D['kwargs_pkl'])
-        function_name = trace_D['function_name']
-        filepath = trace_D['filepath']
-        function = get_function(filepath, function_name)
-        calc_result = function(**kwargs)
-        function_string = f"{function_name}(**{kwargs})"
-        if calc_result == result:
-            print("TRUE", function_string)
-        else:
-             print("FALSE", function_string)
-
 def add(x, y):
     # print(f"Sum Is: {x+y}")
     return x+y
 
+
+def call_and_return_tracer(frame, event, arg, events = []):
+    global total_time
+    start = time()
+    print("handle_trace_event", event, os.path.basename(frame.f_code.co_filename), frame.f_code.co_name)
+    if event == 'call':
+        print(f"Entering: {frame.f_code.co_name}")
+        frame.f_trace_lines = False
+        events.append(event)
+        print(f"Entering: (event): {events!r}")
+        total_time = total_time + time() - start
+        return call_and_return_tracer
+    elif event == 'return':
+        events.append(event)
+        print(f"Returning: {arg!r}")
+        print(f"Returning (event): {events!r}")
+        total_time = total_time + time() - start
+
+def handle_trace_event(frame, event, arg, function_D = {}):
+    # print("handle_trace_event", event, os.path.basename(frame.f_code.co_filename), frame.f_code.co_name)
+    global total_time
+    global gf
+    global path_function_pairs
+    start = time()
+    gf = frame
+    if event.startswith("c_"):
+        return
+
+    pair = (frame.f_code.co_filename, frame.f_code.co_name)
+    if pair not in path_function_pairs:
+        return
+   
+    # done = False
+    # if done:
+    #     return
+
+    frame_hash = hex(hash(frame))
+
+    function_D["function_name"] = frame.f_code.co_name
+    function_D["filepath"] = frame.f_code.co_filename
+    if event == 'call':
+        function_D["start_epoch"] = time()
+        function_D["end_epoch"] = None
+        function_D["kwargs_pkl"] = pickle.dumps(frame.f_locals)
+        frame.f_trace_lines = False
+        total_time = total_time + time() - start
+        return handle_trace_event
+    elif event == 'return':
+        function_D["end_epoch"] = time()
+        function_D["result_pkl"] = pickle.dumps(arg)
+
+    if event == 'return':
+        trace_dictionaries.append(function_D)
+        total_time = total_time + time() - start
+
 def main():
     trace(['add'])
-    result = add(1, 2)
-    # import threading
-    # thread = threading.Thread(target=add, args=[3, 4])
-    # thread.start()
-    # thread.join()
-    print(trace_dictionaries)
+    # sys.settrace(call_and_return_tracer)
+    # foo(spam, "universe")
+    # for i in range(10):
+    #     add(1, 2)
+    import threading
+    thread = threading.Thread(target=add, args=[3, 4])
+    thread.start()
+    thread.join()
+    ic(trace_dictionaries)
 
 
 

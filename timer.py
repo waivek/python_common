@@ -14,7 +14,15 @@ class Timer():
         if message:
             self.timer_D[message] = time()
 
+    def get(self, message):
+        if self.timer_D.get(message) == None and self.start_time == None:
+            print("ERROR: Timer configured incorrectly")
 
+        time_taken = time() - self.timer_D.get(message, self.start_time)
+        if message in self.timer_D:
+            value = self.timer_D[message]
+            del self.timer_D[message]
+        return time_taken
 
     def start_inc(self):
         self.inc_start = time()

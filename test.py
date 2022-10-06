@@ -4,9 +4,7 @@ timer = Timer()
 timer.start("test.py")
 from color import Code    # Multi-Use
 from error import handler # Single Use
-timer.start("import ic")
 from ic import ic         # Multi-Use
-timer.print("import ic")
 import time
 
 def function_call(item_1, key=[1, 2, 3], D={}):
@@ -614,8 +612,84 @@ def test_sys():
     print(sys.getrefcount(L))
 
 
+def test_pudb():
+    import pudb
+    pudb.set_trace()
+
+# def dir():
+#     from pathlib import Path
+#     return Path(__file__).parent
+
+
+def test_pathlib():
+    timer.start("import os.path")
+    import os.path; os.path
+    t1 = timer.get("import os.path")
+    timer.start("import Path")
+    from pathlib import Path; Path
+    t2 = timer.get("import Path")
+    ic(t1, t2)
+    from reltools import here
+    path = here() / "f1/f2/item.txt"
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+
+def test_os_path():
+    import os.path
+    path = "/Users/../vivek/"
+
+    ic(path)
+    ic(os.path.normpath(path))
+    ic(os.path.abspath(path))
+
+
+def test_static_variable():
+    
+    if 'call_count' not in dir(test_static_variable):
+        test_static_variable.call_count = 0
+
+    test_static_variable.call_count = test_static_variable.call_count + 1
+
+def test_pandas_import():
+    timer.start("import pandas as pd")
+    import pandas
+    pandas.show_versions()
+    timer.print("import pandas as pd")
+
+def test_color_bash():
+    result = """
+    SELECT * FROM items
+    """
+    print("".join([Code.LIGHTGREEN_EX + "waivek@vivobook", ":", Code.LIGHTBLUE_EX + "/mnt/c/Users/vivek/Documents/Python"]))
+
+def test_yield_list(): 
+
+    def db_gen(query):
+        from reltools import rel2abs
+        from db import db_init
+        path = rel2abs("./db_test/gen.db")
+        _, connection = db_init(path)
+
+        while True:
+            cursor = connection.cursor()
+            yield cursor.execute(query)
+
+    query = "SELECT * FROM items;"
+    result = db_gen(query)
+    ic(result)
+
+
+# Vim Command: NTF --- call s:PythonNewTestFunction()
 def main():
-    test_sys()
+    test_yield_list()
+    # test_color_bash()
+    # test_pandas_import()
+    # test_pandas_import()
+    # test_static_variable()
+    # test_os_path()
+    # test_pathlib()
+    # test_pudb()
+    # test_sys()
     # ic({ "a": 100, "b": 1, "c": 100_000_000})
     # test_trace()
     # test_pathlib_ib()
