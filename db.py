@@ -22,7 +22,7 @@ def table_exists(cursor, table_name):
     return True if D else False
 
 def dump_list(L):
-    print("dump_list", L)
+    # print("dump_list", L)
     import json
     if L is None:
         return '[]'

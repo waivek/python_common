@@ -1,7 +1,6 @@
 import sys; sys.path = [ "C:/users/vivek/Documents/Python/" ] + sys.path
 from timer import Timer   # Single Use
 timer = Timer()
-timer.start("frame.py")
 import ast
 import linecache
 from color import Code    # Multi-Use
@@ -167,4 +166,3 @@ def main():
 if __name__ == "__main__":
     with handler():
         main()
-timer.print("frame.py")

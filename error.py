@@ -311,7 +311,7 @@ def write_vim_error_file(error: Exception):
     from ic import ic; ic
     import os
 
-    from reltools import frame
+    from frame import frame_gen
     call_frames = list(frame_gen())
     call_file = call_frames[3].f_code.co_filename
 
