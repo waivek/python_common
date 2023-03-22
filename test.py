@@ -679,9 +679,36 @@ def test_yield_list():
     ic(result)
 
 
+def test_datenames(): 
+    from datetime import datetime, timedelta
+    now = datetime.now()
+    day_table = []
+    for daynumber in range(7):
+        d1 = now - timedelta(days=daynumber)
+        d2 = now - timedelta(days=daynumber+1)
+        end_epoch = int(d1.timestamp())
+        start_epoch = int(d2.timestamp())
+        if daynumber == 0:
+            dayname = "today"
+        elif daynumber == 1:
+            dayname = "yesterday"
+        else:
+            dayname = f"{d1 :%a}".lower()
+        day_table.append({ 'dayname': dayname, 'start_epoch': start_epoch, 'end_epoch': end_epoch })
+    range_D = { 
+         "day": now - timedelta(hours=24),
+         "week": now - timedelta(days=7),
+         "month": now - timedelta(days=30),
+         "year": now - timedelta(days=365),
+         "all": datetime(year=2005, month=1, day=1)
+    }
+    range_table = [ { "rangename": rangename, "start_epoch": int(dt.timestamp()), "end_epoch": int(now.timestamp()) } for rangename, dt in range_D.items() ]
+    return { "range": range_table, "day": day_table }
+
 # Vim Command: NTF --- call s:PythonNewTestFunction()
 def main():
-    test_yield_list()
+    test_datenames()
+    # test_yield_list()
     # test_color_bash()
     # test_pandas_import()
     # test_pandas_import()

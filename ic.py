@@ -378,6 +378,14 @@ def log(dictionaries):
     cursor.execute("INSERT INTO errors (epoch, list_json) VALUES (?, ?);", (epoch, list_json))
     connection.commit()
 
+def save_ic_table_error(dictionaries):
+    from datetime import datetime
+    from reltools import write
+    dt = datetime.now()
+    filename = f"{dt:%y%m%d-%Hh%Mm%Ss}.json"
+    path = os.path.abspath(os.path.expanduser(f'~/Documents/Python/ic-test-manual/{filename}'))
+    write(dictionaries, filename)
+
 class Table:
     # Why we can’t use columnar
     # 
@@ -460,6 +468,7 @@ class Table:
             print(f"Column Width All                : {column_width_total}")
             print(f"Minimum Column Width            : {min_column_width}")
             print(f"Final  Widths                   : {final_widths}")
+            print("Do 'u' and then run `save_ic_table_error(x)`")
             breakpoint()
         return column_tuples
 
@@ -762,6 +771,8 @@ def get_args(*values):
 
 
 def main():
+    save_ic_table_error([])
+    return
     # ic(1)
     string = '1'
     # ic(string)

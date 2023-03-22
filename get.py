@@ -119,8 +119,9 @@ async def log_response(response):
 
 async def get_async(url, session):
     headers = Config.url2header(url)
+    cookies = Config.url2cookie(url)
     # breakpoint()
-    response = await session.get(url, headers=headers)
+    response = await session.get(url, headers=headers, cookies=cookies)
     async with response:
         sync_response = await async_response_to_sync_response(response)
     await log_response(response)
@@ -220,7 +221,7 @@ def get_yescache(urls):
 
 # -- END: CACHE --
 
-def aget(urls, cache=True, log=True, limit=100, url2header=lambda url: {}):
+def aget(urls, cache=True, log=True, limit=100, url2header=lambda url: {}, url2cookie=lambda url: {}):
     # START: Configuration
 
     global DEBUG
@@ -228,6 +229,7 @@ def aget(urls, cache=True, log=True, limit=100, url2header=lambda url: {}):
     Config.cache = cache
     Config.log = log
     Config.url2header = url2header
+    Config.url2cookie = url2cookie
     Config.limit = limit
     if Config.cache:
         global connection
