@@ -129,7 +129,7 @@ async def get_async(url, session):
     return sync_response
 
 async def batch_get_async(urls):
-    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(limit=Config.limit)) as session:
+    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(limit=Config.limit), trust_env=True) as session:
         cors = [ get_async(url, session) for url in urls ]
         responses = await asyncio.gather(*cors)
     if Config.log and len(urls) > 0:
