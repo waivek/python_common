@@ -303,6 +303,22 @@ def print_variables(D):
               if type(v) not in exclude_types and k[0:2] != "__" and str(v)[0] != "<"  and not isinstance(v, Exception) ]
     ic(table)
 
+def get_error_filepath():
+    import platform
+    import os.path
+    if platform.system() == 'Linux':
+        vimpath = "~/.vim"
+    else:
+        vimpath = "~/.vimfiles"
+    folder = os.path.join(os.path.expanduser(vimpath), "temp")
+    os.makedirs(folder, exist_ok=True)
+    filename = 'handler_error.txt'
+    filepath = os.path.join(folder, filename)
+    filepath = os.path.abspath(filepath)
+    return filepath
+
+
+
 def write_vim_error_file(error: Exception):
     # test.py:34:5:    import sys
     import linecache
@@ -315,7 +331,7 @@ def write_vim_error_file(error: Exception):
     call_frames = list(frame_gen())
     call_file = call_frames[3].f_code.co_filename
 
-    filepath = os.path.abspath(os.path.expanduser("~/vimfiles/temp/handler_error.txt"))
+    filepath = get_error_filepath()
     frames = [ frame for frame, _ in reversed(list(traceback.walk_tb(error.__traceback__))) ]
     error_lines = []
     cc_nr = -1
