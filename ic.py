@@ -770,7 +770,19 @@ def get_args(*values):
     print()
 
 
+def error_1():
+    from db import db_init
+    import json
+    cursor, connection = db_init("errors/ic.db")
+    dictionaries = [ dict(row) for row in cursor.execute("SELECT * FROM errors") ]
+    json_strings = [ D["list_json"] for D in dictionaries ]
+    dictionaries = [ json.loads(json_string) for json_string in json_strings ]
+    for D in dictionaries:
+        ic(D)
+
 def main():
+    error_1() # Doesn’t Work / Reproduce the error
+    return 
     save_ic_table_error([])
     return
     # ic(1)
