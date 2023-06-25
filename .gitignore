@@ -1,2 +1,5 @@
 venv/
 build/
+aget_cache/
+errors/
+__pycache__/

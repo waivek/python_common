@@ -780,8 +780,14 @@ def error_1():
     for D in dictionaries:
         ic(D)
 
+def error_2():
+    from reltools import read
+    D = read("ic-test-manual/221015.json")
+    ic(D)
+
+
 def main():
-    error_1() # Doesn’t Work / Reproduce the error
+    error_2() # Doesn’t Work / Reproduce the error
     return 
     save_ic_table_error([])
     return
