@@ -100,10 +100,6 @@ def cases():
     # --- 
 
     # Variant 4 (most used pattern, we have consecutive parts in a function that we want to arbitrarily break down and profile)
-    timer.start_inc() # ID-less, only 1 can exist at a time, otherwise print_inc would require two arguments
-    # import pandas
-    # df = pandas
-    timer.print_inc("import pandas")
     import datetime
     dt = datetime
     timer.print_inc("import datetime")

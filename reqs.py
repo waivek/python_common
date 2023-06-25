@@ -8,10 +8,70 @@ Code; ic; ib; handler
 from reltools import rel2abs
 
 def main():
-    # ic(get_tracked_python_files())
+    print_python_modules()
+    print()
     # ic(get_untracked_python_files())
     # ic(get_python_files())
-    ic(get_non_python_files())
+    # ic(get_non_python_files())
+    print_pipreqs()
+
+
+def print_python_modules():
+    helper_modules = [ 'frame.py', 'trace.py' ]
+    ignore_modules = [ 'reqs.py', 'setup.py', 'tdd.py', 'template.py', 'test.py' ]
+    py_modules = [ module for module in get_python_files() if module not in helper_modules and module not in ignore_modules ]
+    print(f"py_modules = {py_modules}")
+    print("# [print_python_modules] see helper_modules and ignore_modules for ignored python files")
+
+def print_pipreqs():
+    import subprocess
+    command = ["pipreqs", "--print", "."]
+    print("$ " + " ".join(command))
+    result_binary = subprocess.run(command, capture_output=True)
+    contents = result_binary.stdout.decode("utf-8").strip()
+    lines = contents.split("\n")
+    table = []
+    manual_lines = [
+        "pysqlite3-binary;Linux"
+    ]
+    required_packages = {
+        "aiohttp": "get.py",
+        "executing": "ic.py",
+        "python_dateutil": "common.py",
+        "timeago": "common.py"
+    }
+    ignore_packages = {
+        "ipdb": "error.py",
+        "pysqlite3": "db.py"
+    }
+    for line in lines:
+        package, version = line.split("==")
+        table.append({ "package": package, "version": version })
+
+    install_requires_lines = []
+    for D in table:
+        package = D['package']
+        version = D['version']
+        if package in required_packages:
+            print(Code.GREEN + package)
+            line = f"{package}=={version}"
+            install_requires_lines.append(line)
+        elif package in ignore_packages:
+            print(Code.LIGHTBLACK_EX + (package + "# ignore"))
+        else:
+            print(Code.RED + package)
+    lines = install_requires_lines + manual_lines
+    lines = [ line.strip() for line in lines ]
+    lines = [ f"'{line}'" for line in lines ]
+    lines = [ f"        {line}" for line in lines ]
+    print("    install_requires = [")
+    print("\n".join(lines))
+    print("    ]")
+
+
+            
+        
+
 
 def get_directories():
     from glob import glob

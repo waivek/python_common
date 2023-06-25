@@ -612,10 +612,6 @@ def test_sys():
     print(sys.getrefcount(L))
 
 
-def test_pudb():
-    import pudb
-    pudb.set_trace()
-
 # def dir():
 #     from pathlib import Path
 #     return Path(__file__).parent
@@ -649,12 +645,6 @@ def test_static_variable():
         test_static_variable.call_count = 0
 
     test_static_variable.call_count = test_static_variable.call_count + 1
-
-def test_pandas_import():
-    timer.start("import pandas as pd")
-    import pandas
-    pandas.show_versions()
-    timer.print("import pandas as pd")
 
 def test_color_bash():
     result = """
@@ -710,8 +700,6 @@ def main():
     test_datenames()
     # test_yield_list()
     # test_color_bash()
-    # test_pandas_import()
-    # test_pandas_import()
     # test_static_variable()
     # test_os_path()
     # test_pathlib()

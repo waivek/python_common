@@ -1,5 +1,6 @@
-from colorama import init, Fore
-init(convert=True)
+# from colorama import init, Fore
+# init(convert=True)
+from color import Code
 
 # print_object {{{
 def print_object(obj, hidden=False):
@@ -116,9 +117,11 @@ def head(inp, preview_lines_count=5):
 
 # print_red_line, print_green_line {{{
 def make_string_green(string):
-    return "{color_code}{string}{reset_code}".format(color_code=Fore.GREEN, string=string, reset_code=Fore.RESET)
+    # return "{color_code}{string}{reset_code}".format(color_code=Fore.GREEN, string=string, reset_code=Fore.RESET)
+    return Code.GREEN + string
 def make_string_red(string):
-    return "{color_code}{string}{reset_code}".format(color_code=Fore.RED, string=string, reset_code=Fore.RESET)
+    # return "{color_code}{string}{reset_code}".format(color_code=Fore.RED, string=string, reset_code=Fore.RESET)
+    return Code.RED + string
 def print_red_line(string):
     print(make_string_red(string))
 def print_green_line(string):

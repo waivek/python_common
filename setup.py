@@ -5,17 +5,16 @@
 #   'colorama;platform_system=="Linux"'
 # ]
 from distutils.core import setup
-setup(name='common',
-      version='1.0',
-      py_modules=['common', 'db', 'ic', 'error', 'timer', 'color'],
-      install_requires = [
-          'colorama==0.3.9',
-          'Columnar==1.3.1',
-          'aiohttp==3.7.3',
-          'requests==2.25.1',
-          'timeago==1.0.14',
-          'python_dateutil==2.8.2',
-          'pysqlite3-binary;platform_system=="Linux"'
-      ]
+setup(
+        name='common',
+        version='1.0',
+        py_modules=['common', 'db', 'ic', 'error', 'timer', 'color'],
+        install_requires = [
+            'aiohttp==3.8.1'
+            'executing==0.8.2'
+            'python_dateutil==2.8.2'
+            'timeago==1.0.14'
+            'pysqlite3-binary;Linux'
+        ]
 )
 

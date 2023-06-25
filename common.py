@@ -22,6 +22,7 @@
 #       rel2abs(relative_path)
 #
 from timer import Timer
+from color import Code
 timer = Timer()
 
 import sys
@@ -289,13 +290,15 @@ def update_json_cache(cache_path, new_cache_D):
 
 
 def make_string_green(string):
-    from colorama import init, Fore
-    init(convert=True)
-    return "{color_code}{string}{reset_code}".format(color_code=Fore.GREEN, string=string, reset_code=Fore.RESET)
+    # from colorama import init, Fore
+    # init(convert=True)
+    # return "{color_code}{string}{reset_code}".format(color_code=Fore.GREEN, string=string, reset_code=Fore.RESET)
+    return Code.GREEN + string
 def make_string_red(string):
-    from colorama import init, Fore
-    init(convert=True)
-    return "{color_code}{string}{reset_code}".format(color_code=Fore.RED, string=string, reset_code=Fore.RESET)
+    # from colorama import init, Fore
+    # init(convert=True)
+    # return "{color_code}{string}{reset_code}".format(color_code=Fore.RED, string=string, reset_code=Fore.RESET)
+    return Code.RED + string
 def print_red_line(string):
     print(make_string_red(string))
 def print_green_line(string):
