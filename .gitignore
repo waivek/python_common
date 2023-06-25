@@ -3,3 +3,4 @@ build/
 aget_cache/
 errors/
 __pycache__/
+texts/
