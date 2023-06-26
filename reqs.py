@@ -25,7 +25,8 @@ def print_python_modules():
 
 def print_pipreqs():
     import subprocess
-    command = ["pipreqs", "--print", "."]
+    current_dir = rel2abs(".")
+    command = ["pipreqs", "--print", current_dir ]
     print("$ " + " ".join(command))
     result_binary = subprocess.run(command, capture_output=True)
     contents = result_binary.stdout.decode("utf-8").strip()
