@@ -2,10 +2,10 @@
 # Hello
 # Red
 # Blue
-from timer import Timer
+from .timer import Timer
 timer = Timer()
-from common import print_red_line, make_string_green, truncate, Timer
-from reltools import rel2abs
+from .common import print_red_line, make_string_green, truncate, Timer
+from .reltools import rel2abs
 from enum import IntEnum
 timer = Timer()
 
@@ -443,7 +443,7 @@ def main():
 
 if __name__ == "__main__":
     # import sys; main(); sys.exit(1)
-    from error import handler
+    from .error import handler
     with handler():
         main()
 

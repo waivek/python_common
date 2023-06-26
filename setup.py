@@ -2,7 +2,7 @@
 from setuptools import setup
 setup(
         name='waivek',
-        version='0.1',
+        version='0.1.2',
         packages=['waivek'],
         py_modules = ['color', 'common', 'db', 'error', 'frame', 'get', 'ic', 'print_utils', 'reltools', 'timer', 'trace'],
         install_requires = [

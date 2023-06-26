@@ -9,8 +9,8 @@ def get_pairs(pairs_type):
 
 def test_ic_custom_types():
 
-    from db import db_init, insert_dictionaries, get_schema
-    from ic import ic
+    from .db import db_init, insert_dictionaries, get_schema
+    from .ic import ic
     cursor, connection = db_init("db_test/lists.db")
     cursor.execute("DROP TABLE IF EXISTS pairs;")
 

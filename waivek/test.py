@@ -1,10 +1,10 @@
 # ./coc-enter.vim
-from timer import Timer   # Single Use
+from .timer import Timer   # Single Use
 timer = Timer()
 timer.start("test.py")
-from color import Code    # Multi-Use
-from error import handler # Single Use
-from ic import ic         # Multi-Use
+from .color import Code    # Multi-Use
+from .error import handler # Single Use
+from .ic import ic         # Multi-Use
 import time
 
 def function_call(item_1, key=[1, 2, 3], D={}):
@@ -56,7 +56,7 @@ def git_is_dirty():
 
 def sqlite_init():
     import os.path
-    from db import db_init
+    from .db import db_init
     temp_directory = os.path.expandvars("%TEMP%")
     db_path = os.path.join(temp_directory, "database.db")
     cursor, connection = db_init(db_path)
@@ -101,7 +101,7 @@ def git_is_dirty_2():
     time.sleep(1)
 
 def insert_dictionaries_test():
-    from db import insert_dictionaries
+    from .db import insert_dictionaries
     cursor, connection = sqlite_init()
 
     path = r"C:\Users\vivek\Desktop\bkp\game"
@@ -144,7 +144,7 @@ def start_many_threads():
 def multiprocessing_multithreading_kill_test():
     from multiprocessing import Process
     from datetime import datetime
-    from error import print_error_information
+    from .error import print_error_information
 
     p1 = Process(target=start_many_threads)
     try:
@@ -545,7 +545,7 @@ def test_handler():
     [ 1/0 for i in range(5) ]
 
 def test_partition():
-    from common import create_partitions
+    from .common import create_partitions
     numbers = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
     pairs = create_partitions(len(numbers), 6)
     for start, end in pairs:
@@ -583,8 +583,8 @@ def rec(n):
     return rec(n+1)
 
 def test_trace():
-    from trace import trace
-    from trace import rerun
+    from .trace import trace
+    from .trace import rerun
     trace([ "foo", "bar", "rec", "baz" ])
     ic(baz('latin'))
     ic(foo(1, 2))
@@ -625,7 +625,7 @@ def test_pathlib():
     from pathlib import Path; Path
     t2 = timer.get("import Path")
     ic(t1, t2)
-    from reltools import here
+    from .reltools import here
     path = here() / "f1/f2/item.txt"
     path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -655,8 +655,8 @@ def test_color_bash():
 def test_yield_list(): 
 
     def db_gen(query):
-        from reltools import rel2abs
-        from db import db_init
+        from .reltools import rel2abs
+        from .db import db_init
         path = rel2abs("./db_test/gen.db")
         _, connection = db_init(path)
 

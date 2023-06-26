@@ -21,8 +21,8 @@
 #       enumerate_count(items)
 #       rel2abs(relative_path)
 #
-from timer import Timer
-from color import Code
+from .timer import Timer
+from .color import Code
 timer = Timer()
 
 import sys
@@ -35,11 +35,11 @@ def simple_repr(self):
     return "%s(%s)" % (self.__class__.__name__, ', '.join(items))
 
 def rel2abs(relative_path):
-    from reltools import rel2abs as func
+    from .reltools import rel2abs as func
     return func(relative_path)
 
 def print_error_information(error):
-    from error import print_error_information as func
+    from .error import print_error_information as func
     func(error)
 
 def stub_quiet():
@@ -47,7 +47,7 @@ def stub_quiet():
 
 # --- START
 def print_function(function_name, for_type, frame_index_strings):
-    from color import Code
+    from .color import Code
     for string in frame_index_strings:
         left, right = string.split(" --- ")
         if right == r"C:\Users\vivek\Desktop\Twitch\coffee-vps\code":
@@ -290,12 +290,12 @@ def update_json_cache(cache_path, new_cache_D):
 
 
 def make_string_green(string):
-    # from colorama import init, Fore
+    # from .colorama import init, Fore
     # init(convert=True)
     # return "{color_code}{string}{reset_code}".format(color_code=Fore.GREEN, string=string, reset_code=Fore.RESET)
     return Code.GREEN + string
 def make_string_red(string):
-    # from colorama import init, Fore
+    # from .colorama import init, Fore
     # init(convert=True)
     # return "{color_code}{string}{reset_code}".format(color_code=Fore.RED, string=string, reset_code=Fore.RESET)
     return Code.RED + string
@@ -475,7 +475,7 @@ class Date:
     # }}}
 
 if __name__ == "__main__":
-    from ic import ic
+    from .ic import ic
     error_table = [{'slug': 'ThankfulDeadMinkJonCarnage-A1wuckc0t442Zdzx', 'views': 384, 'user_id': '160504245', 'title': 'lacari playing gwen', 'thumbnail_url': 'https://clips-media-assets2.twitch.tv/AT-cm%7CtyYhdQNcLnJHNLeONmXc8Q-preview-480x272.jpg'}]
     ic(error_table)
     pass

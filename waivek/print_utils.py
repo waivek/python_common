@@ -1,6 +1,6 @@
 # from colorama import init, Fore
 # init(convert=True)
-from color import Code
+from .color import Code
 
 # print_object {{{
 def print_object(obj, hidden=False):
