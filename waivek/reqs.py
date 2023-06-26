@@ -1,4 +1,4 @@
-import sys; sys.path = [ "C:/users/vivek/Documents/Python/" ] + sys.path
+# import sys; sys.path = [ "C:/users/vivek/Documents/Python/" ] + sys.path
 from .timer import Timer   # Single Use
 timer = Timer()
 from .color import Code    # Multi-Use
@@ -8,12 +8,24 @@ Code; ic; ib; handler
 from .reltools import rel2abs
 
 def main():
-    print_python_modules()
-    print()
-    # ic(get_untracked_python_files())
-    # ic(get_python_files())
-    # ic(get_non_python_files())
-    print_pipreqs()
+    # print_python_modules()
+    # print()
+    # print_pipreqs()
+    pypi_version()
+
+def pypi_version():
+    from .ic import ic
+    import requests
+    package_name = "waivek"
+    url = f"https://pypi.org/pypi/{package_name}/json"
+    resp = requests.get(url)
+    D = resp.json()
+    version = D["info"]["version"]
+    major, minor, patch = version.split(".")
+    patch = int(patch) + 1
+    new_version = f"V- {major}.{minor}.{patch}"
+    ic(new_version)
+    
 
 
 def print_python_modules():
