@@ -1,9 +1,9 @@
 # https://www.python.org/dev/peps/pep-0508/#environment-markers
 from setuptools import setup
 setup(
-        name='box',
+        name='waivek',
         version='0.1',
-        packages=['box'],
+        packages=['waivek'],
         py_modules = ['color', 'common', 'db', 'error', 'frame', 'get', 'ic', 'print_utils', 'reltools', 'timer', 'trace'],
         install_requires = [
             'aiohttp==3.8.1',
