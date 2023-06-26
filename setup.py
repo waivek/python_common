@@ -7,7 +7,7 @@
 from setuptools import setup
 setup(
         name='common',
-        version='1.0',
+        version='1.23',
         py_modules = ['color', 'common', 'db', 'error', 'frame', 'get', 'ic', 'print_utils', 'reltools', 'timer', 'trace'],
         install_requires = [
             'aiohttp==3.8.1',
