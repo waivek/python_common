@@ -1,5 +1,7 @@
 venv/
 build/
+dist/
+*.egg-info/
 aget_cache/
 errors/
 __pycache__/
