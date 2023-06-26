@@ -24,6 +24,7 @@ timer = Timer()
 import os
 import sys
 
+
 class Maker:
     RESET = '\x1b[39m'
     def __init__(self, code):

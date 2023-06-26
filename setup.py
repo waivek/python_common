@@ -1,13 +1,9 @@
 # https://www.python.org/dev/peps/pep-0508/#environment-markers
-# install_requires = [
-#   'python_dateutil==2.8.2',
-#   'timeago;platform_system=="Windows"',
-#   'colorama;platform_system=="Linux"'
-# ]
 from setuptools import setup
 setup(
-        name='common',
-        version='1.23',
+        name='box',
+        version='0.1',
+        packages=['box'],
         py_modules = ['color', 'common', 'db', 'error', 'frame', 'get', 'ic', 'print_utils', 'reltools', 'timer', 'trace'],
         install_requires = [
             'aiohttp==3.8.1',
