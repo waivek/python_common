@@ -17,9 +17,11 @@ def main():
 
 
 def print_python_modules():
+    import os.path
+    to_module_name = lambda path: os.path.splitext(os.path.basename(path))[0]
     helper_modules = [ 'frame.py', 'trace.py' ]
     ignore_modules = [ 'reqs.py', 'setup.py', 'tdd.py', 'template.py', 'test.py' ]
-    py_modules = [ module for module in get_python_files() if module not in helper_modules and module not in ignore_modules ]
+    py_modules = [ to_module_name(module) for module in get_python_files() if module not in ignore_modules ]
     print(f"py_modules = {py_modules}")
     print("# [print_python_modules] see helper_modules and ignore_modules for ignored python files")
 
@@ -33,7 +35,7 @@ def print_pipreqs():
     lines = contents.split("\n")
     table = []
     manual_lines = [
-        "pysqlite3-binary;Linux"
+        'pysqlite3-binary; platform_system=="Linux"'
     ]
     required_packages = {
         "aiohttp": "get.py",
@@ -66,7 +68,7 @@ def print_pipreqs():
     lines = [ f"'{line}'" for line in lines ]
     lines = [ f"        {line}" for line in lines ]
     print("    install_requires = [")
-    print("\n".join(lines))
+    print(",\n".join(lines))
     print("    ]")
 
 
