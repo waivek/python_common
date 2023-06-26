@@ -4,7 +4,7 @@
 #   'timeago;platform_system=="Windows"',
 #   'colorama;platform_system=="Linux"'
 # ]
-from distutils.core import setup
+from setuptools import setup
 setup(
         name='common',
         version='1.0',
