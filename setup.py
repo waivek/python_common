@@ -18,7 +18,7 @@ py_modules = ['waivek.' + x for x in py_modules]
 long_description = open('README.md').read()
 setup(
         name='waivek',
-        version='0.1.3',
+        version='0.1.4',
         packages=['waivek'],
         py_modules = py_modules,
         install_requires = [
