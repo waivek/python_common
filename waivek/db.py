@@ -5,7 +5,7 @@
 from .timer import Timer
 timer = Timer()
 from .common import print_red_line, make_string_green, truncate, Timer
-from .reltools import rel2abs
+from .reltools import pathjoin
 from enum import IntEnum
 timer = Timer()
 
@@ -43,7 +43,7 @@ def db_init(db_path):
     sqlite3.register_converter("LIST", load_json_bytes)
 
     import os
-    db_path = rel2abs(db_path)
+    db_path = pathjoin(sys._getframe(1), db_path)
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
     connection = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES)
     # connection = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_COLNAMES)

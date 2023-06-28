@@ -12,10 +12,20 @@
 import os
 import sys
 
+def pathjoin(frame, relpath):
+    frame_directory = os.path.dirname(frame.f_code.co_filename)
+    return os.path.realpath(os.path.join(frame_directory, relpath))
+
 def read(relpath):
     import json
-    filepath = relpath if os.path.isabs(relpath) else rel2abs(relpath)
+    from .color import Code
+    filepath = relpath if os.path.isabs(relpath) else pathjoin(sys._getframe(1), relpath)
     filepath = os.path.normpath(filepath)
+    if os.path.exists(filepath) is False:
+        message = "[reltools.py:read()] " + (Code.YELLOW + "File does not exist: ") + (Code.RED + filepath)
+        print(message)
+        return {}
+
     with open(filepath, "r") as f:
         obj = json.load(f)
     return obj
@@ -29,11 +39,14 @@ def write(obj, relpath):
     return filepath
 
 def get_caller_parent():
+    from .frame import Frame
     self_path = os.path.normpath(os.path.dirname(__file__))
     frame_index = 0
     directories = []
+    frames = []
     while True:
         frame = sys._getframe(frame_index)
+        frames.append(Frame(frame))
         called_path      = frame.f_code.co_filename
         parent_directory = os.path.dirname(os.path.realpath(called_path))
         directories.append(parent_directory)
@@ -43,14 +56,44 @@ def get_caller_parent():
             break
         frame_index = frame_index + 1
 
+
     if frame.f_back is None and len(set(directories)) == 1 and directories[0] == os.path.dirname(__file__): # importing from a python file in same directory as reltools.py
         return directories[0]
 
     return parent_directory
 
+def frame_to_absolute_directory(frame):
+    return os.path.dirname(os.path.realpath(frame.f_code.co_filename))
+
 def rel2abs(relative_path):
-    parent_directory = get_caller_parent()
+    from .ic import ic
+    from .ic import ib
+    ic; ib
+    return pathjoin(sys._getframe(1), relative_path)
+
+    # Implementation 3
+    # ================
+    parent_directory = os.path.dirname(sys._getframe(1).f_globals["__file__"])
+    absolute_path = os.path.realpath(os.path.join(parent_directory, relative_path))
+    ic(absolute_path)
+    return absolute_path
+
+    # self_function_name = sys._getframe(0).f_code.co_name
+
+    # Implementation 2
+    # ================
+    frame = sys._getframe(1)
+    parent_directory = frame_to_absolute_directory(frame)
     absolute_path    = os.path.realpath(os.path.join(parent_directory, relative_path))
+    ic(absolute_path)
+
+
+    # Implementation 1
+    # ================
+    # parent_directory = get_caller_parent()
+    # absolute_path    = os.path.realpath(os.path.join(parent_directory, relative_path))
+    # ic(absolute_path)
+
     return absolute_path
 
 def here():

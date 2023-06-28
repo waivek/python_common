@@ -1,27 +1,51 @@
-
-color
+Code - Print colored text
 
 ```
-from color import Code
+from waivek import Code
 print(Code.RED + "Hello, World!")
 ```
 
 common
 
 ```
-from common import Date, Timestamp
+from waivek import Date, Timestamp
 dt = Date("2020-01-01"
 timestamp = Timestamp(3600)
 ```
 
 ```
-from common import create_partitions, smart_pad, enumerate_count
+>>> Date(1672511400) == Date('2023-01-01')
+True
+
+>>> date = Date(1672511400)
+>>> date
+12:00 AM, Jan 01 (5 months ago)
+
+>>> date.epoch
+1672511400
+
+>>> date.string
+2023-01-01T00:00:00+05:30
+
+>>> date.timeago()
+5 months ago
+
+>>> str(date)
+12:00 AM, Jan 01 (5 months ago)
+
+>>> date.dt
+2023-01-01 00:00:00+05:30
+```
+
+
+```
+from waivek import create_partitions, smart_pad, enumerate_count
 ```
 
 db
 
 ```
-from db import db_init, insert_dictionaries
+from waivek import db_init, insert_dictionaries
 cursor, connection = db_init(db_path)
 insert_dictionaries(cursor, table_name, dictionaries)
 ```
@@ -29,7 +53,7 @@ insert_dictionaries(cursor, table_name, dictionaries)
 error
 
 ```
-from error import handler
+from waivek import handler
 with handler():
     main()
 ```
@@ -37,32 +61,32 @@ with handler():
 get
 
 ```
-from get import aget
+from waivek import aget
 aget(urls)
 ```
 
 ic
 
 ```
-from ic import ic, ib
+from waivek import ic, ib
 ic({"key": "value"})
 ib(str)
 ```
 
-print\_utils
+print\_utils - Print and manipulate text.
 
 ```
-from print_utils import head, truncate, abbreviate
+from waivek import head, truncate, abbreviate
 ```
 
-reltools
+reltools - Do path manipulation relative to 
 
 ```
-from reltools import rel2abs, read, write
+from waivek import rel2abs, read, write
 ```
 
-timer
+timer - Measure execution time of code snippets
 
 ```
-from timer import Timer
+from waivek import Timer
 ```

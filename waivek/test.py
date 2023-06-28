@@ -1,4 +1,11 @@
 # ./coc-enter.vim
+
+# print("__package__: " + __package__)
+
+if __package__ is None:
+    from os.path import sep
+    *_, __package__, _ = __file__.split(sep)
+
 from .timer import Timer   # Single Use
 timer = Timer()
 timer.start("test.py")
@@ -695,9 +702,57 @@ def test_datenames():
     range_table = [ { "rangename": rangename, "start_epoch": int(dt.timestamp()), "end_epoch": int(now.timestamp()) } for rangename, dt in range_D.items() ]
     return { "range": range_table, "day": day_table }
 
+
+def simulate(expression):
+    import sys
+    from .frame import Frame
+    frame = Frame(sys._getframe(1))
+    start_line = frame.line.strip().replace("simulate(", "")[:-1]
+    end_line = expression
+    print(f">>> {start_line}")
+    print(end_line)
+    print()
+
+def test_summaries():
+    from .common import Date
+    from .ic import ic; ic
+    from datetime import datetime
+    dt = datetime.now()
+    year = dt.year
+    date_string = f"{year}-01-01"
+    date = Date(date_string)
+    epoch = date.epoch
+    epoch_string = f"Date({repr(date.epoch)})"
+    str_string = f"Date({repr(date_string)})"
+    strings = [epoch_string, str_string]
+    # print("\n".join([ "date = " + string for string in  strings]))
+    # ic(date.epoch)
+    # ic(date.string)
+    # ic(date.timeago())
+    # ic(str(date))
+    # ic(date.dt)
+
+    # print()
+    # print(">>> date.epoch")
+    # print(f"{date.epoch}")
+    # print()
+
+    print(f">>> Date({repr(epoch)}) == Date({repr(date_string)})")
+    print("True")
+    print()
+    print(f">>> date = Date({epoch})")
+    simulate(date)
+    simulate(date.epoch)
+    simulate(date.string)
+    simulate(date.timeago())
+    simulate(str(date))
+    simulate(date.dt)
+
+
+
 # Vim Command: NTF --- call s:PythonNewTestFunction()
 def main():
-    test_datenames()
+    test_summaries()
     # test_yield_list()
     # test_color_bash()
     # test_static_variable()
