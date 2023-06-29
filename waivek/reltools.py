@@ -11,10 +11,33 @@
 
 import os
 import sys
+from .color import Code
 
 def pathjoin(frame, relpath):
     frame_directory = os.path.dirname(frame.f_code.co_filename)
     return os.path.realpath(os.path.join(frame_directory, relpath))
+
+def readlines(relpath):
+    """
+    Read lines from a file.
+    relpath can be relative or absolute. Resolved via rel2abs methodology.
+    Leading and trailing whitespace is stripped.
+    """
+    path = relpath if os.path.isabs(relpath) else pathjoin(sys._getframe(1), relpath)
+    if os.path.exists(path) is False:
+        print(f"File not found: {Code.RED + path}")
+    with open(path, "rb") as f:
+        lines = f.read().decode("utf-8").strip().splitlines()
+    return lines
+    
+def writelines(relpath, lines):
+    """
+    Write lines to a file.
+    relpath can be relative or absolute. Resolved via rel2abs methodology.
+    """
+    path = relpath if os.path.isabs(relpath) else pathjoin(sys._getframe(1), relpath)
+    with open(path, "wb") as f:
+        f.write("\n".join(lines).encode("utf-8"))
 
 def read(relpath):
     import json
