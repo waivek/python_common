@@ -98,5 +98,6 @@ def rel2abs(relative_path):
 
 def here():
     # importing pathlib is slow as shit
-    from pathlib import Path
-    return Path(sys._getframe(1).f_code.co_filename).parent
+    # return Path(sys._getframe(1).f_code.co_filename).parent
+    return os.path.dirname(os.path.realpath(sys._getframe(1).f_code.co_filename))
+

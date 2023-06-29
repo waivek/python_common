@@ -225,7 +225,6 @@ def aget(urls, cache=True, log=True, limit=100, url2header=lambda url: {}, url2c
     # START: Configuration
 
     global DEBUG
-    from .reltools import rel2abs
     DEBUG = False
     Config.cache = cache
     Config.log = log
@@ -234,7 +233,7 @@ def aget(urls, cache=True, log=True, limit=100, url2header=lambda url: {}, url2c
     Config.limit = limit
     if Config.cache:
         global connection
-        connection = db_init(rel2abs("aget_cache/cache.db"))[1]
+        connection = db_init("aget_cache/cache.db")[1]
     # END: Configuration
     if DEBUG:
         print(Code.RED + "Debug: True")
