@@ -2,10 +2,6 @@
 
 # print("__package__: " + __package__)
 
-if __package__ is None:
-    from os.path import sep
-    *_, __package__, _ = __file__.split(sep)
-
 from .timer import Timer   # Single Use
 timer = Timer()
 timer.start("test.py")

@@ -26,7 +26,7 @@ else:
     print("Usage: python setup.py sdist bdist_wheel")
     sys.exit(1)
 
-py_modules = ['color', 'common', 'db', 'error', 'frame', 'get', 'ic', 'print_utils', 'reltools', 'timer', 'trace']
+py_modules = ['color', 'common', 'data', 'db', 'error', 'frame', 'get', 'ic', 'print_utils', 'reltools', 'timer', 'trace']
 py_modules = ['waivek.' + x for x in py_modules]
 long_description = open('README.md').read()
 setup(

@@ -197,6 +197,7 @@ def table_friendly(table):
 
 # is_tuple_table, is_single_dict_table, is_multi_dict_table
 def list_fmt(L):
+    breakpoint()
     max_width, max_height = os.get_terminal_size()
     max_height = int(os.get_terminal_size().lines / 2)
     half_height = int(max_height / 2)
@@ -787,6 +788,10 @@ def error_2():
 
 
 def main():
+
+    from .data import Countries
+    ic(Countries)
+    return
     error_2() # Doesn’t Work / Reproduce the error
     return 
     save_ic_table_error([])

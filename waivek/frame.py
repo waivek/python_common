@@ -1,4 +1,4 @@
-import sys; sys.path = [ "C:/users/vivek/Documents/Python/" ] + sys.path
+ #import sys; sys.path = [ "C:/users/vivek/Documents/Python/" ] + sys.path
 from .timer import Timer   # Single Use
 timer = Timer()
 import ast
