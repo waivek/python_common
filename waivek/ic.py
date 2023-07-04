@@ -192,9 +192,11 @@ def is_multi_dict_table(table):
     unique_key_combinations = list(groupby([ D.keys() for D in table ]))
     return len(unique_key_combinations) == 1
 
-def is_db_table(rows):
+def is_db_table(table):
+    if type(table) != list:
+        return False
     from .db import sqlite3
-    boolean = all(type(row) == sqlite3.Row for row in rows) 
+    boolean = all(type(row) == sqlite3.Row for row in table) 
     return boolean
 
 def table_friendly(table):
