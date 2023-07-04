@@ -192,14 +192,32 @@ def is_multi_dict_table(table):
     unique_key_combinations = list(groupby([ D.keys() for D in table ]))
     return len(unique_key_combinations) == 1
 
+def is_db_table(rows):
+    from .db import sqlite3
+    boolean = all(type(row) == sqlite3.Row for row in rows) 
+    return is_db_table
+
 def table_friendly(table):
-    return is_tuple_table(table) or is_single_dict_table(table) or is_multi_dict_table(table)
+    return is_tuple_table(table) or is_single_dict_table(table) or is_multi_dict_table(table) or is_db_table(table)
+
+def get_max_width_and_height():
+    in_terminal = sys.stdout.isatty()
+    if in_terminal:
+        return os.get_terminal_size()
+    else:
+        return (200, 200)
+
+def max_lines():
+    in_terminal = sys.stdout.isatty()
+    if in_terminal:
+        return os.get_terminal_size().lines
+    else:
+        return 200
 
 # is_tuple_table, is_single_dict_table, is_multi_dict_table
 def list_fmt(L):
-    breakpoint()
-    max_width, max_height = os.get_terminal_size()
-    max_height = int(os.get_terminal_size().lines / 2)
+    max_width, max_height = get_max_width_and_height()
+    max_height = int(max_lines() / 2)
     half_height = int(max_height / 2)
     list_length = len(L)
     space_count = len(str(list_length)) + 2
@@ -237,6 +255,9 @@ def ic_one(value):
         if is_tuple_table(value) or is_multi_dict_table(value):
             for row in value:
                 table.row(row)
+        elif is_db_table(value):
+            for row in value:
+                table.row(dict(row))
         else:
             table.parse(value)
         return str(table)
@@ -415,11 +436,18 @@ class Table:
         elif is_single_dict_table(table):
             items = list(table.items())
             return [ "KEY", "VALUE" ], items
+        elif is_db_table(table): # Transform to multi_dict_table, DRY Violated
+            multi_dict_table = [ dict(row) for row in table ]
+            keys = multi_dict_table[0].keys()
+            L = [ tuple(D[key] for key in keys) for D in multi_dict_table ]
+            return keys, L
         elif is_multi_dict_table(table):
             keys = table[0].keys()
             L = [ tuple(D[key] for key in keys) for D in table ]
             return keys, L
+
         return None
+
 
     def get_column_tuples(self, headers, tuple_table):
         def get_column_just(column):
@@ -430,6 +458,21 @@ class Table:
             cell_str = str(cell)
             # return max(len_without_ansi_codes(line) for line in cell_str.split("\n"))
             return max(len(line) for line in cell_str.split("\n"))
+        def distribute(initial_lengths, terminal_length):
+            final_lengths = [ 0 for _ in initial_lengths ]
+            total_length = 0
+            while total_length != terminal_length:
+                all_lengths_satisfied = all([ initial_length == final_length for initial_length, final_length in zip(initial_lengths, final_lengths) ])
+                if all_lengths_satisfied:
+                    break
+                for i, length in enumerate(initial_lengths):
+                    if final_lengths[i] == initial_lengths[i]:
+                        continue
+                    final_lengths[i] = final_lengths[i] + 1
+                    total_length += 1
+                    if total_length == terminal_length:
+                        break
+            return final_lengths
 
         column_count = len(tuple_table[0])
         columns = [ list(row[i] for row in tuple_table) for i in range(column_count) ]
@@ -439,38 +482,52 @@ class Table:
 
         # Distribute Column Widths given terminal size
         initial_widths = [ width for width, _ in column_tuples ]
-        terminal_width, _ = os.get_terminal_size()
+        
+        terminal_width, _ = get_max_width_and_height()
         gutter_width = len(self.gutter) * 2
         separator_width = len(self.separator) * (column_count-1)
         column_width_total = terminal_width - gutter_width - separator_width
-        min_column_width = int(column_width_total / column_count)
-        small_indices = [ i for i, width in enumerate(initial_widths) if width <= min_column_width ]
-        big_indices = [ i for i, width in enumerate(initial_widths) if width > min_column_width ]
-        if len(big_indices) == 0:
-            return column_tuples
-        small_width_total = sum(width for width in initial_widths if width <= min_column_width)
-        remaining_width_total = column_width_total - small_width_total
-        big_width = int(remaining_width_total / len(big_indices))
-        remaining_width_total = remaining_width_total - big_width * len(big_indices)
-        final_big_width = big_width + remaining_width_total
-        for i in big_indices:
-            _, just = column_tuples[i]
-            column_tuples[i] = (big_width, just)
-            if i == len(big_indices)-1:
-                column_tuples[i] = (final_big_width, just)
+        final_widths = distribute(initial_widths, column_width_total)
+        for i, (width, just) in enumerate(column_tuples):
+            column_tuples[i] = (final_widths[i], just)
+        return column_tuples
 
-        final_widths = [ width for width, _ in column_tuples ]
-        calc_total_width = gutter_width + separator_width + sum(final_widths)
-        if calc_total_width != terminal_width:
-            log(self.table)
-            print(Code.RED +  "calc_total_width != terminal_width")
-            print(Code.RED + f"           ({calc_total_width}) !=          ({terminal_width})")
-            print(f"Initial Widths                  : {initial_widths}")
-            print(f"Column Width All                : {column_width_total}")
-            print(f"Minimum Column Width            : {min_column_width}")
-            print(f"Final  Widths                   : {final_widths}")
-            print("Do 'u' and then run `save_ic_table_error(x)`")
-            breakpoint()
+
+
+        # min_column_width = int(column_width_total / column_count)
+        # small_indices = [ i for i, width in enumerate(initial_widths) if width <= min_column_width ]
+        # big_indices = [ i for i, width in enumerate(initial_widths) if width > min_column_width ]
+        # if len(big_indices) == 0:
+        #     return column_tuples
+        # small_width_total = sum(width for width in initial_widths if width <= min_column_width)
+        # remaining_width_total = column_width_total - small_width_total
+        # print(f"{remaining_width_total = }")
+        # big_width = int(remaining_width_total / len(big_indices))
+        # remaining_width_total = remaining_width_total - big_width * len(big_indices)
+        # final_big_width = big_width + remaining_width_total
+        # for i in big_indices:
+        #     _, just = column_tuples[i]
+        #     column_tuples[i] = (big_width, just)
+        #     # if i == len(big_indices)-1:
+        #     if i == big_indices[-1]:
+        #         column_tuples[i] = (final_big_width, just)
+        #
+        # final_widths = [ width for width, _ in column_tuples ]
+        # calc_total_width = gutter_width + separator_width + sum(final_widths)
+        # print(f"{initial_widths = }")
+        # print(f"{final_widths = }")
+        # print(f"{terminal_width = }")
+        # print()
+        # if calc_total_width != terminal_width:
+        #     log(self.table)
+        #     print(Code.RED +  "calc_total_width != terminal_width")
+        #     print(Code.RED + f"           ({calc_total_width}) !=          ({terminal_width})")
+        #     print(f"Initial Widths                  : {initial_widths}")
+        #     print(f"Column Width All                : {column_width_total}")
+        #     print(f"Minimum Column Width            : {min_column_width}")
+        #     print(f"Final  Widths                   : {final_widths}")
+        #     print("Do 'u' and then run `save_ic_table_error(x)`")
+        #     breakpoint()
         return column_tuples
 
     def wrap_box(item, width, height, just):
@@ -782,7 +839,7 @@ def error_1():
         ic(D)
 
 def error_2():
-    from reltools import read
+    from waivek import read
     D = read("ic-test-manual/221015.json")
     ic(D)
 

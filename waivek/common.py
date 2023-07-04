@@ -28,11 +28,6 @@ timer = Timer()
 import sys
 import os.path
 
-RANGE_DEPTH = 8
-
-def simple_repr(self):
-    items = ("%s=%r" % (k, v) for k, v in self.__dict__.items())
-    return "%s(%s)" % (self.__class__.__name__, ', '.join(items))
 
 def rel2abs(relative_path):
     from .reltools import rel2abs as func
@@ -46,37 +41,6 @@ def stub_quiet():
     t = Timer()
 
 # --- START
-def print_function(function_name, for_type, frame_index_strings):
-    from .color import Code
-    for string in frame_index_strings:
-        left, right = string.split(" --- ")
-        if right == r"C:\Users\vivek\Desktop\Twitch\coffee-vps\code":
-            right = Code.GREEN + right
-        elif right != r"C:\Users\vivek\Documents\Python":
-            right = Code.RED + right
-        print(f"{for_type:4s}:{function_name:30s} --- {left:24s} : {right}")
-    print()
-
-def frame_index_to_directory(frame_index):
-    try:
-        frame            = sys._getframe(frame_index)
-    except Exception as e:
-        return "None --- None"
-    saved_frame = frame
-    called_path      = frame.f_code.co_filename
-    parent_directory = os.path.dirname(os.path.realpath(called_path))
-    co_name = frame.f_code.co_name
-    return f"{co_name} --- {parent_directory}"
-
-def tplib(tag):
-
-    lines = [ frame_index_to_directory(i) for i in range(RANGE_DEPTH) ]
-    print_function(tag + "-> tplib", "comp", lines)
-    lines = []
-    for i in range(RANGE_DEPTH):
-        lines.append(frame_index_to_directory(i))
-    print_function(tag + "-> tplib", "for", lines)
-
 
 
 def create_partitions_2(size, n):

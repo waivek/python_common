@@ -55,7 +55,7 @@ def read(relpath):
 
 def write(obj, relpath):
     import json
-    filepath = os.path.normpath(rel2abs(relpath))
+    filepath = relpath if os.path.isabs(relpath) else pathjoin(sys._getframe(1), relpath)
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
     with open(filepath, "w") as f:
         json.dump(obj, f, indent=4)

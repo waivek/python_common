@@ -24,12 +24,16 @@ timer = Timer()
 import os
 import sys
 
+IS_A_TTY = sys.stdout.isatty()
 
 class Maker:
     RESET = '\x1b[39m'
     def __init__(self, code):
         self.COLOR = code
     def __add__(self, item):
+        global IS_A_TTY
+        if not IS_A_TTY:
+            return str(item)
         str_item = str(item)
         color_str_item = self.COLOR + str_item + self.RESET
         return color_str_item
@@ -61,6 +65,10 @@ def color_filepath(filepath):
 
 
 def print_samples():
+    from .reltools import rel2abs
+    filepath = rel2abs("item.txt")
+    print(color_filepath(filepath))
+    return
     value = [1, 2,3, 4]
 
     print()

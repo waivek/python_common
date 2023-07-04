@@ -1,6 +1,6 @@
- #import sys; sys.path = [ "C:/users/vivek/Documents/Python/" ] + sys.path
 from .timer import Timer   # Single Use
 timer = Timer()
+import sys
 import ast
 import linecache
 from .color import Code    # Multi-Use
