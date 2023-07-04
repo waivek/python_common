@@ -195,7 +195,7 @@ def is_multi_dict_table(table):
 def is_db_table(rows):
     from .db import sqlite3
     boolean = all(type(row) == sqlite3.Row for row in rows) 
-    return is_db_table
+    return boolean
 
 def table_friendly(table):
     return is_tuple_table(table) or is_single_dict_table(table) or is_multi_dict_table(table) or is_db_table(table)
