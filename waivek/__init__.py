@@ -9,5 +9,6 @@ from .ic import ic, ib
 from .print_utils import head, truncate, abbreviate
 from .reltools import rel2abs, read, write, readlines, writelines
 from .timer import Timer
+from .introspection import pack, unpack
 
-from .data import Countries
+# from .data import Countries

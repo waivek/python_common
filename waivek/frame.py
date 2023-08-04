@@ -12,12 +12,30 @@ from types import FrameType
 path2lines: dict[str, list[str]] = {}
 
 class Frame:
-    def __init__(self, frame: FrameType):
+    def __init__(self, frame_or_int):
+        if isinstance(frame_or_int, int):
+            frame = sys._getframe(frame_or_int+1)
+        elif isinstance(frame_or_int, FrameType):
+            frame = frame_or_int
         self.path = frame.f_code.co_filename
         self.lineno = frame.f_lineno
         self.line = getline(self.path, self.lineno)
+        self.locals = frame.f_locals
+        self.function_name = frame.f_code.co_name
+        function_args = frame.f_code.co_varnames[:frame.f_code.co_argcount]
+        function_arg_values = [ frame.f_locals[name] for name in function_args ]
+        self.args = { name: value for name, value in zip(function_args, function_arg_values) }
         self.raw = frame
-        # frame.f_back, frame.f_locals, frame.f_globals
+        # frame.f_back, frame.f_globals
+    def print(self):
+        import os.path
+        argument_string = ", ".join([ f"{name}" for name, value in self.args.items() ])
+        comment_string = ", ".join([ f"{name}={value}" for name, value in self.args.items() ])
+        relpath = os.path.relpath(self.path, os.getcwd())
+        location = Code.LIGHTBLACK_EX + f"{relpath}:{self.lineno}"
+        function = f"{self.function_name}({argument_string})" 
+        comment = Code.LIGHTBLACK_EX + f"# {comment_string}"
+        print(" ".join([location, function, comment]))
 
 def getline(path: str, lineno: int):
     global path2lines
@@ -42,7 +60,7 @@ def frame_gen():
         frame = frame.f_back
 
 
-# IMPLEMENTATION 1:
+# IMPLEMENTATION 1: Doesnt Work
 # =================
 def to_dict(*variables):
     current_function_name = sys._getframe(0).f_code.co_name

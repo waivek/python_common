@@ -745,10 +745,16 @@ def test_summaries():
     simulate(date.dt)
 
 
+def test_frame(a, b, c=1):
+    from .frame import Frame
+    frame = Frame(0)
+    frame.print()
+
 
 # Vim Command: NTF --- call s:PythonNewTestFunction()
 def main():
-    test_summaries()
+    D = { 'a': 'A', 'b': 'B' }
+    test_frame(1,2, D)
     # test_yield_list()
     # test_color_bash()
     # test_static_variable()
