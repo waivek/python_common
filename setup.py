@@ -1,6 +1,9 @@
+
 # https://www.python.org/dev/peps/pep-0508/#environment-markers
 from setuptools import setup
 import sys
+import rich
+
 def get_new_version():
     import urllib.request
     import json
@@ -23,7 +26,31 @@ if len(sys.argv) >=3 and sys.argv[1] == 'sdist' and sys.argv[2] == 'bdist_wheel'
     remove_dist_directory()
     new_version = get_new_version()
 else:
-    print("Usage: python setup.py sdist bdist_wheel")
+    usage_message = r"""
+    [red]Usage:[/red] 
+
+        [bold]python setup.py sdist bdist_wheel[/bold]
+    
+    If twine is not installed, install it using:
+
+        [bold]pip install twine[/bold]
+
+    Then upload the package to PyPI using:
+
+        [bold]twine upload dist/*[/bold]
+
+    If you get asked for a username and password, you need to have ~/.pypirc file with the following content:
+
+        \[distutils]
+        index-servers =
+            pypi
+
+        \[pypi]
+        repository: https://upload.pypi.org/legacy/
+        username: waivek 
+        password: <your password>
+    """
+    rich.print(usage_message)
     sys.exit(1)
 
 py_modules = ['color', 'common', 'data', 'db', 'error', 'frame', 'get', 'ic', 'print_utils', 'reltools', 'timer', 'trace']
