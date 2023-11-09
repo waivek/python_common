@@ -1,3 +1,8 @@
+import os
+import sys
+filepath = os.path.realpath(__file__)
+directory = os.path.dirname(filepath)
+sys.path.append(directory)
 
 from .color import Code
 from .common import create_partitions, smart_pad, enumerate_count
