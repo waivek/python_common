@@ -395,7 +395,8 @@ def log(dictionaries):
     from .db import db_init
     from time import time
     import json
-    cursor, connection = db_init("errors/ic.db")
+    connection = db_init("errors/ic.db")
+    cursor = connection.cursor()
     cursor.execute("CREATE TABLE IF NOT EXISTS errors (epoch INTEGER NOT NULL, list_json TEXT NOT NULL UNIQUE ON CONFLICT IGNORE);")
     list_json = json.dumps(dictionaries)
     epoch = int(time())
@@ -833,7 +834,8 @@ def get_args(*values):
 def error_1():
     from .db import db_init
     import json
-    cursor, connection = db_init("errors/ic.db")
+    connection = db_init("errors/ic.db")
+    cursor = connection.cursor()
     dictionaries = [ dict(row) for row in cursor.execute("SELECT * FROM errors") ]
     json_strings = [ D["list_json"] for D in dictionaries ]
     dictionaries = [ json.loads(json_string) for json_string in json_strings ]

@@ -12,7 +12,7 @@ timer = Timer()
 import sys
 
 if sys.platform != "win32":
-    import pysqlite3 as sqlite3
+    import pysqlite3 as sqlite3 # type: ignore
 else:
     import sqlite3
 
@@ -38,7 +38,7 @@ def load_json_bytes(json_bytes):
         return json.loads(json_bytes)
 
 
-def db_init(db_path):
+def db_init_old(db_path):
     sqlite3.register_adapter(list, dump_list)
     sqlite3.register_converter("LIST", load_json_bytes)
 
@@ -46,10 +46,33 @@ def db_init(db_path):
     db_path = pathjoin(sys._getframe(1), db_path)
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
     connection = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES)
-    # connection = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_COLNAMES)
+
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
     return cursor, connection
+
+def db_init(db_path, check_same_thread=False):
+    """
+    db_path: str
+
+    Returns: cursor, connection
+    Creates directories if they do not exist
+    By default check_same_thread is False which means that the connection can be shared across threads
+
+    """
+
+    import os
+    db_path = pathjoin(sys._getframe(1), db_path)
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+
+    connection = sqlite3.connect(db_path, check_same_thread=check_same_thread)
+    connection.row_factory = sqlite3.Row
+    # connection can be configured after creation, e.g.:
+    #
+    # [1] connection.row_factory = sqlite3.Row
+    # [2] connection.check_same_thread = False
+
+    return connection
 
 def jsonify_lists(D):
     import json
@@ -102,6 +125,7 @@ class SqliteType(IntEnum):
     BLOB = 4 # ideally 2 but confuses from_text
     LIST = 5 # ideally 2 but confuses from_text
 
+    @staticmethod
     def from_text(arg):
         D = { "TEXT"    : SqliteType.TEXT,    "REAL" : SqliteType.REAL, 
               "INTEGER" : SqliteType.INTEGER, "INT"  : SqliteType.INTEGER, 

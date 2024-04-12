@@ -19,7 +19,8 @@ def init():
     os.makedirs(rel2abs("data_files"), exist_ok=True)
     if not os.path.exists(DATA_PATH):
         write({}, DATA_PATH)
-    cursor, connection = db_init(DB_PATH)
+    connection = db_init(DB_PATH)
+    cursor = connection.cursor()
     cursor.execute("CREATE TABLE IF NOT EXISTS download_epoch (name TEXT, epoch INTEGER);")
     connection.commit()
     connection.close()
@@ -27,7 +28,8 @@ def init():
 def get_countries():
     init()
     import time
-    cursor, connection = db_init(DB_PATH)
+    connection = db_init(DB_PATH)
+    cursor = connection.cursor()
     download_epoch = cursor.execute("SELECT epoch FROM download_epoch WHERE name = 'countries'").fetchone()
     current_epoch = int(time.time())
     one_month_in_seconds = 60 * 60 * 24 * 30

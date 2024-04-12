@@ -62,7 +62,8 @@ def sqlite_init():
     from .db import db_init
     temp_directory = os.path.expandvars("%TEMP%")
     db_path = os.path.join(temp_directory, "database.db")
-    cursor, connection = db_init(db_path)
+    connection = db_init(db_path)
+    cursor = connection.cursor()
     return cursor, connection
 
 def sqlite_test():
@@ -661,7 +662,7 @@ def test_yield_list():
         from .reltools import rel2abs
         from .db import db_init
         path = rel2abs("./db_test/gen.db")
-        _, connection = db_init(path)
+        connection = db_init(path)
 
         while True:
             cursor = connection.cursor()

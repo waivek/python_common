@@ -11,7 +11,8 @@ def test_ic_custom_types():
 
     from .db import db_init, insert_dictionaries, get_schema
     from .ic import ic
-    cursor, connection = db_init("db_test/lists.db")
+    connection = db_init("db_test/lists.db")
+    cursor = connection.cursor()
     cursor.execute("DROP TABLE IF EXISTS pairs;")
 
     pairs = get_pairs(list)
