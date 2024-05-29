@@ -24,8 +24,8 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - run: |
-        python -m ensurepip
-        python -m pip install .
+        pip install wheel
+        pip install .
     - run: pip install -r requirements.txt  # If you have additional dependencies
     - name: Test with pytest
       run: |
