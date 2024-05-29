@@ -37,8 +37,11 @@ def remove_dist_directory():
     shutil.rmtree("dist", ignore_errors=True)
 
 def get_usage():
-    if len(sys.argv) >= 3 and sys.argv[1] in ['egg_info', 'install']:
+    if len(sys.argv) >= 3 and sys.argv[1] in ['egg_info', 'install', 'clean']:
         # `pip install .` -> ['/home/vivek/python_common/setup.py', 'egg_info', '--egg-base', '/tmp/pip-pip-egg-info-knsmhso3']
+        return "PIP_INSTALL_DOT"
+    # ['/home/vivek/python_common/setup.py', 'bdist_wheel', '-d', '/tmp/pip-wheel-4pt1wlji']
+    if len(sys.argv) >= 3 and sys.argv[1] == 'bdist_wheel' and sys.argv[2] == '-d':
         return "PIP_INSTALL_DOT"
     if len(sys.argv) >= 3 and sys.argv[1] == 'sdist' and sys.argv[2] == 'bdist_wheel':
         return "UPLOAD_TO_PYPI"
@@ -47,6 +50,8 @@ def get_usage():
 temp_usage = get_usage()
 if temp_usage == "UNKNOWN":
     usage_message = r"""
+    Passd args: {0}
+
     [red]Usage:[/red] 
 
         [bold]python setup.py sdist bdist_wheel[/bold]
@@ -65,7 +70,7 @@ if temp_usage == "UNKNOWN":
         repository: https://upload.pypi.org/legacy/
         username: waivek 
         password: <your password>
-    """
+    """.format(sys.argv)
     rich.print(usage_message)
     sys.exit(1)
 
@@ -84,7 +89,6 @@ if usage == "UPLOAD_TO_PYPI":
 
 if usage == "UPLOAD_TO_PYPI":
     remove_dist_directory()
-    new_version = get_new_version()
 
 new_version = "0.0.0" 
 if usage == "UPLOAD_TO_PYPI":
