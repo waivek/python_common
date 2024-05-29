@@ -7,12 +7,25 @@ import sys
 # import rich
 import pip._vendor.rich as rich
 
+print(f"{sys.modules.keys() = }")
+sys.exit(1)
+
 def get_new_version():
     import urllib.request
+    from urllib.error import URLError
     import json
     package_name = "waivek"
     url = f"https://pypi.org/pypi/{package_name}/json"
-    req = urllib.request.urlopen(url)
+    try:
+        req = urllib.request.urlopen(url)
+    # except urllib.request.URL
+    # catch URLError
+    except URLError as e:
+        error = e
+        print(f"Error: {error}")
+        print(f"Could not fetch {url}")
+        sys.exit(1)
+
     D = json.load(req)
     version = D["info"]["version"]
     major, minor, patch = version.split(".")
@@ -25,18 +38,21 @@ def remove_dist_directory():
     import shutil
     shutil.rmtree("dist", ignore_errors=True)
 
+def get_usage():
+    if len(sys.argv) >= 3 and sys.argv[1] in ['egg_info', 'install']:
+        # `pip install .` -> ['/home/vivek/python_common/setup.py', 'egg_info', '--egg-base', '/tmp/pip-pip-egg-info-knsmhso3']
+        return "PIP_INSTALL_DOT"
+    if len(sys.argv) >= 3 and sys.argv[1] == 'sdist' and sys.argv[2] == 'bdist_wheel':
+        return "UPLOAD_TO_PYPI"
+    return "UNKNOWN"
 
-print(f"{sys.argv = }")
-
-if len(sys.argv) >=3 and sys.argv[1] == 'sdist' and sys.argv[2] == 'bdist_wheel':
-    remove_dist_directory()
-    new_version = get_new_version()
-else:
+temp_usage = get_usage()
+if temp_usage == "UNKNOWN":
     usage_message = r"""
     [red]Usage:[/red] 
 
         [bold]python setup.py sdist bdist_wheel[/bold]
-    
+
     If twine is not installed, install it using:
 
         [bold]pip install twine[/bold]
@@ -59,6 +75,14 @@ else:
     rich.print(usage_message)
     sys.exit(1)
 
+usage = get_usage()
+if usage == "UPLOAD_TO_PYPI":
+    remove_dist_directory()
+    new_version = get_new_version()
+
+new_version = "0.0.0" 
+if usage == "UPLOAD_TO_PYPI":
+    new_version = get_new_version()
 py_modules = ['color', 'common', 'data', 'db', 'error', 'frame', 'get', 'ic', 'print_utils', 'reltools', 'timer', 'trace']
 py_modules = ['waivek.' + x for x in py_modules]
 long_description = open('README.md').read()
