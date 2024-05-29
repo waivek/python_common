@@ -11,7 +11,7 @@ timer = Timer()
 
 import sys
 
-if sys.platform != "win32":
+if sys.platform == "linux":
     import pysqlite3 as sqlite3 # type: ignore
 else:
     import sqlite3
