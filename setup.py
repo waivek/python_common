@@ -2,13 +2,11 @@
 # https://www.python.org/dev/peps/pep-0508/#environment-markers
 from setuptools import setup
 import sys
+import importlib.util
 # check if module rich is installed
 
 # import rich
 import pip._vendor.rich as rich
-
-print(f"{sys.modules.keys() = }")
-sys.exit(1)
 
 def get_new_version():
     import urllib.request
@@ -53,10 +51,6 @@ if temp_usage == "UNKNOWN":
 
         [bold]python setup.py sdist bdist_wheel[/bold]
 
-    If twine is not installed, install it using:
-
-        [bold]pip install twine[/bold]
-
     Then upload the package to PyPI using:
 
         [bold]twine upload dist/*[/bold]
@@ -76,6 +70,18 @@ if temp_usage == "UNKNOWN":
     sys.exit(1)
 
 usage = get_usage()
+
+if usage == "UPLOAD_TO_PYPI":
+    missing_modules = False
+    if importlib.util.find_spec("twine") is None:
+        rich.print("Please install twine using [bold]pip install twine[/bold]")
+        missing_modules = True
+    if importlib.util.find_spec("wheel") is None:
+        rich.print("Please install wheel using [bold]pip install wheel[/bold]")
+        missing_modules = True
+    if missing_modules:
+        sys.exit(1)
+
 if usage == "UPLOAD_TO_PYPI":
     remove_dist_directory()
     new_version = get_new_version()
@@ -102,3 +108,4 @@ setup(
         long_description_content_type='text/markdown'
 )
 
+# run.vim:sdist bdist_wheel
