@@ -26,3 +26,5 @@ jobs:
     - run: |
         pip install wheel
         pip install .
+    - run:
+        python test.py
