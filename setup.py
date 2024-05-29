@@ -102,7 +102,7 @@ setup(
         packages=['waivek'],
         py_modules = py_modules,
         install_requires = [
-            'aiohttp==3.8.1',
+            'aiohttp>=3.8.1',
             'executing==0.8.2',
             'python_dateutil==2.8.2',
             'timeago==1.0.14',
