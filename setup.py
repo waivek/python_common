@@ -106,6 +106,7 @@ setup(
             'executing==0.8.2',
             'python_dateutil==2.8.2',
             'timeago==1.0.14',
+            'columnar==1.3.1',
             'pysqlite3-binary; platform_system=="Linux"'
         ],
         long_description=long_description,
