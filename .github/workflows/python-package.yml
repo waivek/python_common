@@ -12,8 +12,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # python-version: ['3.10', 3.11, 3.12]
-        python-version: [3.12.1]
+        python-version: ['3.10', 3.11, 3.12]
+        # python-version: [3.12.1]
         # os: [ubuntu-latest, macos-latest, windows-latest]
         os: [ubuntu-latest]
 
@@ -25,7 +25,6 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - run: pip install setuptools
     - run: pip install wheel
-    - run: pip install build
     - run: pip install .
     - run:
         python test.py
