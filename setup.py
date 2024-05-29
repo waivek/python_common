@@ -2,7 +2,10 @@
 # https://www.python.org/dev/peps/pep-0508/#environment-markers
 from setuptools import setup
 import sys
-import rich
+# check if module rich is installed
+
+# import rich
+import pip._vendor.rich as rich
 
 def get_new_version():
     import urllib.request
@@ -21,6 +24,8 @@ def get_new_version():
 def remove_dist_directory():
     import shutil
     shutil.rmtree("dist", ignore_errors=True)
+
+print(f"{sys.argv = }")
 
 if len(sys.argv) >=3 and sys.argv[1] == 'sdist' and sys.argv[2] == 'bdist_wheel':
     remove_dist_directory()
@@ -66,8 +71,7 @@ setup(
             'executing==0.8.2',
             'python_dateutil==2.8.2',
             'timeago==1.0.14',
-            'pysqlite3-binary; platform_system=="Linux"',
-            "rich"
+            'pysqlite3-binary; platform_system=="Linux"'
         ],
         long_description=long_description,
         long_description_content_type='text/markdown'
