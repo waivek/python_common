@@ -23,8 +23,7 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: python -m pip install --upgrade pip
+    - run: python -m pip install --upgrade pip
     - run: pip install .
     - run: pip install -r requirements.txt  # If you have additional dependencies
     - name: Test with pytest
