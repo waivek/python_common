@@ -1,13 +1,10 @@
 
 from .color import Code
 # from .ic import ic, ib
+from .timer import Timer
+from .ic import ic
 
 from contextlib import contextmanager
-
-def stub_quiet():
-    from .ic import ic, ib
-    ic
-    ib
 
 def get_args(frame, summary):
     import inspect # builtin
@@ -20,10 +17,7 @@ def get_args(frame, summary):
     # Line is inside a LOCAL function of a class
     import gc # builtin
     # https://stackoverflow.com/a/52762678
-    try:
-        function_object = [obj for obj in gc.get_referrers(frame.f_code) if hasattr(obj, '__code__') and obj.__code__ is frame.f_code][0]
-    except Exception as e:
-        error = e
+    function_object = [obj for obj in gc.get_referrers(frame.f_code) if hasattr(obj, '__code__') and obj.__code__ is frame.f_code][0]
     return inspect.getfullargspec(function_object).args
 
 class Frame:
@@ -132,11 +126,7 @@ def print_variables_by_frame(error):
 
     method_lines = []
     for frame, summary in pairs:
-        try:
-            keys = get_args(frame, summary)
-        except Exception as e:
-            error = e
-            print(Code.RED + repr(error))
+        keys = get_args(frame, summary)
         signature = "(" + ", ".join(keys) + ")"
         method = summary.name
         method_line = method + signature if summary.name != "<module>" else "<module>"
@@ -175,6 +165,8 @@ def color_error_regex(error):
     string = repr(error)
     import re
     m = re.match(r"""(\w+\(["'])(.*)(["']\))""", string)
+    if m is None:
+        return string
     
     lhs = Code.LIGHTRED_EX + m.group(1) 
     middle =  Code.YELLOW + m.group(2) 
@@ -255,7 +247,6 @@ def print_error_information(error):
     # print(Code.LIGHTRED_EX + repr(error))
 
     from .frame import frame_gen
-    from .ic import ic; ic
     call_frames = list(frame_gen())
     call_file = call_frames[3].f_code.co_filename
 
@@ -297,7 +288,6 @@ def print_error_information(error):
 def print_variables(D):
     import types
     from .common import truncate
-    from .ic import ic
     exclude_types = [types.FunctionType, types.ModuleType, types.BuiltinFunctionType, type]
     table = [ {"name":k,"type":type(v), "value": truncate(str(v), 160)} for k,v in D.items() 
               if type(v) not in exclude_types and k[0:2] != "__" and str(v)[0] != "<"  and not isinstance(v, Exception) ]
@@ -324,7 +314,7 @@ def write_vim_error_file(error: Exception):
     import linecache
     import traceback
     import re
-    from .ic import ic; ic
+    from .ic import ic
     import os
 
     from .frame import frame_gen
@@ -341,7 +331,10 @@ def write_vim_error_file(error: Exception):
         line = linecache.getline(path, lineno)
         if cc_nr == -1 and path == call_file:
             cc_nr = index + 1
-        column = re.search(r"\S", line).start() + 1
+        m = re.search(r"\S", line)
+        if not m:
+            raise ValueError(f"Error: {line}")
+        column = m.start() + 1
         error_line = f"{path}:{lineno}:{column}:{line}".rstrip()
         error_lines.append(error_line)
     with open(filepath, "w") as f:
@@ -377,7 +370,9 @@ def handler():
             # try __builtins__.__dict__
             # if "ipython" in sys.argv[0] or __builtins__.get("get_ipython", False):
             if "ipython" in sys.argv[0]:
-                import ipdb
+                import importlib
+                # import ipdb
+                ipdb = importlib.import_module("ipdb")
                 ipdb.post_mortem(e.__traceback__)
             else:
                 import pdb
@@ -400,7 +395,7 @@ def divide_by_zero():
     # Error 3:
     # ========
     from .reltools import here
-    path = here() / "f1/f2/f3/item.txt"
+    path = here() / "f1/f2/f3/item.txt" # type: ignore[reportOperatorIssue]
     path.mkdir(exist_ok=True)
 
     result = 1
@@ -423,8 +418,6 @@ def main():
     return divide_by_zero()
 
 if __name__ == "__main__":
-    from .timer import Timer
-    from .ic import ic; ic
     timer = Timer()
     with handler():
         main()

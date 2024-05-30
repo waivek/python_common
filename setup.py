@@ -60,16 +60,11 @@ if temp_usage == "UNKNOWN":
 
         [bold]twine upload dist/*[/bold]
 
-    If you get asked for a username and password, you need to have ~/.pypirc file with the following content:
-
-        \[distutils]
-        index-servers =
-            pypi
+    If you get asked for a username and password, you need to have [bold]~/.pypirc[/bold] file with the following content:
 
         \[pypi]
-        repository: https://upload.pypi.org/legacy/
-        username: waivek 
-        password: <your password>
+        username: __token__ 
+        password: <your api token, with `pypi` prefix>
     """.format(sys.argv)
     rich.print(usage_message)
     sys.exit(1)
@@ -113,4 +108,3 @@ setup(
         long_description_content_type='text/markdown'
 )
 
-# run.vim:sdist bdist_wheel

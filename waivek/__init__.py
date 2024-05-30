@@ -8,6 +8,7 @@ from .color import Code
 from .common import create_partitions, smart_pad, enumerate_count
 from .common import Timestamp, Date
 from .db import db_init, insert_dictionaries
+from .dbutils import Connection
 from .error import handler
 from .get import aget
 from .ic import ic, ib

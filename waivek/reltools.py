@@ -31,6 +31,7 @@ def readlines(relpath):
     return lines
     
 def writelines(relpath, lines):
+
     """
     Write lines to a file.
     relpath can be relative or absolute. Resolved via rel2abs methodology.
@@ -53,7 +54,7 @@ def read(relpath):
         obj = json.load(f)
     return obj
 
-def write(obj, relpath):
+def write(obj : list | dict, relpath: str) -> str:
     import json
     filepath = relpath if os.path.isabs(relpath) else pathjoin(sys._getframe(1), relpath)
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
@@ -91,7 +92,6 @@ def frame_to_absolute_directory(frame):
 def rel2abs(relative_path):
     from .ic import ic
     from .ic import ib
-    ic; ib
     return pathjoin(sys._getframe(1), relative_path)
 
     # Implementation 3

@@ -12,7 +12,10 @@ timer = Timer()
 import sys
 
 if sys.platform == "linux":
-    import pysqlite3 as sqlite3 # type: ignore
+    import typing
+    import pysqlite3
+    import sqlite3 as sq3
+    sqlite3 = typing.cast(sq3, pysqlite3)
 else:
     import sqlite3
 
@@ -36,7 +39,6 @@ def load_json_bytes(json_bytes):
         return []
     else:
         return json.loads(json_bytes)
-
 
 def db_init_old(db_path):
     sqlite3.register_adapter(list, dump_list)

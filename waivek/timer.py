@@ -26,9 +26,12 @@ class Timer():
 
     def start_inc(self):
         self.inc_start = time()
+
     def print_inc(self, message):
         if self.no_print:
             return
+        if self.inc_start == None:
+            raise Exception("Timer not started")
         time_taken = time() - self.inc_start
         print(f"{message:20s}: {time_taken:.2f} seconds")
         self.inc_start = time()

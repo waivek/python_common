@@ -368,7 +368,6 @@ def ic(*values):
             print(str(value))
         return
 
-
     # Implementation 3:
     # =================
     frame = sys._getframe(1)

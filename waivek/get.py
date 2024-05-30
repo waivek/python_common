@@ -23,7 +23,11 @@ asyncio = None
 connection = None
 
 class Config:
-    pass
+    cache = True
+    log = True
+    url2header = lambda url: {}
+    url2cookie = lambda url: {}
+    limit = 100
 
 class Response:
     def __init__(self, response, obj):
@@ -34,12 +38,6 @@ class Response:
         self.headers = {row[0]: row[1] for row in response.headers.items()}
         self.obj = obj
         self.total_bytes = response.content.total_bytes
-    def manual_init():
-        url = None
-        status = 200
-        ok = True
-        reason = "OK"
-        headers = {}
     def __repr__(self):
         return f"Response <{self.status}>"
 
@@ -225,6 +223,7 @@ def aget(urls, cache=True, log=True, limit=100, url2header=lambda url: {}, url2c
     # START: Configuration
 
     global DEBUG
+    global Config
     DEBUG = False
     Config.cache = cache
     Config.log = log
@@ -260,7 +259,6 @@ def run_async_get():
 
 if __name__ == "__main__":
     from .ic import ic
-    ic
     from .error import handler
     with handler():
         run_async_get()
