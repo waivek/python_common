@@ -1,0 +1,13 @@
+
+[44;30m ENSURE [0m
+
+✓ data/ exists
+✓ aria2c executable exists
+
+[41;30m MISSING [0m
+
+    /home/vivek/subset-material-symbols/data/MaterialSymbolsOutlined[FILL,GRAD,opsz,wght].ttf
+    /home/vivek/subset-material-symbols/data/MaterialSymbolsRounded[FILL,GRAD,opsz,wght].ttf
+    /home/vivek/subset-material-symbols/data/MaterialSymbolsSharp[FILL,GRAD,opsz,wght].ttf
+
+[42;30m WRITE [0m /home/vivek/subset-material-symbols/download-material-symbols.afl
