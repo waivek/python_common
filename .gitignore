@@ -5,7 +5,7 @@
 node_modules/
 __pycache__/
 .direnv/
-data/
+data/*
 
 # Files to ignore
 *.env
