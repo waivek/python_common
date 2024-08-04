@@ -1,4 +1,7 @@
 
+from datetime import datetime, timezone
+import sys
+from zoneinfo import ZoneInfo
 from .color import Code
 # from .ic import ic, ib
 from .timer import Timer
@@ -18,6 +21,7 @@ def get_args(frame, summary):
     import gc # builtin
     # https://stackoverflow.com/a/52762678
     function_object = [obj for obj in gc.get_referrers(frame.f_code) if hasattr(obj, '__code__') and obj.__code__ is frame.f_code][0]
+
     return inspect.getfullargspec(function_object).args
 
 class Frame:
@@ -300,7 +304,7 @@ def get_error_filepath():
         vimpath = "~/.vim"
     else:
         vimpath = "~/.vimfiles"
-    folder = os.path.join(os.path.expanduser(vimpath), "temp")
+    folder = os.path.join(os.path.expanduser(vimpath), "tmp")
     os.makedirs(folder, exist_ok=True)
     filename = 'handler_error.txt'
     filepath = os.path.join(folder, filename)
@@ -351,6 +355,8 @@ def handler():
         yield
     except Exception as e:
         error = e
+        append_traceback_to_file(error)
+        return
         if type(e).__name__ == 'bdb.BdbQuit':
             # Exit Via CTRL-D
             pass
@@ -400,6 +406,33 @@ def divide_by_zero():
 
     result = 1
     return result
+
+def append_traceback_to_file(error: Exception):
+    import os.path
+    import traceback
+    path = os.path.expanduser("~/.cache/python_common_cache/error-traceback.txt")
+    folder = os.path.dirname(path)
+    # ansi constant codes {{{
+    ANSI_RED_BG_BLACK_FG = "\x1b[41;30m"
+    ANSI_GRAY_FG = "\x1b[90m"
+    ANSI_MAGENTA_FG = "\x1b[35m"
+    ANSI_BLUE_FG = "\x1b[34m"
+    ANSI_RESET = "\x1b[0m"
+    # }}}
+    dt = datetime.now(ZoneInfo("Asia/Kolkata")).replace(microsecond=0)
+    if not os.path.exists(folder):
+        
+        error_tag = ANSI_RED_BG_BLACK_FG + " OSError " + ANSI_RESET
+        file_tag = ANSI_MAGENTA_FG + "{}".format(os.path.join(os.path.basename(os.path.dirname(__file__)), os.path.basename(__file__))) + ANSI_RESET
+        datetime_tag = ANSI_GRAY_FG + dt.isoformat() + ANSI_RESET
+        folder_tag = ANSI_BLUE_FG + folder + ANSI_RESET
+        error_string = f"{datetime_tag} {file_tag} {error_tag} Directory does not exist: {folder_tag}"
+        print(error_string)
+        sys.exit(1)
+
+    traceback_string = "".join(traceback.format_exception(type(error), error, error.__traceback__))
+    print(traceback_string)
+    
 
 def table_wide():
     pass

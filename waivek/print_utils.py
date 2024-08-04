@@ -180,3 +180,34 @@ def abbreviate(number):
 
     return abbr_string
 # }}}
+
+
+def dict_to_rich_table(input_table: list[dict]):
+    # turn this list[dict] into a rich.Table
+    # rich_table = Table(title="Countries")
+    # for i, row in enumerate(table):
+    #     if i == 0:
+    #         rich_table.add_column("Key", style="bold", header_style="bold")
+    #         for key in row.keys():
+    #             rich_table.add_column(key, style="bold", header_style="bold")
+    #     rich_table.add_row(str(i), *[str(value) for value in row.values()])
+    # console.print(rich_table)
+    from rich.console import Console
+    from rich.table import Table
+    console = Console()
+    table = Table(title="Countries")
+    table.add_column("Key", style="bold", header_style="bold")
+    for key in input_table[0].keys():
+        table.add_column(key, style="bold", header_style="bold")
+    for i, row in enumerate(input_table):
+        table.add_row(str(i), *[str(value) for value in row.values()])
+    console.print(table)
+
+
+def main():
+    # from rich import inspect
+    # inspect(int, methods=True)
+    from .data import Countries
+    assert isinstance(Countries, list)
+    dict_to_rich_table(Countries)
+    ic(Countries)

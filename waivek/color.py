@@ -67,8 +67,8 @@ def color_filepath(filepath):
 def print_samples():
     from .reltools import rel2abs
     filepath = rel2abs("item.txt")
-    print(color_filepath(filepath))
-    return
+    # print(color_filepath(filepath))
+    # return
     value = [1, 2,3, 4]
 
     print()

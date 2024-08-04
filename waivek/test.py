@@ -755,7 +755,8 @@ def test_frame(a, b, c=1):
 # Vim Command: NTF --- call s:PythonNewTestFunction()
 def main():
     D = { 'a': 'A', 'b': 'B' }
-    test_frame(1,2, D)
+    rich_movie()
+    # test_frame(1,2, D)
     # test_yield_list()
     # test_color_bash()
     # test_static_variable()

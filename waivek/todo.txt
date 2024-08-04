@@ -1,2 +1,8 @@
-240716 - For print_utils.py do a `cat colored-output-example.txt` to see the output. We want a way to do this generally.
-240716 - Look at __read_2.py for next version of reltools.py
+Date   - Category  - Description
+240803 - color log - Unify `rich`, `loguru` and `viewlog` with the goals: Relative datetimes via viewlog, color support via viewlog+rich in STDIO and when running `bat file.log`
+240803 - color     - Either add color support to `ic` and fix narrow column bug or add API to make it easier to use `rich.console` and `rich.table`
+240803 - color     - Unify color printing b/w `rich.print`, `color.py`, `print-colors.py` and `print-colors-lister.py` and `!rg -g "*.py" "ANSI"`
+240803 - log       - While writing `log.py`, look at `loguru` and `structlog`
+240803 - error     - For `error.py` create a function that returns the line the error took place. Color the error segment in red. Print all the variables referenced in that line.
+240716 - color     - For `print_utils.py` do a `cat colored-output-example.txt` to see the output. We want a way to do this generally.
+240716 - reltools  - Look at `__read_2.py` for next version of `reltools.py`
