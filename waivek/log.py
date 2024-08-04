@@ -55,7 +55,7 @@ def print_loguru_defaults():
 
 def will_always_error_large_json_object():
     import json
-    json.loads(1)
+    json.loads(1) # intentional error
     json_string = """
     {
         "key1": "value1",

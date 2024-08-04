@@ -16,5 +16,6 @@ from .print_utils import head, truncate, abbreviate
 from .reltools import rel2abs, read, write, readlines, writelines
 from .timer import Timer
 from .introspection import pack, unpack
+from .log import log, add_file_handler, set_verbose_stdout
 
 # from .data import Countries

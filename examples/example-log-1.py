@@ -5,7 +5,7 @@ from waivek import handler # Single Use
 from waivek import ic, ib     # Multi-Use, import time: 70ms - 110ms
 from waivek import rel2abs
 
-from waivek.loglib import log, add_file_handler, set_verbose_stdout
+from waivek.log import log, add_file_handler, set_verbose_stdout
 
 
 def main():
