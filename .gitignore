@@ -1,11 +1,20 @@
-venv/
-build/
-dist/
-*.egg-info/
-aget_cache/
-errors/
+# also see: https://github.com/github/gitignore/blob/main/Python.gitignore
+# also see: https://github.com/github/gitignore/blob/main/Node.gitignore
+
+# Folders
+node_modules/
 __pycache__/
-texts/
 .direnv/
 data/
-!.gitkeep
+
+# Files to ignore
+*.env
+
+# Files to keep
+# we use .gitkeep to keep empty folders
+!.gitkeep 
+!data/.gitkeep
+
+# Workspace Specific:
+build/
+*.egg-info
