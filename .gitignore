@@ -8,3 +8,4 @@ __pycache__/
 texts/
 .direnv/
 data/
+!.gitkeep
