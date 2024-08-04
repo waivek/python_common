@@ -5,7 +5,7 @@
 node_modules/
 __pycache__/
 .direnv/
-data/*
+*/data/*
 
 # Files to ignore
 *.env
@@ -13,7 +13,6 @@ data/*
 # Files to keep
 # we use .gitkeep to keep empty folders
 !.gitkeep 
-!data/.gitkeep
 
 # Workspace Specific:
 build/
