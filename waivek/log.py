@@ -55,7 +55,8 @@ def print_loguru_defaults():
 
 def will_always_error_large_json_object():
     import json
-    json.loads(1) # intentional error
+    # intentional error
+    json.loads(1) # type: ignore
     json_string = """
     {
         "key1": "value1",
@@ -80,7 +81,7 @@ def will_always_error():
 def experiments():
     from waivek.reltools import rel2abs
     from waivek.ic import ic
-    log_path = rel2abs("experiments.log")
+    log_path = rel2abs("data/experiments.log")
     with open(log_path, "w") as f:
         f.write("")
     add_file_handler(log_path)

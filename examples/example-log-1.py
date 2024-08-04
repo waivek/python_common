@@ -9,7 +9,7 @@ from waivek.log import log, add_file_handler, set_verbose_stdout
 
 
 def main():
-    log_path = rel2abs('sink.log')
+    log_path = rel2abs('data/sink.log')
     with open(log_path, 'w') as f:
         f.write("")
     add_file_handler(log_path)
