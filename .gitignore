@@ -7,3 +7,4 @@ errors/
 __pycache__/
 texts/
 .direnv/
+data/
