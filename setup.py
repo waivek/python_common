@@ -100,7 +100,7 @@ setup(
             'aiohttp>=3.8.1',
             'executing==0.8.2',
             'python_dateutil==2.8.2',
-            'tzlocal', # for `log.py`
+            'loguru',# for `log.py`
             'timeago==1.0.14',
             'columnar==1.3.1',
             'pysqlite3-binary; platform_system=="Linux"'
