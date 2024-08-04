@@ -8,6 +8,7 @@ __pycache__/
 
 # Files to keep
 # we use .gitkeep to keep empty folders
+**/data/*
 data/*
 !data/
 !.gitkeep
