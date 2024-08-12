@@ -355,8 +355,8 @@ def handler():
         yield
     except Exception as e:
         error = e
-        append_traceback_to_file(error)
-        return
+        # append_traceback_to_file(error)
+        # return
         if type(e).__name__ == 'bdb.BdbQuit':
             # Exit Via CTRL-D
             pass
