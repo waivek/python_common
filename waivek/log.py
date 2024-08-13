@@ -30,7 +30,7 @@ def custom_file_formatter(record):
     from loguru._recattrs import RecordFile
     record_file: RecordFile = record["file"]
     file_tag = f"{record_file.name}:{record['line']}"
-    return f"{record['time'].strftime('%Y-%m-%dT%H:%M:%SZ')} {file_tag:>20} {record['level']:<7} - {record['message']}" + "\n{exception}"
+    return f"{record['time'].strftime('%Y-%m-%dT%H:%M:%S%z')} {file_tag:>20} {record['level']:<7} - {record['message']}" + "\n{exception}"
 
 def add_file_handler(file_path):
     if not os.path.isabs(file_path):
@@ -92,13 +92,14 @@ def experiments():
     message = "Custom Message"
     log(f"{message = }")
     try:
-        will_always_error_large_json_object()
+        # will_always_error_large_json_object()
+        pass
     except Exception as e:
         logger.opt(exception=True).error("An error occurred.")
 
-    # with open(log_path, "r") as f:
-    #     contents = f.read()
-    #     print(contents)
+    with open(log_path, "r") as f:
+        contents = f.read()
+        print(contents)
 
 def foo():
     # print_loguru_defaults()
