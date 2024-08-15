@@ -30,6 +30,7 @@ def custom_file_formatter(record):
     from loguru._recattrs import RecordFile
     record_file: RecordFile = record["file"]
     file_tag = f"{record_file.name}:{record['line']}"
+
     return f"{record['time'].strftime('%Y-%m-%dT%H:%M:%S%z')} {file_tag:>20} {record['level']:<7} - {record['message']}" + "\n{exception}"
 
 def add_file_handler(file_path):
