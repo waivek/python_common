@@ -1,3 +1,5 @@
+240816 - error     - In `handler`, currently we start at the 0th frame. Sometimes this is in third-party libs. Instead, go up until we find a frame in the current file.
+240816 - error     - Track every line executed in current file and keep a log of the variables for each line. Mark `desired` logs. Then when you run later and get an error, compare the variables in the error line with the `desired` logs. See ~/python_staging/track_function_states.py for more.
 240803 - color log - Unify `rich`, `loguru` and `viewlog` with the goals: Relative datetimes via viewlog, color support via viewlog+rich in STDIO and when running `bat file.log`
 240803 - color     - Either add color support to `ic` and fix narrow column bug or add API to make it easier to use `rich.console` and `rich.table`
 240803 - color     - Unify color printing b/w `rich.print`, `color.py`, `print-colors.py` and `print-colors-lister.py` and `!rg -g "*.py" "ANSI"`

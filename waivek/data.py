@@ -72,6 +72,11 @@ def main():
     from .ic import ic
     Countries = get_countries()
     ic(Countries)
+    from rich import print, inspect
+    from .ic import ib
+    from datetime import datetime
+    # ib(datetime)
+    # inspect(datetime
 
 Countries = get_countries()
 

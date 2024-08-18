@@ -7,7 +7,7 @@ import os.path
 logger = loguru.logger
 logger.remove()
 
-logger.level("INFO", color="<white>") # remove default configuration of <white><bold>
+logger.level("INFO", color="") # remove default configuration of <white><bold>
 
 # [NOTE:1/3] Note that it’s not possible to chain opt() calls, the last one takes precedence over the others as it will “reset” the options to their default values. (from the docs https://loguru.readthedocs.io/en/stable/api/logger.html#loguru._logger.Logger.opt)
 logger = logger.opt(colors=True, depth=1) # make sure to put all the `opt` in a single call, don’t separate them
@@ -98,6 +98,7 @@ def experiments():
     except Exception as e:
         logger.opt(exception=True).error("An error occurred.")
 
+    print("\nLog file contents: " + log_path + "\n")
     with open(log_path, "r") as f:
         contents = f.read()
         print(contents)

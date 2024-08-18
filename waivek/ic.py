@@ -849,6 +849,10 @@ def error_2():
 
 def main():
 
+    variable = 20
+    my_string = "3"
+    print(("=" + "\x1b[96m").join(f"{my_string = }".split("=", 1)) + "\x1b[39m")
+    return
     from .data import Countries
     ic(Countries)
     return

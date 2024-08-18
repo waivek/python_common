@@ -2,6 +2,7 @@ from .timer import Timer
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from .ic import ic
+from .color import Code
 # from .error import handler
 timer = Timer()
 import rich
@@ -33,8 +34,45 @@ console = rich.get_console()
 #
 # to get the local timezone in a cross-platform way, you can use the tzlocal module
 
+def print_datetime_flaws():
+    ic(datetime.now())
+    print("... now() is not timezone-aware\n")
+    ic(str(datetime.now()))
+    print("... str() missing 'T' and timezone or 'Z\n'")
+    ic(datetime.now().isoformat())
+    print("... isoformat() is verbose, includes microseconds, and missing timezone\n")
+    ic(datetime.now(ZoneInfo("Asia/Kolkata")))
+    print("... missing 'T'\n")
+    ic(datetime.now(ZoneInfo("UTC")).isoformat())
+    ic(datetime.now(ZoneInfo("Asia/Kolkata")).isoformat())
+    print("... valid\n")
+
+    print(".fromisoformat():")
+    ic(datetime.fromisoformat(str(datetime.now())))
+    ic(datetime.fromisoformat(str(datetime.now().isoformat())))
+    ic(datetime.fromisoformat("2024-08-18 16:54:26.331658+00:00"))
+
+    print("datetime.fromisoformat(2024-08-18 16:54:26.331658Z)" + (Code.LIGHTRED_EX + " ERROR"))
+
+
+    
+
+
 def get_now(zone: str): # for IST, use "Asia/Kolkata"
     return datetime.now(ZoneInfo(zone)).replace(microsecond=0)
+
+def foo():
+    dt = DateTimeTZ.now(ZoneInfo("Asia/Kolkata"))
+    ic(dt.astimezone(ZoneInfo("UTC")))
+    ic(int(dt.timestamp()))
+    ic(dt.isoformat())
+
+    epoch = 1722394690
+    epoch.bit_count
+
+    x = 1
+    y = { "zero": 0 }
+    print(x/y["zero"])
 
 class DateTimeTZ(datetime):
     """
@@ -58,8 +96,10 @@ class DateTimeTZ(datetime):
 
 if __name__ == "__main__":
     try:
-        pass
+        # foo()
+        print_datetime_flaws()
     except Exception as e:
         # handler(e)
         console.print_exception(show_locals=True, extra_lines=0)
+
 

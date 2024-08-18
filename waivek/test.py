@@ -747,13 +747,29 @@ def test_summaries():
 
 
 def test_frame(a, b, c=1):
+    timer.start("my-block-of-code")
     from .frame import Frame
     frame = Frame(0)
     frame.print()
+    timer.print("my-block-of-code")
+
+def long_function():
+    import time
+    time.sleep(1)
+
+def short_function():
+    pass
+
+def both_functions():
+    test_frame(1, 2)
+    long_function()
+    short_function()
 
 
 # Vim Command: NTF --- call s:PythonNewTestFunction()
 def main():
+    both_functions()
+    return
     D = { 'a': 'A', 'b': 'B' }
     rich_movie()
     # test_frame(1,2, D)
