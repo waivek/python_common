@@ -1,20 +1,30 @@
 
+# [NOTE:4/6] Without this, we can’t compile type hints like loguru.Record; see: https://loguru.readthedocs.io/en/stable/api/type_hints.html
+from __future__ import annotations
+
+from datetime import datetime, timedelta
 import loguru
 import sys
 import os.path
 
-
 logger = loguru.logger
 logger.remove()
 
-logger.level("INFO", color="") # remove default configuration of <white><bold>
+# [NOTE:5/6] We want to use the default `white` of the terminal, which is different from <white> or <light-white> in loguru
+logger.level("INFO", color="")
 
-# [NOTE:1/3] Note that it’s not possible to chain opt() calls, the last one takes precedence over the others as it will “reset” the options to their default values. (from the docs https://loguru.readthedocs.io/en/stable/api/logger.html#loguru._logger.Logger.opt)
+# [NOTE:1/6] Note that it’s not possible to chain opt() calls, the last one takes precedence over the others as it will “reset” the options to their default values. (from the docs https://loguru.readthedocs.io/en/stable/api/logger.html#loguru._logger.Logger.opt)
 logger = logger.opt(colors=True, depth=1) # make sure to put all the `opt` in a single call, don’t separate them
 
-# constants
+def custom_message_formatter(record: loguru.Record):
+    # [NOTE:6/6] <level> always adds an ANSI reset code at the end of the message, even if we specify color="" as we have don above
+    if record["level"].name == "INFO":
+        return f"{record['message']}" + "\n{exception}"
+    return f"<level>{record['message']}</level>" + "\n{exception}"
+
 loguru_format_stdout = "<level>{message}</level>"
-STDOUT_HANDLER_ID = logger.add(sys.stdout, colorize=True, format=loguru_format_stdout)
+# STDOUT_HANDLER_ID = logger.add(sys.stdout, colorize=True, format=loguru_format_stdout)
+STDOUT_HANDLER_ID = logger.add(sys.stdout, colorize=True, format=custom_message_formatter)
 
 def set_verbose_stdout():
     # change the format of the stdout handler
@@ -22,13 +32,12 @@ def set_verbose_stdout():
     logger.remove(STDOUT_HANDLER_ID)
     STDOUT_HANDLER_ID = logger.add(sys.stdout, colorize=True, format=custom_file_formatter)
 
-def custom_file_formatter(record):
-    # [NOTE:2/3] to see why we do \n{exception} see: https://loguru.readthedocs.io/en/stable/api/logger.html#message
+def custom_file_formatter(record: loguru.Record):
+    # [NOTE:2/6] to see why we do \n{exception} see: https://loguru.readthedocs.io/en/stable/api/logger.html#message
 
     # loguru_format_file = "<green>{time:YYYY-MM-DDTHH:mm:ssZ}</green> <cyan>{file}:{line}</cyan> <level>{level: <8}</level> - <level>{message}</level>"
-    # [NOTE:3/3] we aren’t using the above as we want to align the file name and line number in our log files.
-    from loguru._recattrs import RecordFile
-    record_file: RecordFile = record["file"]
+    # [NOTE:3/6] we aren’t using the above as we want to align the file name and line number in our log files.
+    record_file: loguru.RecordFile = record["file"]
     file_tag = f"{record_file.name}:{record['line']}"
 
     return f"{record['time'].strftime('%Y-%m-%dT%H:%M:%S%z')} {file_tag:>20} {record['level']:<7} - {record['message']}" + "\n{exception}"
@@ -44,6 +53,7 @@ def add_file_handler(file_path):
 
 def log(message, level="INFO"):
     # logger.opt(depth=1).log(level, message)
+
     logger.log(level, message)
 
 def print_loguru_defaults():
@@ -70,8 +80,6 @@ def will_always_error_large_json_object():
     }"""
     json_object = json.loads(json_string)
     error_key = json_object["key8"]["key9"]
-
-
 
 def will_always_error():
     x = 1
@@ -103,9 +111,16 @@ def experiments():
         contents = f.read()
         print(contents)
 
+def test_1():
+    # redirect to file
+    log("Hello, World!")
+    log("Something went wrong", "ERROR")
+
+
 def foo():
     # print_loguru_defaults()
-    experiments()
+    # experiments()
+    test_1()
 
 if __name__ == "__main__":
     foo()

@@ -1,11 +1,14 @@
+import sys
 
 from datetime import datetime, timezone
-import sys
 from zoneinfo import ZoneInfo
+
+
 from .color import Code
 # from .ic import ic, ib
 from .timer import Timer
 from .ic import ic
+from .betterpdb import BetterPdb
 
 from contextlib import contextmanager
 
@@ -344,10 +347,17 @@ def write_vim_error_file(error: Exception):
     with open(filepath, "w") as f:
         f.write("\n".join(error_lines))
     # we use threading to make os\.system call not take up 0.08 seconds
-    gvim_command = lambda : os.system(f'''start gvim --servername GVIM --remote-send ":call RHEF('{filepath}', {cc_nr})<CR>" ''')
-    import threading
-    threading.Thread(target=gvim_command).start()
-
+    if sys.platform == 'win32':
+        gvim_command = lambda : os.system(f'''start gvim --servername GVIM --remote-send ":call RHEF('{filepath}', {cc_nr})<CR>" ''')
+        import threading
+        threading.Thread(target=gvim_command).start()
+    elif sys.platform == 'linux':
+        command = f'''
+        vim --servername FOO --remote-send "<C-w><C-w>:call RHEF('{filepath}', {cc_nr})<CR>"
+        '''.strip()
+        # os.system(command)
+        import threading
+        threading.Thread(target=lambda : os.system(command)).start()
 
 @contextmanager
 def handler():
@@ -361,7 +371,8 @@ def handler():
             # Exit Via CTRL-D
             pass
         else:
-            write_vim_error_file(e)
+            if False:
+                write_vim_error_file(e)
             print_error_information(e)
             # print_variables_by_frame(e)
             import sys
@@ -381,8 +392,18 @@ def handler():
                 ipdb = importlib.import_module("ipdb")
                 ipdb.post_mortem(e.__traceback__)
             else:
-                import pdb
-                pdb.post_mortem(e.__traceback__)
+                # import pdb
+                # pdb.post_mortem(e.__traceback__)
+                import traceback
+                custom_pdb = BetterPdb()
+                assert e.__traceback__
+                needle_frame = None
+                for frame, _ in traceback.walk_tb(e.__traceback__):
+                    if frame.f_code.co_filename == __file__:
+                        needle_frame = frame
+                assert needle_frame
+                # print(f"{needle_frame.f_code.co_filename}:{needle_frame.f_lineno}")
+                custom_pdb.post_mortem(e.__traceback__, needle_frame)
 
 def divide_by_zero():
 
@@ -447,8 +468,13 @@ def table_wide():
     #     table.row(row)
     # print(table)
     #
+
+def library_error():
+    import json
+    json.loads("{'a': 1}")
+
 def main():
-    return divide_by_zero()
+    library_error()
 
 if __name__ == "__main__":
     timer = Timer()
