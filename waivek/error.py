@@ -298,7 +298,10 @@ def print_variables(D):
     exclude_types = [types.FunctionType, types.ModuleType, types.BuiltinFunctionType, type]
     table = [ {"name":k,"type":type(v), "value": truncate(str(v), 160)} for k,v in D.items() 
               if type(v) not in exclude_types and k[0:2] != "__" and str(v)[0] != "<"  and not isinstance(v, Exception) ]
-    ic(table)
+    if table:
+        ic(table)
+    else:
+        print("    (empty table)")
 
 def get_error_filepath():
     import platform
