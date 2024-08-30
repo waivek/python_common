@@ -20,6 +20,6 @@ from waivek.timer import Timer
 from waivek.introspection import pack, unpack
 from waivek.log import log, add_file_handler, set_verbose_stdout
 
-from waivek.test_import import greet, greet_relative
+# from waivek.test_import import greet, greet_relative
 
 # from .data import Countries
