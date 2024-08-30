@@ -10,13 +10,12 @@ from waivek.error import handler # Single Use
 # from .ic import ic, ib     # Multi-Use, import time: 70ms - 110ms
 from waivek.reltools import rel2abs, read, write
 from waivek.db import db_init
-Code; handler
 
-DATA_PATH = rel2abs("data_files/countries.json")
-DB_PATH = rel2abs("data_files/download_epochs.db")
+DATA_PATH = rel2abs("data/countries.json")
+DB_PATH = rel2abs("data/download_epochs.db")
 def init():
     import os
-    os.makedirs(rel2abs("data_files"), exist_ok=True)
+    os.makedirs(rel2abs("data"), exist_ok=True)
     if not os.path.exists(DATA_PATH):
         write({}, DATA_PATH)
     connection = db_init(DB_PATH)
@@ -43,8 +42,8 @@ def get_countries():
     from waivek.get import aget
     import json
 
-    urls = [ "https://raw.githubusercontent.com/samayo/country-json/master/src/country-by-population.json",
-    "https://raw.githubusercontent.com/samayo/country-json/master/src/country-by-capital-city.json" ]
+    urls = ["https://raw.githubusercontent.com/samayo/country-json/master/src/country-by-population.json",
+            "https://raw.githubusercontent.com/samayo/country-json/master/src/country-by-capital-city.json"]
     responses = aget(urls, cache=False)
     dictionaries = [ json.loads(response) for response in responses ]
     dicts_1, dicts_2 = dictionaries

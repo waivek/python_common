@@ -8,7 +8,6 @@ from waivek.color import Code
 # from .ic import ic, ib
 from waivek.timer import Timer
 from waivek.ic import ic
-from waivek.betterpdb import BetterPdb
 
 from contextlib import contextmanager
 
@@ -395,18 +394,8 @@ def handler():
                 ipdb = importlib.import_module("ipdb")
                 ipdb.post_mortem(e.__traceback__)
             else:
-                # import pdb
-                # pdb.post_mortem(e.__traceback__)
-                import traceback
-                custom_pdb = BetterPdb()
-                assert e.__traceback__
-                needle_frame = None
-                for frame, _ in traceback.walk_tb(e.__traceback__):
-                    if frame.f_code.co_filename == __file__:
-                        needle_frame = frame
-                assert needle_frame
-                # print(f"{needle_frame.f_code.co_filename}:{needle_frame.f_lineno}")
-                custom_pdb.post_mortem(e.__traceback__, needle_frame)
+                import pdb
+                pdb.post_mortem(e.__traceback__)
 
 def divide_by_zero():
 
