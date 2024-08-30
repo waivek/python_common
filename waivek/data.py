@@ -3,13 +3,13 @@
 #     from os.path import sep
 #     *_, __package__, _ = __file__.split(sep)
 
-from .timer import Timer   # Single Use
+from waivek.timer import Timer   # Single Use
 timer = Timer()
-from .color import Code    # Multi-Use
-from .error import handler # Single Use
+from waivek.color import Code    # Multi-Use
+from waivek.error import handler # Single Use
 # from .ic import ic, ib     # Multi-Use, import time: 70ms - 110ms
-from .reltools import rel2abs, read, write
-from .db import db_init
+from waivek.reltools import rel2abs, read, write
+from waivek.db import db_init
 Code; handler
 
 DATA_PATH = rel2abs("data_files/countries.json")
@@ -40,7 +40,7 @@ def get_countries():
         table = read(DATA_PATH)
         return table
 
-    from .get import aget
+    from waivek.get import aget
     import json
 
     urls = [ "https://raw.githubusercontent.com/samayo/country-json/master/src/country-by-population.json",
@@ -69,11 +69,11 @@ def get_countries():
     return top_20
 
 def main():
-    from .ic import ic
+    from waivek.ic import ic
     Countries = get_countries()
     ic(Countries)
     from rich import print, inspect
-    from .ic import ib
+    from waivek.ic import ib
     from datetime import datetime
     # ib(datetime)
     # inspect(datetime

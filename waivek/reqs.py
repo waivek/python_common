@@ -1,10 +1,10 @@
-from .timer import Timer   # Single Use
+from waivek.timer import Timer   # Single Use
 timer = Timer()
-from .color import Code    # Multi-Use
-from .error import handler # Single Use
-from .ic import ic, ib     # Multi-Use, import time: 70ms - 110ms
+from waivek.color import Code    # Multi-Use
+from waivek.error import handler # Single Use
+from waivek.ic import ic, ib     # Multi-Use, import time: 70ms - 110ms
 Code; ic; ib; handler
-from .reltools import rel2abs
+from waivek.reltools import rel2abs
 
 def main():
     # print_python_modules()
@@ -13,7 +13,7 @@ def main():
     pypi_version()
 
 def pypi_version():
-    from .ic import ic
+    from waivek.ic import ic
     import requests
     package_name = "waivek"
     url = f"https://pypi.org/pypi/{package_name}/json"

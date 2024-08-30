@@ -26,11 +26,11 @@ Exampe - rel2abs(string), ic()
 
 """
 
-from .timer import Timer   # Single Use
+from waivek.timer import Timer   # Single Use
 timer = Timer()
-from .color import Code    # Multi-Use
-from .error import handler # Single Use
-from .ic import ic, ib
+from waivek.color import Code    # Multi-Use
+from waivek.error import handler # Single Use
+from waivek.ic import ic, ib
 ib; ic; Code
 
 from datetime import datetime
@@ -94,7 +94,7 @@ def target(name: str, age: int, dob: datetime, face_bytes: bytes, items: list[st
 
 
 def to_table(D):
-    from .ic import Table
+    from waivek.ic import Table
     table = Table()
     for row in D.items():
         table.row(row)

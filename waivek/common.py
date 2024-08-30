@@ -21,8 +21,8 @@
 #       enumerate_count(items)
 #       rel2abs(relative_path)
 #
-from .timer import Timer
-from .color import Code
+from waivek.timer import Timer
+from waivek.color import Code
 timer = Timer()
 
 import sys
@@ -30,11 +30,11 @@ import os.path
 
 
 def rel2abs(relative_path):
-    from .reltools import rel2abs as func
+    from waivek.reltools import rel2abs as func
     return func(relative_path)
 
 def print_error_information(error):
-    from .error import print_error_information as func
+    from waivek.error import print_error_information as func
     func(error)
 
 def stub_quiet():
@@ -439,7 +439,7 @@ class Date:
     # }}}
 
 if __name__ == "__main__":
-    from .ic import ic
+    from waivek.ic import ic
     error_table = [{'slug': 'ThankfulDeadMinkJonCarnage-A1wuckc0t442Zdzx', 'views': 384, 'user_id': '160504245', 'title': 'lacari playing gwen', 'thumbnail_url': 'https://clips-media-assets2.twitch.tv/AT-cm%7CtyYhdQNcLnJHNLeONmXc8Q-preview-480x272.jpg'}]
     ic(error_table)
     pass

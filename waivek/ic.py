@@ -9,11 +9,11 @@
 # 5. Autocomplete
 # 6. Coloring Strings <externalized to color.py>
 
-from .timer import Timer
+from waivek.timer import Timer
 timer = Timer()
 
-from .common import print_dict, truncate, Date
-from .color import Code
+from waivek.common import print_dict, truncate, Date
+from waivek.color import Code
 
 import sys
 import os
@@ -195,7 +195,7 @@ def is_multi_dict_table(table):
 def is_db_table(table):
     if type(table) != list:
         return False
-    from .db import sqlite3
+    from waivek.db import sqlite3
     boolean = all(type(row) == sqlite3.Row for row in table) 
     return boolean
 
@@ -391,7 +391,7 @@ def len_without_ansi_codes(s):
     return len(re.sub(f'[{ansi_codes_joined}]', '', s))
 
 def log(dictionaries):
-    from .db import db_init
+    from waivek.db import db_init
     from time import time
     import json
     connection = db_init("errors/ic.db")
@@ -404,7 +404,7 @@ def log(dictionaries):
 
 def save_ic_table_error(dictionaries):
     from datetime import datetime
-    from .reltools import write
+    from waivek.reltools import write
     dt = datetime.now()
     filename = f"{dt:%y%m%d-%Hh%Mm%Ss}.json"
     path = os.path.abspath(os.path.expanduser(f'~/Documents/Python/ic-test-manual/{filename}'))
@@ -612,7 +612,7 @@ def data_source_multiline_long_colored_variables():
     # import pdb
     # tall_string = str(pdb.__doc__)
     import textwrap
-    from .error import color_D_if_big
+    from waivek.error import color_D_if_big
     range_count = 100
     numbers = list(range(range_count))
     alphabets = [ "abcdefghijklmnopqrstuvwxyz", "ABCDEFGHIJKLMNOPQRSTUVWXYZ" ]
@@ -831,7 +831,7 @@ def get_args(*values):
 
 
 def error_1():
-    from .db import db_init
+    from waivek.db import db_init
     import json
     connection = db_init("errors/ic.db")
     cursor = connection.cursor()
@@ -853,7 +853,7 @@ def main():
     my_string = "3"
     print(("=" + "\x1b[96m").join(f"{my_string = }".split("=", 1)) + "\x1b[39m")
     return
-    from .data import Countries
+    from waivek.data import Countries
     ic(Countries)
     return
     error_2() # Doesn’t Work / Reproduce the error
@@ -883,6 +883,6 @@ timer.no_print = False
 
 if __name__ == "__main__":
 
-    from .error import handler
+    from waivek.error import handler
     with handler():
         main()

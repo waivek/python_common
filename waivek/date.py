@@ -1,8 +1,8 @@
-from .timer import Timer
+from waivek.timer import Timer
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
-from .ic import ic
-from .color import Code
+from waivek.ic import ic
+from waivek.color import Code
 # from .error import handler
 timer = Timer()
 import rich

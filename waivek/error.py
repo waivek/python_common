@@ -4,11 +4,11 @@ from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 
-from .color import Code
+from waivek.color import Code
 # from .ic import ic, ib
-from .timer import Timer
-from .ic import ic
-from .betterpdb import BetterPdb
+from waivek.timer import Timer
+from waivek.ic import ic
+from waivek.betterpdb import BetterPdb
 
 from contextlib import contextmanager
 
@@ -38,7 +38,7 @@ class Frame:
         self.path = basename(summary.filename)
 
     def pretty(self):
-        from .ic import Table
+        from waivek.ic import Table
         header = "\n".join([ self.path+":"+self.line_number, self.method + self.signature ])
 
         rows = [ (k, v) for k, v in self.locals.items() ]
@@ -91,8 +91,8 @@ class Frames:
         return str(self.frames)
 
     def pretty(self):
-        from .ic import Table
-        from .common import truncate
+        from waivek.ic import Table
+        from waivek.common import truncate
         dictionaries = [ ( "i", "method", "local_count", "locals" ) ]
         dictionaries = dictionaries + [ ( i, D.method, D.local_count, truncate(str(D.locals), 120) ) for i, D in enumerate(self.frames) ]
         table = Table()
@@ -121,7 +121,7 @@ def print_variables_by_frame(error):
     import os
     import textwrap
     import types
-    from .ic import Table
+    from waivek.ic import Table
 
     tb = error.__traceback__
     frames = [ frame for frame, _ in traceback.walk_tb(tb) ]
@@ -253,7 +253,7 @@ def print_error_information(error):
     print(color_error_repr(error))
     # print(Code.LIGHTRED_EX + repr(error))
 
-    from .frame import frame_gen
+    from waivek.frame import frame_gen
     call_frames = list(frame_gen())
     call_file = call_frames[3].f_code.co_filename
 
@@ -262,7 +262,7 @@ def print_error_information(error):
     summaries = traceback.extract_tb(tb)
     pairs = reversed(list(zip(frames, summaries)))
     
-    from .ic import Table
+    from waivek.ic import Table
     table = Table()
     table.gutter = '    '
     table.separator = ' ... '
@@ -294,7 +294,7 @@ def print_error_information(error):
 
 def print_variables(D):
     import types
-    from .common import truncate
+    from waivek.common import truncate
     exclude_types = [types.FunctionType, types.ModuleType, types.BuiltinFunctionType, type]
     table = [ {"name":k,"type":type(v), "value": truncate(str(v), 160)} for k,v in D.items() 
               if type(v) not in exclude_types and k[0:2] != "__" and str(v)[0] != "<"  and not isinstance(v, Exception) ]
@@ -324,10 +324,10 @@ def write_vim_error_file(error: Exception):
     import linecache
     import traceback
     import re
-    from .ic import ic
+    from waivek.ic import ic
     import os
 
-    from .frame import frame_gen
+    from waivek.frame import frame_gen
     call_frames = list(frame_gen())
     call_file = call_frames[3].f_code.co_filename
 
@@ -424,7 +424,7 @@ def divide_by_zero():
 
     # Error 3:
     # ========
-    from .reltools import here
+    from waivek.reltools import here
     path = here() / "f1/f2/f3/item.txt" # type: ignore[reportOperatorIssue]
     path.mkdir(exist_ok=True)
 

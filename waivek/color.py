@@ -18,7 +18,7 @@
 # SEARCH     : make_string_\(\w\+\)(\(.*\))
 # SUBSTITUTE : s/make_string_\(\w\+\)(\(.*\))/Code.\U\1\E+\2
 
-from .timer import Timer
+from waivek.timer import Timer
 timer = Timer()
 
 import os
@@ -65,7 +65,7 @@ def color_filepath(filepath):
 
 
 def print_samples():
-    from .reltools import rel2abs
+    from waivek.reltools import rel2abs
     filepath = rel2abs("item.txt")
     # print(color_filepath(filepath))
     # return

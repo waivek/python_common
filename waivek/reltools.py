@@ -11,7 +11,7 @@
 
 import os
 import sys
-from .color import Code
+from waivek.color import Code
 
 def pathjoin(frame, relpath):
     frame_directory = os.path.dirname(frame.f_code.co_filename)
@@ -42,7 +42,7 @@ def writelines(relpath, lines):
 
 def read(relpath):
     import json
-    from .color import Code
+    from waivek.color import Code
     filepath = relpath if os.path.isabs(relpath) else pathjoin(sys._getframe(1), relpath)
     filepath = os.path.normpath(filepath)
     if os.path.exists(filepath) is False:
@@ -63,7 +63,7 @@ def write(obj : list | dict, relpath: str) -> str:
     return filepath
 
 def get_caller_parent():
-    from .frame import Frame
+    from waivek.frame import Frame
     self_path = os.path.normpath(os.path.dirname(__file__))
     frame_index = 0
     directories = []
@@ -90,8 +90,8 @@ def frame_to_absolute_directory(frame):
     return os.path.dirname(os.path.realpath(frame.f_code.co_filename))
 
 def rel2abs(relative_path):
-    from .ic import ic
-    from .ic import ib
+    from waivek.ic import ic
+    from waivek.ic import ib
     return pathjoin(sys._getframe(1), relative_path)
 
     # Implementation 3

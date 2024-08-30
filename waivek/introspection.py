@@ -1,9 +1,9 @@
-from .timer import Timer   # Single Use
+from waivek.timer import Timer   # Single Use
 timer = Timer()
-from .color import Code    # Multi-Use
-from .error import handler # Single Use
-from .ic import ic
-from .frame import Frame
+from waivek.color import Code    # Multi-Use
+from waivek.error import handler # Single Use
+from waivek.ic import ic
+from waivek.frame import Frame
 
 class User:
     def __init__(self, name, age):

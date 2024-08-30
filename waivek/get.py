@@ -8,11 +8,11 @@
 # 5. Configureable url2header Function
 # 6. POST with payload
 
-from .timer import Timer   # Single Use
+from waivek.timer import Timer   # Single Use
 timer = Timer()
 
-from .db import db_init
-from .color import Code
+from waivek.db import db_init
+from waivek.color import Code
 
 # import aiohttp
 # import asyncio
@@ -258,7 +258,7 @@ def run_async_get():
     return objects
 
 if __name__ == "__main__":
-    from .ic import ic
-    from .error import handler
+    from waivek.ic import ic
+    from waivek.error import handler
     with handler():
         run_async_get()

@@ -1,6 +1,6 @@
 # from colorama import init, Fore
 # init(convert=True)
-from .color import Code
+from waivek.color import Code
 
 # print_object {{{
 def print_object(obj, hidden=False):
@@ -207,7 +207,7 @@ def dict_to_rich_table(input_table: list[dict]):
 def main():
     # from rich import inspect
     # inspect(int, methods=True)
-    from .data import Countries
+    from waivek.data import Countries
     assert isinstance(Countries, list)
     dict_to_rich_table(Countries)
     ic(Countries)

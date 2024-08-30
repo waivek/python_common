@@ -2,12 +2,12 @@
 
 # print("__package__: " + __package__)
 
-from .timer import Timer   # Single Use
+from waivek.timer import Timer   # Single Use
 timer = Timer()
 timer.start("test.py")
-from .color import Code    # Multi-Use
-from .error import handler # Single Use
-from .ic import ic         # Multi-Use
+from waivek.color import Code    # Multi-Use
+from waivek.error import handler # Single Use
+from waivek.ic import ic         # Multi-Use
 import time
 
 def function_call(item_1, key=[1, 2, 3], D={}):
@@ -59,7 +59,7 @@ def git_is_dirty():
 
 def sqlite_init():
     import os.path
-    from .db import db_init
+    from waivek.db import db_init
     temp_directory = os.path.expandvars("%TEMP%")
     db_path = os.path.join(temp_directory, "database.db")
     connection = db_init(db_path)
@@ -105,7 +105,7 @@ def git_is_dirty_2():
     time.sleep(1)
 
 def insert_dictionaries_test():
-    from .db import insert_dictionaries
+    from waivek.db import insert_dictionaries
     cursor, connection = sqlite_init()
 
     path = r"C:\Users\vivek\Desktop\bkp\game"
@@ -148,7 +148,7 @@ def start_many_threads():
 def multiprocessing_multithreading_kill_test():
     from multiprocessing import Process
     from datetime import datetime
-    from .error import print_error_information
+    from waivek.error import print_error_information
 
     p1 = Process(target=start_many_threads)
     try:
@@ -549,7 +549,7 @@ def test_handler():
     [ 1/0 for i in range(5) ]
 
 def test_partition():
-    from .common import create_partitions
+    from waivek.common import create_partitions
     numbers = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
     pairs = create_partitions(len(numbers), 6)
     for start, end in pairs:
@@ -587,8 +587,8 @@ def rec(n):
     return rec(n+1)
 
 def test_trace():
-    from .trace import trace
-    from .trace import rerun
+    from waivek.trace import trace
+    from waivek.trace import rerun
     trace([ "foo", "bar", "rec", "baz" ])
     ic(baz('latin'))
     ic(foo(1, 2))
@@ -629,7 +629,7 @@ def test_pathlib():
     from pathlib import Path; Path
     t2 = timer.get("import Path")
     ic(t1, t2)
-    from .reltools import here
+    from waivek.reltools import here
     path = here() / "f1/f2/item.txt"
     path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -659,8 +659,8 @@ def test_color_bash():
 def test_yield_list(): 
 
     def db_gen(query):
-        from .reltools import rel2abs
-        from .db import db_init
+        from waivek.reltools import rel2abs
+        from waivek.db import db_init
         path = rel2abs("./db_test/gen.db")
         connection = db_init(path)
 
@@ -702,7 +702,7 @@ def test_datenames():
 
 def simulate(expression):
     import sys
-    from .frame import Frame
+    from waivek.frame import Frame
     frame = Frame(sys._getframe(1))
     start_line = frame.line.strip().replace("simulate(", "")[:-1]
     end_line = expression
@@ -711,8 +711,8 @@ def simulate(expression):
     print()
 
 def test_summaries():
-    from .common import Date
-    from .ic import ic; ic
+    from waivek.common import Date
+    from waivek.ic import ic; ic
     from datetime import datetime
     dt = datetime.now()
     year = dt.year
@@ -748,7 +748,7 @@ def test_summaries():
 
 def test_frame(a, b, c=1):
     timer.start("my-block-of-code")
-    from .frame import Frame
+    from waivek.frame import Frame
     frame = Frame(0)
     frame.print()
     timer.print("my-block-of-code")
