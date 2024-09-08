@@ -295,4 +295,7 @@ def main():
     # raise Exception('This is an error', 1)
 
 if __name__ == "__main__":
-    main()
+    with handler():
+        main()
+
+# run.vim: term python waivek/test_error2.py

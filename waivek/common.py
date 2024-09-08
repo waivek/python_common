@@ -297,7 +297,7 @@ def truncate(string, length):
     right_slice = string[-right_start:]
     trunc_string = "{left_slice}{middle_string}{right_slice}".format(left_slice=left_slice, middle_string=middle_string, right_slice=right_slice)
     if len(trunc_string) != length:
-        print_red_line("ERROR: Could not return a truncated string")
+        print_red_line(f"[common.py:func=truncate] ERROR: Could not return a truncated string. (string={repr(string)}, length={length})")
         return "ERROR"
     return trunc_string
 
@@ -443,3 +443,5 @@ if __name__ == "__main__":
     error_table = [{'slug': 'ThankfulDeadMinkJonCarnage-A1wuckc0t442Zdzx', 'views': 384, 'user_id': '160504245', 'title': 'lacari playing gwen', 'thumbnail_url': 'https://clips-media-assets2.twitch.tv/AT-cm%7CtyYhdQNcLnJHNLeONmXc8Q-preview-480x272.jpg'}]
     ic(error_table)
     pass
+
+# run.vim: term python waivek/test_error2.py

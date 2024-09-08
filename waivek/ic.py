@@ -19,6 +19,7 @@ import sys
 import os
 import os.path
 import types
+import re
 
 # TextDoc.docroutine
 
@@ -384,11 +385,20 @@ def ic(*values):
 __all__ = [ "ic", "ib" ]
 
 
-def len_without_ansi_codes(s):
-    import re
-    ansi_codes = [ '\x1b[30m', '\x1b[31m', '\x1b[32m', '\x1b[33m', '\x1b[34m', '\x1b[35m', '\x1b[36m', '\x1b[37m', '\x1b[90m', '\x1b[91m', '\x1b[92m', '\x1b[93m', '\x1b[94m', '\x1b[95m', '\x1b[96m', '\x1b[97m' ]
-    ansi_codes_joined = "".join(ansi_codes)
-    return len(re.sub(f'[{ansi_codes_joined}]', '', s))
+def len_without_ansi_codes(s: str):
+    # Regex to match ANSI escape sequences
+    ansi_escape = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
+
+    # Remove ANSI codes
+    clean_string = ansi_escape.sub('', s)
+    # Print the length of the cleaned string
+    return len(clean_string)
+
+# def len_without_ansi_codes(s):
+#     import re
+#     ansi_codes = [ '\x1b[30m', '\x1b[31m', '\x1b[32m', '\x1b[33m', '\x1b[34m', '\x1b[35m', '\x1b[36m', '\x1b[37m', '\x1b[90m', '\x1b[91m', '\x1b[92m', '\x1b[93m', '\x1b[94m', '\x1b[95m', '\x1b[96m', '\x1b[97m' ]
+#     ansi_codes_joined = "".join(ansi_codes)
+#     return len(re.sub(f'[{ansi_codes_joined}]', '', s))
 
 def log(dictionaries):
     from waivek.db import db_init
@@ -458,8 +468,10 @@ class Table:
         def get_width(cell):
             # Handles multi-line strings
             cell_str = str(cell)
-            # return max(len_without_ansi_codes(line) for line in cell_str.split("\n"))
-            return max(len(line) for line in cell_str.split("\n"))
+            val = max(len_without_ansi_codes(line) for line in cell_str.split("\n"))
+            # val = max(len(line) for line in cell_str.split("\n"))
+            # print(f"val = {val}")
+            return val
         def distribute(initial_lengths, terminal_length):
             final_lengths = [ 0 for _ in initial_lengths ]
             total_length = 0
@@ -846,8 +858,17 @@ def error_2():
     D = read("ic-test-manual/221015.json")
     ic(D)
 
+def get_small_colored_table() -> list:
+    ansi_red = "\x1b[31m"
+    ansi_reset_all = "\x1b[0m"
+    row1 = [ "1", "2", "3", "4", "5" ]
+    row2 = [ "6", "7", ansi_red + "8" + ansi_reset_all, "9", "10" ]
+    return [ row1, row2 ]
 
 def main():
+    table = get_small_colored_table()
+    ic(table)
+    return
 
     variable = 20
     my_string = "3"
@@ -875,7 +896,6 @@ def main():
     # normal_len = len(s)
     # ic(calc_len, normal_len)
     # # Required for error.print_variables_by_frame
-    # # data_source_multiline_long_colored_variables()
 
 # main()
 
@@ -886,3 +906,4 @@ if __name__ == "__main__":
     from waivek.error import handler
     with handler():
         main()
+# run.vim: term ++rows=80 python %
