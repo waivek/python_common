@@ -1,5 +1,6 @@
+  240909 - ic        - Refactor `v_pad` and `fmt` in `ic.py` to better names. Especially the else statement in `fmt` where `v_pad_cells` is of type list[list[str]]
   240906 - ic        - Make `Table(...)` that returns a string. Use in ~/pyscripts/print_todo.py. Handle ANSI color code issue. Offer wrap / truncate option.
-  240905 - error     - In pydantic validation error, we are jumping to the incorrect frame.
+✓ 240905 - error     - In pydantic validation error, we are jumping to the incorrect frame.
   240905 - error     - Handle pydantic validation errors. ~/pyscripts/simple-pydantic-error.py
   240830 - ic        - Add ANSI color support for table printing in `ic`. Do `:find ic.py | /Handle color codes/` for more.
   240816 - error     - In `handler`, currently we start at the 0th frame. Sometimes this is in third-party libs. Instead, go up until we find a frame in the current file.

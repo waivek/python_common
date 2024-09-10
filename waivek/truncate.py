@@ -13,6 +13,7 @@ class TokenType(Enum):
     ZERO_WIDTH_SPACE = "zero_width_space"
 
 class Token:
+
     def __init__(self, value: str, token_type: TokenType, display_length: int, ansi_reset_code: Optional[str] = None, active_ansi_codes: Optional[List[str]] = None):
         self.value = value  # Raw value of the token (e.g., a character, emoji, or ANSI code)
         self.token_type = token_type  # Type of the token (character, ANSI code, etc.)
@@ -31,6 +32,7 @@ def tokenize_string(string: str) -> List[Token]:
     """
     tokens = []
     ansi_code_pattern = re.compile(r'\x1b\[[0-9;]*m')
+    emoji_pattern = re.compile(r'[\U0001F600-\U0001F64F]')
     active_ansi_codes = []  # To track the list of active ANSI codes
 
     index = 0
@@ -62,8 +64,8 @@ def tokenize_string(string: str) -> List[Token]:
         elif re.match(r'[\u0300-\u036F]', char):
             tokens.append(Token(char, TokenType.COMBINING_CHAR, 0, active_ansi_codes=list(active_ansi_codes)))
 
-        # Handle emojis (surrogate pairs or multi-character)
-        elif re.match(r'[\U0001F600-\U0001F64F]', char) or len(char.encode('utf-16', 'surrogatepass')) > 2:
+        # Handle emojis
+        elif emoji_pattern.match(char):
             tokens.append(Token(char, TokenType.EMOJI, 1, active_ansi_codes=list(active_ansi_codes)))
 
         # Handle regular characters
@@ -163,10 +165,6 @@ def print_truncate_or_raise(string, length):
     print()
 
 def main():
-
-    tokens = tokenize_string("Hello, World!")
-    ic(tokens)
-
     # Example usage
     input_string = "Hello \033[31mWorld\033[0m combining\u0301 and zero-width"
     input_string = "Hello, World!"
@@ -189,6 +187,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# run.vim: vert term python test_truncate.py
 

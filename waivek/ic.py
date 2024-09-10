@@ -1,6 +1,5 @@
 # See `IMPORT INFORMATION` section in ic()
 
-
 # Brief:
 # 1. Timing things
 # 2. Printing Error messages
@@ -12,7 +11,8 @@
 from waivek.timer import Timer
 timer = Timer()
 
-from waivek.common import print_dict, truncate, Date
+from waivek.common import print_dict, Date
+from waivek.truncate import truncate, get_display_length
 from waivek.color import Code
 
 import sys
@@ -108,7 +108,6 @@ def docroutine(object, name=None, mod=None, cl=None):
         return '\n' + decl + '\n' + (doc and indent(doc).rstrip() + '\n')
     # }}}
 
-
 def sig(frame_index=1):
     import inspect
 
@@ -142,6 +141,7 @@ def sig(frame_index=1):
 def get_context(callFrame=None):
     import inspect
     callFrame = callFrame if callFrame else sys._getframe().f_back
+    assert callFrame
     frameInfo = inspect.getframeinfo(callFrame)
     # lineNumber = frameInfo.lineno
     lineNumber = callFrame.f_lineno
@@ -377,13 +377,13 @@ def ic(*values):
         print(f"{line[3:-1]}: {Code.LIGHTCYAN_EX+values[0]}")
     else:
         import ast
-        node = ast.parse(line).body[0].value
+        stmt = ast.parse(line).body[0]
+        node = stmt.value
+
         for arg, value in zip(node.args, values):
             print(f"{ast.unparse(arg)}: {Code.LIGHTCYAN_EX+value}")
 
-
 __all__ = [ "ic", "ib" ]
-
 
 def len_without_ansi_codes(s: str):
     # Regex to match ANSI escape sequences
@@ -420,9 +420,25 @@ def save_ic_table_error(dictionaries):
     path = os.path.abspath(os.path.expanduser(f'~/Documents/Python/ic-test-manual/{filename}'))
     write(dictionaries, filename)
 
+def ljust_display(s, width):
+    fill = " "
+    display_length = get_display_length(s)
+    if display_length < width:
+        return s + fill * (width - display_length)
+    else:
+        return s
+
+def rjust_display(s, width):
+    fill = " "
+    display_length = get_display_length(s)
+    if display_length < width:
+        return fill * (width - display_length) + s
+    else:
+        return s
+
 class Table:
     # Why we can’t use columnar
-    # 
+    #
     # 1. No option for separator only between columns. Any separator you choose is also part of the border
     # 2. 150ms import time vanilla 
     def __init__(self):
@@ -446,7 +462,8 @@ class Table:
             L = [ tuple(sublist) for sublist in table ]
             return [], L
         elif is_single_dict_table(table):
-            items = list(table.items())
+            assert hasattr(table, 'items')
+            items = list(table.items()) # pyright:ignore[reportAttributeAccessIssue]
             return [ "KEY", "VALUE" ], items
         elif is_db_table(table): # Transform to multi_dict_table, DRY Violated
             multi_dict_table = [ dict(row) for row in table ]
@@ -460,17 +477,14 @@ class Table:
 
         return None
 
-
     def get_column_tuples(self, headers, tuple_table):
         def get_column_just(column):
             is_numeric = all(type(cell) in [int, float] for cell in column)
-            return str.rjust if is_numeric else str.ljust
+            return rjust_display if is_numeric else ljust_display
         def get_width(cell):
             # Handles multi-line strings
             cell_str = str(cell)
-            val = max(len_without_ansi_codes(line) for line in cell_str.split("\n"))
-            # val = max(len(line) for line in cell_str.split("\n"))
-            # print(f"val = {val}")
+            val = max(get_display_length(line) for line in cell_str.split("\n")) # get_display_length
             return val
         def distribute(initial_lengths, terminal_length):
             final_lengths = [ 0 for _ in initial_lengths ]
@@ -506,45 +520,8 @@ class Table:
             column_tuples[i] = (final_widths[i], just)
         return column_tuples
 
-
-
-        # min_column_width = int(column_width_total / column_count)
-        # small_indices = [ i for i, width in enumerate(initial_widths) if width <= min_column_width ]
-        # big_indices = [ i for i, width in enumerate(initial_widths) if width > min_column_width ]
-        # if len(big_indices) == 0:
-        #     return column_tuples
-        # small_width_total = sum(width for width in initial_widths if width <= min_column_width)
-        # remaining_width_total = column_width_total - small_width_total
-        # print(f"{remaining_width_total = }")
-        # big_width = int(remaining_width_total / len(big_indices))
-        # remaining_width_total = remaining_width_total - big_width * len(big_indices)
-        # final_big_width = big_width + remaining_width_total
-        # for i in big_indices:
-        #     _, just = column_tuples[i]
-        #     column_tuples[i] = (big_width, just)
-        #     # if i == len(big_indices)-1:
-        #     if i == big_indices[-1]:
-        #         column_tuples[i] = (final_big_width, just)
-        #
-        # final_widths = [ width for width, _ in column_tuples ]
-        # calc_total_width = gutter_width + separator_width + sum(final_widths)
-        # print(f"{initial_widths = }")
-        # print(f"{final_widths = }")
-        # print(f"{terminal_width = }")
-        # print()
-        # if calc_total_width != terminal_width:
-        #     log(self.table)
-        #     print(Code.RED +  "calc_total_width != terminal_width")
-        #     print(Code.RED + f"           ({calc_total_width}) !=          ({terminal_width})")
-        #     print(f"Initial Widths                  : {initial_widths}")
-        #     print(f"Column Width All                : {column_width_total}")
-        #     print(f"Minimum Column Width            : {min_column_width}")
-        #     print(f"Final  Widths                   : {final_widths}")
-        #     print("Do 'u' and then run `save_ic_table_error(x)`")
-        #     breakpoint()
-        return column_tuples
-
-    def wrap_box(item, width, height, just):
+    # wrap_box {{{
+    def wrap_box(self, item, width, height, just):
         # Purpose: Handle truncate, wrap, newline, padding
         # If there is a newline, avoid truncate() probably and truncate on line
         # Make sure returned result is padded correctly and all lines have the width specified
@@ -569,7 +546,10 @@ class Table:
 
         pass
 
+    # }}}
+
     def to_string(self):
+
         def fmt(cells, column_tuples):
             S = self.separator
             G = self.gutter
@@ -587,7 +567,9 @@ class Table:
                     return_lines.append(G + S.join(parts))
                 return "\n".join(return_lines)
 
-        headers, tuple_table = self.normalize_table()
+        result = self.normalize_table()
+        assert result
+        headers, tuple_table = result
         column_tuples = self.get_column_tuples(headers, tuple_table)
 
         header_lines = [ "", fmt(headers, column_tuples), "" ] if headers else [ "" ]
@@ -642,27 +624,23 @@ def data_source_multiline_long_colored_variables():
     from rich import ansi
     decoder = ansi.AnsiDecoder()
 
-
-    timer.start("import Table")
-    from rich.console import Console
-    from rich.table import Table
-    timer.print("import Table")
-    table = Table(title="two-column display")
-    mystuff = next(decoder.decode(color_D_if_big(locals())))
-    table.add_column("key")
-    table.add_column("value")
-    table.add_column("type")
-    for key, value in locals().items():
-        if key == "mystuff":
-            table.add_row(key, value, str(type(value)))
-        else:
-            table.add_row(key, str(value), str(type(value)))
-    console = Console()
-    console.print(table)
-    # r_print(local_D["mystuff"])
-
-
-
+    # timer.start("import Table")
+    # from rich.console import Console
+    # from rich.table import Table
+    # timer.print("import Table")
+    # table = Table(title="two-column display")
+    # mystuff = next(decoder.decode(color_D_if_big(locals())))
+    # table.add_column("key")
+    # table.add_column("value")
+    # table.add_column("type")
+    # for key, value in locals().items():
+    #     if key == "mystuff":
+    #         table.add_row(key, value, str(type(value)))
+    #     else:
+    #         table.add_row(key, str(value), str(type(value)))
+    # console = Console()
+    # console.print(table)
+    # # r_print(local_D["mystuff"])
 
     # table = Table()
     # for key, value in locals().items():
@@ -670,9 +648,6 @@ def data_source_multiline_long_colored_variables():
     #         continue
     #     table.row(key, str(value), str(type(value)))
     # print(table)
-
-
-    
 
 def single_dict_table():
     D = data_source_mixed_dict()
@@ -713,8 +688,6 @@ def test_ic():
     ic_locals = { str(key).strip(): str(value).strip() for key, value in ic_locals.items() }
     ic(ic_locals)
     print()
-
-
     # }}}
 
 # IntelliJ: Replace VCS Buttons
@@ -728,7 +701,6 @@ def test_ic():
 # [DONE] Vim: Jedi Intellisense
 # [DONE] Vim: gd for class
 # [DONE] Vim: go to end of function 
-
 
 def table_print():
     #  data
@@ -810,7 +782,6 @@ def wrap_test():
 def foo(x, y):
     return x + y
 
-
 def baz(string):
     return string.upper()
 
@@ -840,7 +811,6 @@ def get_args(*values):
     print(frame.f_lineno)
     # print(ast.unparse(nodes))
     print()
-
 
 def error_1():
     from waivek.db import db_init
@@ -892,7 +862,6 @@ def main():
     return
     # _visit_after_children: C:\Users\vivek\AppData\Roaming\Python\Python37\site-packages\asttokens\mark_tokens.py :63
     # test_ic()
-    # calc_len = len_without_ansi_codes(s)
     # normal_len = len(s)
     # ic(calc_len, normal_len)
     # # Required for error.print_variables_by_frame
@@ -906,4 +875,3 @@ if __name__ == "__main__":
     from waivek.error import handler
     with handler():
         main()
-# run.vim: term ++rows=80 python %

@@ -252,12 +252,15 @@ def handler():
         else:
             # pdb.post_mortem(error.__traceback__); return
 
+            caller_file = sys._getframe(2).f_code.co_filename
+
             Pdb = pdb.Pdb()
             Pdb.reset()
 
             # CUSTOMIZATION 2: Move the debugger to the frame where the error occurred within the file from which the program was run, instead of the frame where the error was raised
             frames = [ frame for frame, _ in traceback.walk_tb(error.__traceback__) ]
-            needle_frame = next(frame for frame in reversed(frames) if frame.f_code.co_filename == __file__)
+            # needle_frame = next(frame for frame in reversed(frames) if frame.f_code.co_filename == __file__)
+            needle_frame = next(frame for frame in reversed(frames) if frame.f_code.co_filename == caller_file)
             Pdb.setup(f=None, tb=error.__traceback__) # NOTE[1/1]: Do not do `Pdb.setup(f=needle_frame, tb=error.__traceback__)` as it creates new frames or something
 
             _select_frame_silent(Pdb, frames.index(needle_frame))
@@ -283,8 +286,9 @@ def select_frame_for_file(frames: List[FrameType], target_file: str) -> Optional
     return None
 
 def raise_simple_json_decode_error():
-    # import json
-    # json.loads('')
+    import json
+    string = ''
+    json.loads(string)
     raise JSONDecodeError('Expecting value', '', 0)
 
 def main():
@@ -298,4 +302,3 @@ if __name__ == "__main__":
     with handler():
         main()
 
-# run.vim: term python waivek/test_error2.py

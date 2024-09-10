@@ -87,26 +87,27 @@ def test_truncate():
 
         ("Hello \033[31mWorld\033[0m!", 10, "FOO"),
 
-
-        ("👨‍👩‍👧‍👦 Family", 5, "👨‍👩‍👧‍👦..."),  # Complex emoji (should count as one character)
-        ("H\u0065\u0301llo", 3, "Hé..."),  # Combining characters
-        ("Héllo\nWorld", 7, "Héll..."),  # Newline character
-        ("Tab\tcharacter", 6, "Tab..."),  # Tab character
-        ("Mixed\twhitespace \ncharacters", 10, "Mixed\t..."),  # Mixed whitespace
-        ("\033[1mBold\033[0m \033[3mItalic\033[0m", 8, "\033[1mBol...\033[0m"),  # Multiple ANSI codes
-        ("\033[38;5;10mColored\033[0m text", 10, "\033[38;5;10mColo...\033[0m"),  # 8-bit color ANSI code
-        ("\033[48;2;255;0;0mRGB\033[0m background", 7, "\033[48;2;255;0;0mRGB...\033[0m"),  # 24-bit color ANSI code
-        ("ASCII art: ┌─┐\n│ │\n└─┘", 15, "ASCII art: ┌..."),  # ASCII art
-        ("Über für", 5, "Übe..."),  # Non-ASCII characters
-        ("अ ऑ इ ई उ ऊ", 4, "अ ..."),  # Devanagari script
-        ("سلام دنیا", 5, "سلا..."),  # Right-to-left text (Arabic)
-        ("\u200Ezero-width\u200F", 8, "\u200Ezer...\u200F"),  # Zero-width characters
-        ("Normal \x1b[31mred\x1b[0m \x1b[1mbold\x1b[0m", 10, "Normal \x1b[31mre...\x1b[0m"),  # ANSI codes mid-string
+        ("👨‍👩‍👧‍👦 Family"            ,  5 , "👨‍👩‍👧‍👦...")   , # Complex emoji (should count as one character)
+        ("H\u0065\u0301llo"                             ,  3 , "Hé...")                           , # Combining characters
+        ("Héllo\nWorld"                                 ,  7 , "Héll...")                         , # Newline character
+        ("Tab\tcharacter"                               ,  6 , "Tab...")                          , # Tab character
+        ("Mixed\twhitespace \ncharacters"               , 10 , "Mixed\t...")                      , # Mixed whitespace
+        ("\033[1mBold\033[0m \033[3mItalic\033[0m"      ,  8 , "\033[1mBol...\033[0m")            , # Multiple ANSI codes
+        ("\033[38;5;10mColored\033[0m text"             , 10 , "\033[38;5;10mColo...\033[0m")     , # 8-bit color ANSI code
+        ("\033[48;2;255;0;0mRGB\033[0m background"      ,  7 , "\033[48;2;255;0;0mRGB...\033[0m") , # 24-bit color ANSI code
+        ("ASCII art: ┌─┐\n│ │\n└─┘"                     , 15 , "ASCII art: ┌...")                 , # ASCII art
+        ("Über für"                                     ,  5 , "Übe...")                          , # Non-ASCII characters
+        ("अ ऑ इ ई उ ऊ"                                  ,  4 , "अ ...")                           , # Devanagari script
+        ("سلام دنیا"                                     ,  5 , "سلا...")                           , # Right-to-left text (Arabic)
+        ("\u200Ezero-width\u200F"                       ,  8 , "\u200Ezer...\u200F")              , # Zero-width characters
+        ("Normal \x1b[31mred\x1b[0m \x1b[1mbold\x1b[0m" , 10 , "Normal \x1b[31mre...\x1b[0m")     , # ANSI codes mid-string
 
         ("🎨\033[38;5;208m🖌️\033[0m🎭", 4, "🎨🖌️..."),  # Emojis with ANSI color codes
         ("文字化け", 4, "文字..."),  # CJK characters
         ("🇺🇸🇬🇧🇫🇷", 4, "🇺🇸🇬🇧..."),  # Flag emojis
         ("Hello World!", 4, "Hel..."),  # Basic Latin characters
+
+        # ("\033[1m..........\033[0m", 5, "....."), # Ten periods
     ]
 
     assertion_failures = []
