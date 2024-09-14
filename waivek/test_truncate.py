@@ -1,6 +1,10 @@
+import os
 import re
 from common import enumerate_count
-from truncate import get_display_length, truncate
+from ic import ic
+from truncate import get_display_length
+from truncate import truncate as t1
+from ai_truncate import truncate as t2
 
 def special_cases():
 
@@ -37,10 +41,8 @@ def normalize_ansi_order(string):
         print()
     return return_string
 
-def test_truncate():
-    """
-    Test cases to validate the correctness of the truncate function.
-    """
+def get_test_cases():
+    # test_cases = [ ... ] {{{
     test_cases = [
         # Basic case without any special characters
         ("Hello, World!", 5, "H...!"),
@@ -109,6 +111,40 @@ def test_truncate():
 
         # ("\033[1m..........\033[0m", 5, "....."), # Ten periods
     ]
+    # }}}
+    return test_cases
+
+def compare_truncate_implementations(truncate1, truncate2):
+    truncate1_tag = f"{os.path.basename(truncate1.__code__.co_filename)}:{truncate1.__name__}()"
+    truncate2_tag = f"{os.path.basename(truncate2.__code__.co_filename)}:{truncate2.__name__}()"
+    just_int = max(len(truncate1_tag), len(truncate2_tag))
+    test_cases = get_test_cases()
+    for count_string, (input_string, max_length, expected_output) in enumerate_count(test_cases):
+        index = count_string[1:-1].split("/")[0]
+        result1 = truncate1(input_string, max_length)
+        result2 = truncate2(input_string, max_length)
+        if result1 != result2:
+            print(f"\n\033[1;30;41m FAIL \033[0m Test {index}")
+        else:
+            print(f"\n\033[1;30;42m PASS \033[0m Test {index}")
+
+        if result1 != result2:
+            print(f"max_length: {max_length}")
+            print(f"{'Input'.ljust(just_int)}: {repr(input_string)}")
+            print(f"{truncate1_tag.ljust(just_int)}: {repr(result1)}")
+            print(f"{truncate2_tag.ljust(just_int)}: {repr(result2)}")
+            print(f"{'Input'.ljust(just_int)}:  {input_string}")
+            print(f"{truncate1_tag.ljust(just_int)}:  {result1}")
+            print(f"{truncate2_tag.ljust(just_int)}:  {result2}")
+            print()
+
+
+def test_truncate():
+    """
+    Test cases to validate the correctness of the truncate function.
+    """
+    from truncate import truncate
+    test_cases = get_test_cases()
 
     assertion_failures = []
     for count_string, (input_string, max_length, expected_output) in enumerate_count(test_cases):
@@ -150,7 +186,9 @@ def test_truncate():
     if assertion_failures:
         print("\n\033[1;31mASSERTION FAILURES: \033[0m" + ", ".join([f"Test {index}" for index in assertion_failures]) + "\n")
 
-test_truncate()
+compare_truncate_implementations(t1, t2)
+
+# test_truncate()
 
 # run.vim: term ++rows=80 python %
 
