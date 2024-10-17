@@ -2,12 +2,13 @@
 from time import time
 class Timer():
 
-    def __init__(self, no_print=False):
+    def __init__(self, no_print=False, precision=2):
         self.start_time = None
         self.inc_start = None
         self.timer_D = {}
         self.no_print = no_print
         self.sum_D = {}
+        self.precision = precision
 
     def start(self, message=None):
         self.start_time = time()
@@ -27,13 +28,19 @@ class Timer():
     def start_inc(self):
         self.inc_start = time()
 
+    def _print(self, message, time_taken):
+        time_taken_string = f"{time_taken:.{self.precision}f}"
+        print(f"{message:20s}: {time_taken_string} seconds")
+
     def print_inc(self, message):
         if self.no_print:
             return
         if self.inc_start == None:
             raise Exception("Timer not started")
         time_taken = time() - self.inc_start
-        print(f"{message:20s}: {time_taken:.2f} seconds")
+        precision = 2
+        time_taken = round(time_taken, precision)
+        self._print(message, time_taken)
         self.inc_start = time()
 
 
@@ -45,7 +52,7 @@ class Timer():
         if self.no_print:
             return
         time_taken = time() - self.multi_start_time
-        print(f"{message:20s}: {time_taken:.2f} seconds")
+        self._print(message, time_taken)
 
     def start_sum(self, message):
         self.timer_D[message] = time()
@@ -57,7 +64,7 @@ class Timer():
 
     def print_sum(self, message):
         time_taken = self.sum_D[message]
-        print(f"{message:20s}: {time_taken:.2f} seconds")
+        self._print(message, time_taken)
         del self.sum_D[message]
 
     def print(self, message):
@@ -66,7 +73,7 @@ class Timer():
         if self.timer_D.get(message) == None and self.start_time == None:
             print("ERROR: Timer configured incorrectly")
         time_taken = time() - self.timer_D.get(message, self.start_time)
-        print(f"{message:20s}: {time_taken:.2f} seconds")
+        self._print(message, time_taken)
         if self.timer_D.get(message):
             del self.timer_D[message]
         else:

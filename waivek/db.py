@@ -6,18 +6,11 @@ from waivek.timer import Timer
 timer = Timer()
 from waivek.common import print_red_line, make_string_green, truncate, Timer
 from waivek.reltools import pathjoin
+from waivek.dbutils import get_sqlite3
 from enum import IntEnum
 timer = Timer()
 
 import sys
-
-if sys.platform == "linux":
-    import typing
-    import pysqlite3
-    import sqlite3 as sq3
-    sqlite3 = typing.cast(sq3, pysqlite3)
-else:
-    import sqlite3
 
 def table_exists(cursor, table_name):
     statement = f"SELECT * FROM sqlite_master WHERE type='table' AND name='{table_name}'"
@@ -41,6 +34,7 @@ def load_json_bytes(json_bytes):
         return json.loads(json_bytes)
 
 def db_init_old(db_path):
+    sqlite3 = get_sqlite3()
     sqlite3.register_adapter(list, dump_list)
     sqlite3.register_converter("LIST", load_json_bytes)
 
@@ -64,6 +58,7 @@ def db_init(db_path, check_same_thread=False):
     """
 
     import os
+    sqlite3 = get_sqlite3()
     db_path = pathjoin(sys._getframe(1), db_path)
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
 
@@ -151,6 +146,7 @@ class Schema:
     "LIST"
 
     def __init__(self, arg=None):
+        sqlite3 = get_sqlite3()
         if arg == [] or arg == None:
             self.D = {}
         else:
@@ -456,6 +452,7 @@ def insert_dictionaries(cursor, table_name, dictionaries, constraint_D={}, vcs=F
     lock.release()
 
 def version():
+    sqlite3 = get_sqlite3()
     pysqlite_version = sqlite3.version
     sqlite_version = sqlite3.sqlite_version
     print(f"PYSQLITE: {pysqlite_version}")

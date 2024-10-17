@@ -1,12 +1,16 @@
-import os.path
-import typing
-import sys
-import platform
+from waivek.timer import Timer
+timer = Timer()
 
-def get_sqlite3() :
-    import sqlite3
+import os.path
+import sys
+
+def get_sqlite3():
+    import typing   # takes 0.02s
+    import sqlite3  # takes 0.02s
+    import platform # takes 0.01s
     if platform.system() != "Linux":
         return sqlite3
+
     import pysqlite3
     return typing.cast(sqlite3, pysqlite3)
 
@@ -39,3 +43,5 @@ def Connection(path: str):
     ensure_db_dir_exists(path)
 
     return get_connection(path)
+
+# run.vim: vert term python waivek/__init__.py

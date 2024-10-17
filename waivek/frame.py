@@ -1,8 +1,8 @@
 from waivek.timer import Timer   # Single Use
-timer = Timer()
+timer = Timer(precision=3)
 import sys
-import ast
-import linecache
+import ast # takes 0.002s
+import linecache # takes 0.003s
 from waivek.color import Code    # Multi-Use
 from waivek.error import handler # Single Use
 from waivek.ic import ic, ib     # Multi-Use, import time: 70ms - 110ms

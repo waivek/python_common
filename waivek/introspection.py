@@ -1,9 +1,9 @@
 from waivek.timer import Timer   # Single Use
-timer = Timer()
-from waivek.color import Code    # Multi-Use
+timer = Timer(precision=3)
 from waivek.error import handler # Single Use
+from waivek.color import Code    # Multi-Use
 from waivek.ic import ic
-from waivek.frame import Frame
+from waivek.frame import Frame # takes 0.005s cuz of `ast` and `linecache`
 
 class User:
     def __init__(self, name, age):
@@ -101,3 +101,4 @@ if __name__ == "__main__":
     with handler():
         main()
 
+# run.vim: vert term python waivek/__init__.py

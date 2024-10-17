@@ -1,8 +1,10 @@
 
 
-from json import JSONDecodeError
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from json import JSONDecodeError
 
-def handle_json_decode_error(error: JSONDecodeError):
+def handle_json_decode_error(error: "JSONDecodeError"):
 
     # raise JSONDecodeError("\\uXXXX escape", s, pos)
     # raise JSONDecodeError("Unterminated string starting at", s, begin)
@@ -193,7 +195,7 @@ def handle_multiple_json_decode_errors():
     for i, faulty_json_string in enumerate([*faulty_json_strings, string, generate_faulty_json()]):
         try:
             json.loads(faulty_json_string)
-        except JSONDecodeError as error:
+        except json.JSONDecodeError as error:
             handle_json_decode_error(error)
             print()
     big_string = generate_faulty_json()

@@ -1,10 +1,14 @@
-from json import JSONDecodeError
+from waivek.timer import Timer
+timer = Timer(precision=3)
+
+from typing import TYPE_CHECKING # takes 0.01s
+if TYPE_CHECKING:
+    import pdb
+
 import sys
-from contextlib import contextmanager
-import pdb
-import traceback
-from types import FrameType, TracebackType
 from typing import Optional, List
+from contextlib import contextmanager
+from types import FrameType, TracebackType
 
 from waivek.json_decode_error import handle_json_decode_error
 
@@ -129,14 +133,14 @@ def framestr(frame: FrameType) -> str:
     line = lines[frame.f_lineno - 1].strip()
     return f'<frame> {frame.f_code.co_filename}:{frame.f_lineno} {line}'
 
-def _select_frame_silent(self: pdb.Pdb, number: int):
+def _select_frame_silent(self: "pdb.Pdb", number: int):
     assert 0 <= number < len(self.stack)
     self.curindex = number
     self.curframe = self.stack[self.curindex][0]
     self.curframe_locals = self.curframe.f_locals
     self.lineno = None
 
-def do_down_silent(self: pdb.Pdb, arg: int):
+def do_down_silent(self: "pdb.Pdb", arg: int):
     if self.curindex + 1 == len(self.stack):
         print('Newest frame')
         return
@@ -147,7 +151,7 @@ def do_down_silent(self: pdb.Pdb, arg: int):
         newframe = min(len(self.stack) - 1, self.curindex + count)
     _select_frame_silent(self, newframe)
 
-def do_up_silent(self: pdb.Pdb, error: Exception, arg: int):
+def do_up_silent(self: "pdb.Pdb", error: Exception, arg: int):
     if self.curindex == 0:
         print('Oldest frame')
         return
@@ -158,7 +162,7 @@ def do_up_silent(self: pdb.Pdb, error: Exception, arg: int):
         newframe = max(0, self.curindex - count)
     _select_frame_silent(self, newframe)
 
-def x_three(self: pdb.Pdb, error: Exception, arg):
+def x_three(self: "pdb.Pdb", error: Exception, arg):
     """
     Move up the stack by `arg` frames and print the stack frame
     """
@@ -166,7 +170,7 @@ def x_three(self: pdb.Pdb, error: Exception, arg):
     assert self.curframe
     print_error_information(error, self.curframe)
 
-def make_x_one(self: pdb.Pdb, error: Exception):
+def make_x_one(self: "pdb.Pdb", error: Exception):
     def x_one(arg):
         if arg == '':
             arg = 1
@@ -175,7 +179,7 @@ def make_x_one(self: pdb.Pdb, error: Exception):
         x_three(self, error, arg)
     return x_one
 
-def y_three(self: pdb.Pdb, error: Exception, arg):
+def y_three(self: "pdb.Pdb", error: Exception, arg):
     """
     Move down the stack by `arg` frames and print the stack frame
     """
@@ -183,7 +187,7 @@ def y_three(self: pdb.Pdb, error: Exception, arg):
     assert self.curframe
     print_error_information(error, self.curframe)
 
-def make_y_one(self: pdb.Pdb, error: Exception):
+def make_y_one(self: "pdb.Pdb", error: Exception):
     def y_one(arg):
         if arg == '':
             arg = 1
@@ -192,7 +196,7 @@ def make_y_one(self: pdb.Pdb, error: Exception):
         y_three(self, error, arg)
     return y_one
 
-def make_v_zero_arg(self: pdb.Pdb, error: Exception):
+def make_v_zero_arg(self: "pdb.Pdb", error: Exception):
     """
     Print the variables in the current stack frame
     """
@@ -202,7 +206,7 @@ def make_v_zero_arg(self: pdb.Pdb, error: Exception):
         print_variables(self.curframe.f_locals)
     return v_zero_arg
 
-def make_z_zero_arg(self: pdb.Pdb, error: Exception):
+def make_z_zero_arg(self: "pdb.Pdb", error: Exception):
     """
     Print the stack frame
     """
@@ -211,29 +215,29 @@ def make_z_zero_arg(self: pdb.Pdb, error: Exception):
         print_error_information(error, self.curframe)
     return z_zero_arg
 
-def ic_two(self: pdb.Pdb, arg):
+def ic_two(self: "pdb.Pdb", arg):
     from waivek.ic import ic
     assert self.curframe
     val = eval(arg, self.curframe.f_globals, self.curframe.f_locals)
     ic(val)
 
-def make_ic_one_arg(self: pdb.Pdb):
+def make_ic_one_arg(self: "pdb.Pdb"):
     def ic_one(arg):
         ic_two(self, arg)
     return ic_one
 
-def ib_two(self: pdb.Pdb, arg):
+def ib_two(self: "pdb.Pdb", arg):
     from waivek.ic import ib
     assert self.curframe
     val = eval(arg, self.curframe.f_globals, self.curframe.f_locals)
     ib(val)
 
-def make_ib_one_arg(self: pdb.Pdb):
+def make_ib_one_arg(self: "pdb.Pdb"):
     def ib_one(arg):
         ib_two(self, arg)
     return ib_one
 
-def print_error_information_from_pdb(self: pdb.Pdb, error: Exception):
+def print_error_information_from_pdb(self: "pdb.Pdb", error: Exception):
     # frame = self.curframe
     # assert frame
     if not self.curframe:
@@ -242,6 +246,8 @@ def print_error_information_from_pdb(self: pdb.Pdb, error: Exception):
 
 @contextmanager
 def handler():
+    from json import JSONDecodeError # takes 0.01s - 0.02s
+    import traceback # takes 0.002s, not much but still inlining
     try:
         yield
     except Exception as error:
@@ -251,6 +257,7 @@ def handler():
             pass
         else:
             # pdb.post_mortem(error.__traceback__); return
+            import pdb
 
             caller_file = sys._getframe(2).f_code.co_filename
 
@@ -289,7 +296,7 @@ def raise_simple_json_decode_error():
     import json
     string = ''
     json.loads(string)
-    raise JSONDecodeError('Expecting value', '', 0)
+    raise json.JSONDecodeError('Expecting value', '', 0)
 
 def main():
     # files:
@@ -301,4 +308,4 @@ def main():
 if __name__ == "__main__":
     with handler():
         main()
-
+# run.vim: vert term python waivek/__init__.py
