@@ -1,0 +1,11 @@
+$pattern = (rich|console)\.print\(.*\[
+
+RIPGREP
+
+    rg --glob "*.py" "{pattern}" --files-with-matches
+    rg --glob "*.py" '\\\033' --files-with-matches
+
+GITHUB
+
+    owner:waivek language:python /{pattern}/
+    owner:waivek language:python /\\033/
