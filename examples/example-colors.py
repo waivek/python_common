@@ -67,7 +67,7 @@ def print_color_lister():
     # }}}
 
 def experiments():
-    from rich import print # doesn’t play well with coloroma init(autoreset=True)
+    import rich
     # experiments {{{
 
     color = "#FF0000"
@@ -81,8 +81,8 @@ def experiments():
         # print(f"{color}: [#FFFFFF bold on {color}] OK [/#FFFFFF bold on {color}]!")
         # print(f"{color}: [#000000 bold on {color}] OK [/#000000 bold on {color}]!")
         # do above but with padding on {color} of 10
-        print("{color:{width}s}: [#FFFFFF bold on {color}] OK [/#FFFFFF bold on {color}]".format(color=color, width=length))
-        print("{color:{width}s}: [#000000 bold on {color}] OK [/#000000 bold on {color}]".format(color=color, width=length))
+        rich.print("{color:{width}s}: [#FFFFFF bold on {color}] OK [/#FFFFFF bold on {color}]".format(color=color, width=length))
+        rich.print("{color:{width}s}: [#000000 bold on {color}] OK [/#000000 bold on {color}]".format(color=color, width=length))
     # }}}
 
 def main():

@@ -31,7 +31,8 @@ def is_multi_dict_table(table):
 def is_db_table(table):
     if type(table) != list:
         return False
-    from waivek.db import sqlite3
+    from waivek.dbutils import get_sqlite3
+    sqlite3 = get_sqlite3()
     boolean = all(type(row) == sqlite3.Row for row in table) 
     return boolean
 
@@ -213,6 +214,7 @@ def to_table(rows):
     return T
 
 def test_table():
+    from waivek.ic import ic
     merged_test_cases = [
         ("is_tuple_table", [ ("a", "b", "c"), ("d", "e", "f"), ("g", "h", "i") ]),
         ("is_tuple_table", [(1, 2), (3, 4)]),   # List of tuples
