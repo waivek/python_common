@@ -18,5 +18,7 @@ from waivek.reltools import rel2abs, read, write, readlines, writelines
 from waivek.introspection import pack, unpack
 # timer.print("import pack, unpack")
 from waivek.log import log, add_file_handler, set_verbose_stdout
+from waivek.bat import bat
+from waivek.markup import markup
 
 # from waivek.data import Countries

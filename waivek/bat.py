@@ -50,5 +50,4 @@ def bat(path):
 if __name__ == "__main__":
     bat(sys.argv[1])
 
-
 # run.vim: vert term python % tmp/lorem_ipsum.txt
