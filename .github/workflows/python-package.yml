@@ -25,5 +25,8 @@ jobs:
     - run: pip install setuptools # required for 3.12
     - run: pip install wheel # required for 3.11 and ?3.10?
     - run: pip install .
+
+    - run: ls -R
+
     - run:
         python test.py
