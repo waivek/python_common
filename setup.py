@@ -12,7 +12,7 @@ def get_new_version():
     import urllib.request
     from urllib.error import URLError
     import json
-    package_name = "waivek"
+    package_name = "box"
     url = f"https://pypi.org/pypi/{package_name}/json"
     try:
         req = urllib.request.urlopen(url)
@@ -87,14 +87,15 @@ if usage == "UPLOAD_TO_PYPI":
 
 new_version = "0.0.0" 
 if usage == "UPLOAD_TO_PYPI":
+    # new_version = "0.1.0"
     new_version = get_new_version()
 py_modules = ['color', 'common', 'data', 'db', 'error', 'frame', 'get', 'ic', 'print_utils', 'reltools', 'timer', 'trace']
-py_modules = ['waivek.' + x for x in py_modules]
+py_modules = ['box.' + x for x in py_modules]
 long_description = open('README.md').read()
 setup(
-        name='waivek',
+        name='box',
         version=new_version,
-        packages=['waivek'],
+        packages=['box'],
         py_modules = py_modules,
         install_requires = [
             'aiohttp>=3.8.1',

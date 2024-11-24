@@ -1,11 +1,11 @@
-from waivek import Timer   # Single Use
+from box import Timer   # Single Use
 timer = Timer()
-from waivek import Code    # Multi-Use
-from waivek import handler # Single Use
-from waivek import ic, ib     # Multi-Use, import time: 70ms - 110ms
-from waivek import rel2abs
+from box import Code    # Multi-Use
+from box import handler # Single Use
+from box import ic, ib     # Multi-Use, import time: 70ms - 110ms
+from box import rel2abs
 
-from waivek.log import log, add_file_handler
+from box.log import log, add_file_handler
 
 def message():
     log("Goodbye, World!")

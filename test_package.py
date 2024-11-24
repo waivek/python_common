@@ -1,3 +1,3 @@
 
-from waivek import greet
-from waivek.nest.nested import greet_nested
+from box import greet
+from box.nest.nested import greet_nested

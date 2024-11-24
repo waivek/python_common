@@ -22,7 +22,7 @@ def log(*args, **kwargs):
     print(get_date_tag(), get_file_tag(), *args, **kwargs)
 
 def main():
-    from waivek.ic import ic
+    from box.ic import ic
     date_tag = get_date_tag()
     file_tag = get_file_tag()
     print(f"{date_tag} {file_tag}")
