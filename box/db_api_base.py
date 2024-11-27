@@ -1,18 +1,23 @@
-from typing import List, TYPE_CHECKING, Any, TypeVar, Generic
-
-from box.timer import Timer
-from box.ic import ib
-
+from typing import List, Any, Tuple, TYPE_CHECKING
 if TYPE_CHECKING:
-    from peewee import ModelSelect
-
-timer = Timer()
+    from sqlalchemy.orm import Session
+    from sqlalchemy.sql.selectable import Select
 
 def get_pagination(
     total_items: int,
     page: int = 1,
     size: int = 50
 ) -> dict:
+    """Get pagination details.
+    
+    Args:
+        total_items: Total number of items
+        page: Current page number (1-based)
+        size: Items per page
+    
+    Returns:
+        Dictionary with pagination details
+    """
     page = max(1, page)
     size = max(1, min(size, 100))
     total_pages = (total_items + size - 1) // size
@@ -29,114 +34,115 @@ def get_pagination(
         'total_items': total_items
     }
 
-def get_clusters(query: "ModelSelect", column: str) -> List[tuple]:
-    from peewee import fn
-    # Get the base query conditions
-    base_query = query.model.select()
-    
-    # Copy conditions from original query except those involving the cluster column
-    if query._where: # pyright: ignore[reportAttributeAccessIssue]
-        # If it's a compound expression (AND)
-        if hasattr(query._where, 'lhs') and hasattr(query._where, 'rhs'): # pyright: ignore[reportAttributeAccessIssue]
-            # If it's a field comparison
-            if hasattr(query._where.lhs, 'name'): # pyright: ignore[reportAttributeAccessIssue]
-                field_name = query._where.lhs.name # pyright: ignore[reportAttributeAccessIssue]
-                if field_name != column:
-                    base_query = base_query.where(query._where) # pyright: ignore[reportAttributeAccessIssue]
-            # If it's nested expressions
-            else:
-                if column not in str(query._where.lhs): # pyright: ignore[reportAttributeAccessIssue]
-                    base_query = base_query.where(query._where.lhs) # pyright: ignore[reportAttributeAccessIssue]
-        else:
-            # Single condition
-            if column not in str(query._where): # pyright: ignore[reportAttributeAccessIssue]
-                base_query = base_query.where(query._where) # pyright: ignore[reportAttributeAccessIssue]
-    
-    assert query.model.id
-    model_id = query.model.id
-    
-    final_query = (base_query
-        .select(
-            getattr(query.model, column),
-            fn.COUNT(model_id).alias('count')
-        )
-        .group_by(getattr(query.model, column))
-        .order_by(fn.COUNT(model_id).desc()))
-    
-    # Get the SQL (for debugging)
-    sql, params = final_query.sql()
-    print(f"SQL Query: {sql}")
-    print(f"Parameters: {params}")
-    
-    return list(final_query.tuples())
+def get_clusters_sqlalchemy(query: "Select", column: str, session: "Session") -> List[Tuple[Any, int]]:
+    """
+    A SQLAlchemy helper function.
 
-# Test code
-if __name__ == "__main__":
-    from peewee import SqliteDatabase, Model, AutoField, CharField
-    # Create a test database in memory
-    db = SqliteDatabase(':memory:')
+    Takes a query and runs it. 
 
-    class TestModel(Model):
-        id = AutoField()
-        name = CharField()
-        category = CharField()
-        
-        class Meta:
-            database = db
+    If there is any WHERE clause in the query that filters for including / excluding the `column` or uses column `IN` or column `NOT IN`, thoses WHERE clauses should
+    be removed before executing the query
 
-    # Set up the database
-    db.connect()
-    db.create_tables([TestModel])
+    Then runs a GROUP BY on the results of the query.
 
-    # Insert expanded test data
-    test_data = [
-        {'name': 'Item 1', 'category': 'A'},
-        {'name': 'Item 2', 'category': 'A'},
-        {'name': 'Item 3', 'category': 'B'},
-        {'name': 'Item 4', 'category': 'B'},
-        {'name': 'Item 5', 'category': 'C'},
-        {'name': 'Item 6', 'category': 'C'},
-        {'name': 'Item 7', 'category': 'D'},
-        {'name': 'Item 8', 'category': 'D'},
-        {'name': 'Other 1', 'category': 'A'},  # Non-matching name
-        {'name': 'Other 2', 'category': 'B'},  # Non-matching name
+    Returns that result.
+
+    Basically provides an interface for creating buttons that user can press to add / remove tags
+
+    Example:
+
+    [
+        { 'category': 'A', name: 'Apple' },
+        { 'category': 'A', name: 'Astronaut' },
+        { 'category': 'B', name: 'Banana' },
+        { 'category': 'B', name: 'Bird' },
+        { 'category': 'B', name: 'Bison' },
     ]
-    TestModel.insert_many(test_data, fields=[TestModel.name, TestModel.category]).execute()
 
-    # Test 1: Basic clustering with name filter
-    print("\nTest 1: Basic clustering with name filter")
-    query = TestModel.select().where(TestModel.name.contains('Item'))
-    clusters = get_clusters(query, 'category')
-    print("Results when filtering by name:")
-    print(clusters)
+    CASE 1:
+    if we run this table through the normal get_clusters, we should get:
+    [
+        { 'category': 'A', count: 2 },
+        { 'category': 'B', count: 3 },
+    ]
+    
+    CASE 2:
+    if we run this table through the query:
+    WHERE name == 'Apple', and cluster this via get_clusters, we should get:
+    [
+        { 'category': 'A', count: 1 },
+    ]
 
-    # Test 2: Clustering with single category filter
-    print("\nTest 2: Clustering with single category filter")
-    query = TestModel.select().where(
-        (TestModel.name.contains('Item')) & 
-        (TestModel.category == 'A')
+    CASE 3:
+    if we run this table through the query:
+    WHERE category = 'A'
+    the where clause should be removed and we should get:
+    [
+        { 'category': 'A', count: 2 },
+        { 'category': 'B', count: 3 },
+    ]
+
+    CASE 4:
+    if we run this table through the query:
+    WHERE category IN ('A')
+    the where clause should be removed and we should get:
+    [
+        { 'category': 'A', count: 2 },
+        { 'category': 'B', count: 3 },
+    ]
+    as we don't want WHERE clauses that filter for including / excluding the `column` or uses column `IN` or column `NOT IN` to affect the clustering
+
+    CASE 5:
+    if we run this table through the query:
+    WHERE category NOT IN ('A')
+    the where clause should be removed and we should get:
+    [
+        { 'category': 'A', count: 2 },
+        { 'category': 'B', count: 3 },
+    ]
+
+    """
+    from sqlalchemy import select, func
+    
+    # Create a new select statement based on the original query
+    modified_query = query
+    
+    # Remove WHERE clauses that filter on the specified column
+    if hasattr(query, '_where_criteria') and query._where_criteria:
+        new_criteria = []
+        for criterion in query._where_criteria:
+            # Skip criteria that involve the specified column
+            if hasattr(criterion, 'left') and hasattr(criterion.left, 'name'):
+                if criterion.left.name == column:
+                    continue
+                # Also skip IN/NOT IN clauses for the column
+                if hasattr(criterion, 'operator') and criterion.operator.__name__ in ('in_op', 'notin_op'):
+                    if criterion.left.name == column:
+                        continue
+            new_criteria.append(criterion)
+        
+        # Create new query with filtered WHERE clauses
+        if len(new_criteria) != len(query._where_criteria):
+            modified_query = select(*query.selected_columns)
+            if new_criteria:
+                modified_query = modified_query.where(*new_criteria)
+    
+    # Create a subquery once and reuse it
+    subq = modified_query.subquery()
+    
+    # Create the grouping query using the same subquery reference
+    group_query = (
+        select(
+            subq.c[column],
+            func.count().label('count')
+        )
+        .select_from(subq)
+        .group_by(subq.c[column])
+        .order_by(subq.c[column])
     )
-    clusters = get_clusters(query, 'category')
-    print("Results when filtering by name AND category 'A':")
-    print(clusters)
+    
+    # Execute and return results
+    results = session.execute(group_query).all()
+    return [(row[0], row[1]) for row in results]
 
-    # Test 3: Clustering with IN filter
-    print("\nTest 3: Clustering with IN filter")
-    query = TestModel.select().where(
-        (TestModel.name.contains('Item')) & 
-        (TestModel.category.in_(['A', 'B'])) # type:ignore
-    )
-    clusters = get_clusters(query, 'category')
-    print("Results when filtering by name AND categories IN ('A', 'B'):")
-    print(clusters)
-
-    # Test 4: Clustering with NOT IN filter
-    print("\nTest 4: Clustering with NOT IN filter")
-    query = TestModel.select().where(
-        (TestModel.name.contains('Item')) & 
-        (TestModel.category.not_in(['A', 'B'])) # type:ignore
-    )
-    clusters = get_clusters(query, 'category')
-    print("Results when filtering by name AND categories NOT IN ('A', 'B'):")
-    print(clusters)
-
+# run.vim:vert term pytest tests/test_db_api_base.py
