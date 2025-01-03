@@ -24,7 +24,29 @@
 #
 # in the output, the background should be red, foreground should be black and the text should be bold
 
-def markup(s):
+def color_yn() -> str:
+    import os, sys
+    color = "yes"
+    if "NO_COLOR" in os.environ and os.environ["NO_COLOR"] != "":
+        # https://no-color.org/
+        # 
+        #     Command-line software which adds ANSI color to its output by default should check for a NO_COLOR
+        #     environment variable that, when present and not an empty string (regardless of its value), prevents the
+        #     addition of ANSI color.
+        return "no"
+    # established condition1: NO_COLOR does not exist or is an empty string
+
+    # copied from color.py, isatty is not always implemented, #6223.
+    is_a_tty = hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
+    if is_a_tty:
+        return "yes"
+    # established condition2: output is not a terminal
+
+    return "no"
+
+def markup(s, force=False):
+    if not force and color_yn() == "no":
+        return s
     style_codes = {
         'bold': '1',
         'italic': '3',
