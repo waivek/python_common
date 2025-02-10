@@ -1,3 +1,9 @@
+  250104 - unzip_url - Add etag support and don’t redoownload if etag matches
+  250104 - unzip_url - Add option to print / configure default tmp directory and default cache time
+  250104 - unzip_url - Add option to surpress output
+  250104 - markup    - Add support for markup("[bold red]Running from [magenta].vim[/magenta] directory. _viminfo_linux files must be excluded from the diff.[/bold red]")
+  250104 - unzip_url - We test running file via CLI. Also test running via function call. (maybe?)
+  250104 - error     - Add handler for UnicodeDecodeError: 'utf-8' codec can't decode byte 0x80 in position 49941: invalid start byte. There is a partial implementation in ~/pyscripts/commit-message-gemini.py
   241122 - error     - Add handler for pydantic_core._pydantic_core.ValidationError
   240909 - ic        - Refactor `v_pad` and `fmt` in `ic.py` to better names. Especially the else statement in `fmt` where `v_pad_cells` is of type list[list[str]]
   240906 - ic        - Make `Table(...)` that returns a string. Use in ~/pyscripts/print_todo.py. Handle ANSI color code issue. Offer wrap / truncate option.
